@@ -20,10 +20,11 @@
 </head>
 <body class="bg-gray-100 flex justify-center min-h-screen">
 
-    <div class="w-full max-w-md bg-gray-50 shadow-xl relative overflow-hidden flex flex-col">
+    <div class="w-full max-w-md bg-gray-50 shadow-xl relative overflow-hidden flex flex-col min-h-screen">
 
         <!-- ================= SECTION AUTENTIKASI (LOGIN/REGISTER) ================= -->
-        <div id="auth-section" class="flex-1 flex flex-col justify-center px-8 py-12 bg-white hidden">
+        <!-- Tidak lagi menggunakan 'hidden' di awal agar tidak blank putih -->
+        <div id="auth-section" class="flex-1 flex flex-col justify-center px-8 py-12 bg-white">
             <div class="text-center mb-8">
                 <i class="fa-solid fa-clock-rotate-left text-5xl text-green-700 mb-4"></i>
                 <h2 id="auth-title" class="text-3xl font-bold text-gray-800">Masuk Akun</h2>
@@ -51,7 +52,7 @@
 
             <p class="text-center text-sm text-gray-600 mt-6">
                 <span id="auth-switch-text">Belum punya akun?</span> 
-                <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-green-700 font-bold hover:underline">Daftar di sini</button>
+                <button type="button" onclick="toggleAuthMode()" id="auth-switch-btn" class="text-green-700 font-bold hover:underline">Daftar di sini</button>
             </p>
         </div>
 
@@ -134,37 +135,55 @@
     <script>
         const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Inisialisasi Supabase yang aman
+        let supabaseClient = null;
+        try {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch (err) {
+            console.error("Gagal menginisialisasi Supabase:", err);
+        }
 
         let isLoginMode = true;
         let currentUser = null;
 
-        // Cek apakah user sudah login ketika halaman dimuat
-        document.addEventListener('DOMContentLoaded', checkSession);
+        // Cek sesi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            if (supabaseClient) {
+                checkSession();
+            } else {
+                alert("Gagal memuat sistem database.");
+            }
+        });
 
         async function checkSession() {
-            const { data: { session } } = await supabase.auth.getSession();
-            
-            if (session) {
-                // User sudah login, tampilkan dashboard
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('dashboard-section').classList.remove('hidden');
-                document.getElementById('dashboard-section').classList.add('block');
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (error) throw error;
                 
-                // Ambil nama (atau email jika nama tidak diatur)
-                const userName = session.user.user_metadata.full_name || session.user.email.split('@')[0];
-                document.getElementById('user-display-name').innerText = userName;
-                currentUser = userName;
-            } else {
-                // User belum login, tampilkan form login
+                const authSection = document.getElementById('auth-section');
+                const dashboardSection = document.getElementById('dashboard-section');
+
+                if (session) {
+                    authSection.classList.add('hidden');
+                    dashboardSection.classList.remove('hidden');
+                    
+                    const userName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+                    document.getElementById('user-display-name').innerText = userName;
+                    currentUser = userName;
+                } else {
+                    authSection.classList.remove('hidden');
+                    dashboardSection.classList.add('hidden');
+                    currentUser = null;
+                }
+            } catch (err) {
+                console.error("Sesi error:", err);
+                // Pastikan form login tetap muncul jika terjadi error jaringan/sesi
                 document.getElementById('auth-section').classList.remove('hidden');
                 document.getElementById('dashboard-section').classList.add('hidden');
-                document.getElementById('dashboard-section').classList.remove('block');
-                currentUser = null;
             }
         }
 
-        // Fungsi Toggle antara Login dan Daftar
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? 'Masuk Akun' : 'Daftar Akun Baru';
@@ -172,95 +191,85 @@
             document.getElementById('auth-switch-text').innerText = isLoginMode ? 'Belum punya akun?' : 'Sudah punya akun?';
             document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Daftar di sini' : 'Login di sini';
             
-            // Tampilkan/Sembunyikan kolom Nama Lengkap
+            const nameField = document.getElementById('name-field');
+            const fullnameInput = document.getElementById('fullname');
+            
             if (isLoginMode) {
-                document.getElementById('name-field').classList.add('hidden');
-                document.getElementById('fullname').removeAttribute('required');
+                nameField.classList.add('hidden');
+                fullnameInput.removeAttribute('required');
             } else {
-                document.getElementById('name-field').classList.remove('hidden');
-                document.getElementById('fullname').setAttribute('required', 'true');
+                nameField.classList.remove('hidden');
+                fullnameInput.setAttribute('required', 'true');
             }
         }
 
-        // Fungsi Proses Login / Register
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const fullName = document.getElementById('fullname').value;
+            const btn = document.getElementById('auth-btn');
             
-            document.getElementById('auth-btn').innerText = "Memproses...";
-            document.getElementById('auth-btn').disabled = true;
+            btn.innerText = "Memproses...";
+            btn.disabled = true;
 
             try {
                 if (isLoginMode) {
-                    // Proses LOGIN
-                    const { data, error } = await supabase.auth.signInWithPassword({
-                        email: email,
-                        password: password,
-                    });
+                    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
                     if (error) throw error;
                     
                     alert('Berhasil Login!');
-                    checkSession(); // Segarkan tampilan
+                    checkSession();
                 } else {
-                    // Proses REGISTER
-                    const { data, error } = await supabase.auth.signUp({
+                    const { error } = await supabaseClient.auth.signUp({
                         email: email,
                         password: password,
-                        options: {
-                            data: { full_name: fullName } // Simpan nama di metadata
-                        }
+                        options: { data: { full_name: fullName } }
                     });
                     if (error) throw error;
                     
-                    alert('Registrasi berhasil! Silakan masuk dengan akun yang baru dibuat.');
-                    toggleAuthMode(); // Balikkan layar ke mode login
+                    alert('Registrasi berhasil! Silakan masuk.');
+                    toggleAuthMode();
                     document.getElementById('password').value = '';
                 }
             } catch (error) {
                 alert("Gagal: " + error.message);
             } finally {
-                document.getElementById('auth-btn').innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
-                document.getElementById('auth-btn').disabled = false;
+                btn.innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
+                btn.disabled = false;
             }
         });
 
-        // Fungsi Keluar (Logout)
         async function logout() {
-            const { error } = await supabase.auth.signOut();
-            if (!error) {
-                // Bersihkan inputan
-                document.getElementById('email').value = '';
-                document.getElementById('password').value = '';
-                checkSession();
-            }
+            await supabaseClient.auth.signOut();
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            checkSession();
         }
 
-        // Fungsi mencatat Absensi (Menyimpan sesuai user login)
         async function recordAttendance(actionType) {
             if (!currentUser) return alert('Sesi berakhir, silakan login kembali.');
 
+            const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
+            const btnElement = document.getElementById(btnId);
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+            btnElement.disabled = true;
+
             try {
-                // Nonaktifkan tombol sementara agar tidak dobel klik
-                const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
-                const btnOrigin = document.getElementById(btnId).innerHTML;
-                document.getElementById(btnId).innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
-                
-                const { data, error } = await supabase
+                const { error } = await supabaseClient
                     .from('attendance_logs')
-                    .insert([
-                        { user_name: currentUser, action_type: actionType }
-                    ]);
+                    .insert([{ user_name: currentUser, action_type: actionType }]);
 
                 if (error) throw error;
-                
                 alert(`Berhasil ${actionType}!`);
-                document.getElementById(btnId).innerHTML = btnOrigin;
             } catch (error) {
                 console.error('Error:', error);
-                alert(`Gagal menyimpan data. Error: ` + error.message);
+                alert(`Gagal menyimpan data: ` + error.message);
+            } finally {
+                btnElement.innerHTML = originalContent;
+                btnElement.disabled = false;
             }
         }
     </script>
