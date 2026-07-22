@@ -104,11 +104,11 @@
 
             <!-- Clock In & Clock Out Action Buttons -->
             <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-100">
-              <button onclick="openGenericModal('absen-modal'); window.startSelfieCamera();" class="bg-appGreenDark hover:bg-emerald-950 active:scale-95 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+              <button onclick="window.prepareAttendance('Clock In')" class="bg-appGreenDark hover:bg-emerald-950 active:scale-95 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow">
                 <svg class="w-4 h-4 text-emerald-300 stroke-current" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                 <span>Clock In</span>
               </button>
-              <button onclick="openGenericModal('absen-modal'); window.startSelfieCamera();" class="bg-appGreenDark hover:bg-emerald-950 active:scale-95 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+              <button onclick="window.prepareAttendance('Clock Out')" class="bg-appGreenDark hover:bg-emerald-950 active:scale-95 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow">
                 <svg class="w-4 h-4 text-rose-300 stroke-current" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 <span>Clock Out</span>
               </button>
@@ -126,7 +126,7 @@
             <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Daftar<br>Pengajuan</span>
           </button>
 
-          <button onclick="openGenericModal('absen-modal'); window.startSelfieCamera();" class="flex flex-col items-center group">
+          <button onclick="window.prepareAttendance('Clock In')" class="flex flex-col items-center group">
             <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
               <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
@@ -469,7 +469,6 @@
 
   <!-- JAVASCRIPT CORE FAIL-SAFE -->
   <script>
-    // FUNGSI UTAMA (Dibuka Global agar bisa diklik langsung)
     window.openGenericModal = function(id) { 
       const el = document.getElementById(id);
       if (el) el.classList.remove('hidden'); 
@@ -496,7 +495,7 @@
       }
     };
 
-    // INISIALISASI SUPABASE DENGAN TRY/CATCH
+    // INISIALISASI SUPABASE
     const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
     let supabase = null;
@@ -513,9 +512,7 @@
     let allRecords = [];
     window.currentUserSession = null;
 
-    // EVENT SAAT HALAMAN SELESAI DIMUAT
     document.addEventListener("DOMContentLoaded", () => {
-      // Dibuat blok try-catch mandiri agar jika satu error, yang lain tetap jalan.
       try { startDigitalClock(); } catch(e){ console.error(e); }
       try { updateShiftDateAndJawa(); } catch(e){ console.error(e); }
       try { checkSupabaseSession(); } catch(e){ console.error(e); }
@@ -527,21 +524,15 @@
       if (fDate) fDate.value = new Date().toISOString().split('T')[0];
     });
 
-    // ==================== JAM DIGITAL & PASARAN JAWA ====================
     function startDigitalClock() {
       const textEl = document.getElementById('digital-clock-text');
       if (!textEl) return;
-
       function updateClock() {
         try {
           const now = new Date();
-          const hours = String(now.getHours()).padStart(2, '0');
-          const minutes = String(now.getMinutes()).padStart(2, '0');
-          const seconds = String(now.getSeconds()).padStart(2, '0');
-          textEl.innerText = `${hours}:${minutes}:${seconds}`;
-        } catch (err) { console.error(err); }
+          textEl.innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        } catch (err) {}
       }
-
       updateClock();
       setInterval(updateClock, 1000);
     }
@@ -558,21 +549,14 @@
       const now = new Date();
       const hariArr = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const bulanArr = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-
-      const namaHari = hariArr[now.getDay()];
-      const pasaran = getPasaranJawa(now);
-      const tanggal = now.getDate();
-      const namaBulan = bulanArr[now.getMonth()];
-      const tahun = now.getFullYear();
-
+      
       const jawaEl = document.getElementById('current-jawa-date');
       const shiftEl = document.getElementById('current-shift-date');
 
-      if(jawaEl) jawaEl.innerText = `${namaHari} ${pasaran}`;
-      if(shiftEl) shiftEl.innerText = `${tanggal} ${namaBulan} ${tahun}`;
+      if(jawaEl) jawaEl.innerText = `${hariArr[now.getDay()]} ${getPasaranJawa(now)}`;
+      if(shiftEl) shiftEl.innerText = `${now.getDate()} ${bulanArr[now.getMonth()]} ${now.getFullYear()}`;
     }
 
-    // ==================== AUTHENTICATION & LOGIN ====================
     window.handleAuthButtonClick = function() {
       if (window.currentUserSession) {
         window.handleLogout();
@@ -583,16 +567,18 @@
 
     async function checkSupabaseSession() {
       if (!supabase) return;
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        window.currentUserSession = session.user;
-        const meta = session.user.user_metadata || {};
-        applyUserData(meta.nama || session.user.email, meta.jabatan || 'Karyawan');
-      } else {
-        applyUserData('Sutrisno', 'Staff Operational');
-        const btnLabel = document.getElementById('login-btn-label');
-        if (btnLabel) btnLabel.innerText = "Login / Daftar";
-      }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          window.currentUserSession = session.user;
+          const meta = session.user.user_metadata || {};
+          applyUserData(meta.nama || session.user.email, meta.jabatan || 'Karyawan');
+        } else {
+          applyUserData('Sutrisno', 'Staff Operational');
+          const btnLabel = document.getElementById('login-btn-label');
+          if (btnLabel) btnLabel.innerText = "Login / Daftar";
+        }
+      } catch(e) { console.error("Session check error:", e); }
     }
 
     function applyUserData(nama, jabatan) {
@@ -615,8 +601,8 @@
       if (timAvatar) timAvatar.innerText = nama.charAt(0).toUpperCase();
 
       const btnLabel = document.getElementById('login-btn-label');
-      if (btnLabel && window.currentUserSession) {
-        btnLabel.innerText = "Logout";
+      if (btnLabel) {
+        btnLabel.innerText = window.currentUserSession ? "Logout" : "Login / Daftar";
       }
     }
 
@@ -675,13 +661,13 @@
 
       try {
         if (!supabase) throw new Error("Gagal menyambung database.");
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: { data: { nama, jabatan } }
         });
         if (error) throw error;
 
-        window.showToast("Pendaftaran Berhasil!", "Silakan login menggunakan akun baru Anda.", "success");
+        window.showToast("Pendaftaran Berhasil!", "Akun berhasil dibuat. Silakan login.", "success");
         window.toggleAuthMode('login');
       } catch (err) {
         window.showToast("Gagal Mendaftar!", err.message, "error");
@@ -694,12 +680,9 @@
       if(supabase) await supabase.auth.signOut();
       window.currentUserSession = null;
       applyUserData('Sutrisno', 'Staff Operational');
-      const btnLabel = document.getElementById('login-btn-label');
-      if(btnLabel) btnLabel.innerText = "Login / Daftar";
       window.showToast("Berhasil Keluar", "Sesi Anda telah diakhiri.", "success");
     };
 
-    // ==================== ABSENSI & KAMERA ====================
     function getLocation() {
       const statusEl = document.getElementById('location-status');
       if ("geolocation" in navigator && statusEl) {
@@ -717,6 +700,20 @@
         );
       }
     }
+
+    window.prepareAttendance = function(type) {
+      const inputType = document.getElementById('tipe_absen_val');
+      const modalTitle = document.getElementById('modal-title');
+      
+      if (inputType) inputType.value = type;
+      if (modalTitle) {
+        modalTitle.innerHTML = `<i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i> Presensi Selfie (${type})`;
+      }
+
+      window.openGenericModal('absen-modal');
+      window.startSelfieCamera();
+      try { lucide.createIcons(); } catch(e){}
+    };
 
     window.startSelfieCamera = async function() {
       const loadingEl = document.getElementById('camera-loading');
@@ -818,7 +815,6 @@
       }
     };
 
-    // ==================== OTHERS ====================
     window.handleLemburSubmit = async function(e) {
       e.preventDefault();
       const currentNama = document.getElementById('user-display-name').innerText;
@@ -895,7 +891,7 @@
         return `
           <div class="bg-white p-3.5 rounded-2xl border border-emerald-100 shadow-sm flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-              ${item.foto_url ? `<img src="${item.foto_url}" class="w-11 h-11 rounded-xl object-cover border" onclick="window.openLightbox('${item.foto_url}', '${escapeHtml(item.nama)}', '${dt.toLocaleTimeString()}')" alt="Selfie thumbnail" />` : `<div class="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center"><i data-lucide="user" class="w-5 h-5 text-slate-400"></i></div>`}
+              ${item.foto_url ? `<img src="${item.foto_url}" class="w-11 h-11 rounded-xl object-cover border" onclick="window.openLightbox('${item.foto_url}', '${escapeHtml(item.nama)}', '${dt.toLocaleTimeString()}')" alt="Selfie" />` : `<div class="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center"><i data-lucide="user" class="w-5 h-5 text-slate-400"></i></div>`}
               <div>
                 <h4 class="font-bold text-xs text-slate-900">${escapeHtml(item.nama)}</h4>
                 <p class="text-[10px] text-slate-400">${escapeHtml(item.jabatan)}</p>
