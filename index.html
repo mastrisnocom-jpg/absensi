@@ -47,7 +47,10 @@
                 <!-- Clock In / Out Card -->
                 <div class="px-6 -mt-12 relative z-10">
                     <div class="bg-white rounded-2xl shadow-md p-5">
-                        <h2 class="text-gray-700 font-bold text-sm mb-4">Status Shift Aktif</h2>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-gray-700 font-bold text-sm">Status Shift Aktif</h2>
+                            <span id="gps-status-badge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold"><i class="fa-solid fa-location-crosshairs mr-1"></i> Mendeteksi GPS...</span>
+                        </div>
                         <div class="flex gap-3">
                             <button onclick="recordAttendance('Clock In')" id="btn-in" class="flex-1 bg-green-800 hover:bg-green-700 active:scale-95 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition shadow-sm cursor-pointer">
                                 <i class="fa-solid fa-arrow-right-to-bracket"></i> Clock In
@@ -168,7 +171,14 @@
                         </div>
                     </div>
 
-                    <div class="pt-3">
+                    <!-- Tombol Pengaturan Super Admin (Hanya muncul jika mastrisnocom@gmail.com) -->
+                    <div id="superadmin-menu-container" class="hidden pt-2 border-t">
+                        <button onclick="openSettingsModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold py-2.5 rounded-xl transition text-xs border border-amber-300 cursor-pointer flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-gear"></i> Pengaturan Titik Kantor (Super Admin)
+                        </button>
+                    </div>
+
+                    <div class="pt-2">
                         <button onclick="logout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl transition text-xs border border-red-200 cursor-pointer">
                             <i class="fa-solid fa-power-off mr-1"></i> Keluar Akun
                         </button>
@@ -196,6 +206,36 @@
                 <i class="fa-regular fa-user mb-1 text-base"></i><span class="text-[10px] font-medium">Profil</span>
             </div>
         </nav>
+
+        <!-- ================= MODAL PENGATURAN SUPER ADMIN ================= -->
+        <div id="settings-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative my-auto space-y-4">
+                <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="text-center">
+                    <h3 class="text-lg font-bold text-gray-800">Pengaturan Titik Kantor</h3>
+                    <p class="text-gray-500 text-xs mt-0.5">Atur koordinat pusat dan radius absensi</p>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-gray-600">Latitude Kantor</label>
+                        <input type="number" step="any" id="setting-lat" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-green-600" />
+                    </div>
+                    <div>
+                        <label class="font-semibold text-gray-600">Longitude Kantor</label>
+                        <input type="number" step="any" id="setting-lng" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-green-600" />
+                    </div>
+                    <div>
+                        <label class="font-semibold text-gray-600">Maksimal Radius (Meter)</label>
+                        <input type="number" id="setting-radius" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-green-600" />
+                    </div>
+                    <button onclick="saveOfficeSettings()" class="w-full bg-primary-dark hover:bg-green-900 text-white font-bold py-2.5 rounded-xl shadow transition cursor-pointer mt-2">
+                        Simpan Pengaturan
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- ================= MODAL / POP-UP LOGIN & DAFTAR ================= -->
         <div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
@@ -290,13 +330,100 @@
 
         let isLoginMode = true;
         let currentUser = null;
+        let currentUserEmail = null;
         let currentUserData = {};
+        let currentCoords = null;
+
+        // Load Koordinat Kantor dari localStorage (Default: Jakarta / Koordinat Default)
+        let OFFICE_LAT = parseFloat(localStorage.getItem('office_lat')) || -6.200000;
+        let OFFICE_LNG = parseFloat(localStorage.getItem('office_lng')) || 106.816666;
+        let MAX_RADIUS_METERS = parseInt(localStorage.getItem('office_radius')) || 100;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
                 checkSession();
             }
+            initGeolocation();
         });
+
+        // Buka / Tutup Modal Pengaturan Super Admin
+        function openSettingsModal() {
+            document.getElementById('setting-lat').value = OFFICE_LAT;
+            document.getElementById('setting-lng').value = OFFICE_LNG;
+            document.getElementById('setting-radius').value = MAX_RADIUS_METERS;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        // Simpan Pengaturan Koordinat Kantor oleh Super Admin
+        function saveOfficeSettings() {
+            const lat = parseFloat(document.getElementById('setting-lat').value);
+            const lng = parseFloat(document.getElementById('setting-lng').value);
+            const radius = parseInt(document.getElementById('setting-radius').value);
+
+            if (isNaN(lat) || isNaN(lng) || isNaN(radius)) {
+                alert('Semua kolom pengaturan harus diisi dengan angka yang valid!');
+                return;
+            }
+
+            OFFICE_LAT = lat;
+            OFFICE_LNG = lng;
+            MAX_RADIUS_METERS = radius;
+
+            localStorage.setItem('office_lat', lat);
+            localStorage.setItem('office_lng', lng);
+            localStorage.setItem('office_radius', radius);
+
+            alert('Pengaturan koordinat kantor berhasil disimpan!');
+            closeSettingsModal();
+            initGeolocation(); // Refresh perhitungan GPS
+        }
+
+        function initGeolocation() {
+            const gpsBadge = document.getElementById('gps-status-badge');
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        currentCoords = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        const dist = calculateDistance(currentCoords.lat, currentCoords.lng, OFFICE_LAT, OFFICE_LNG);
+                        if (dist <= MAX_RADIUS_METERS) {
+                            gpsBadge.className = "text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold";
+                            gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> Dalam Area Kantor (${Math.round(dist)}m)`;
+                        } else {
+                            gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
+                            gpsBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Luar Area (${Math.round(dist)}m)`;
+                        }
+                    },
+                    (error) => {
+                        gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
+                        gpsBadge.innerHTML = `<i class="fa-solid fa-ban mr-1"></i> GPS Tidak Aktif`;
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                gpsBadge.innerHTML = "GPS Tidak Didukung";
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3;
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c;
+        }
 
         function switchTab(tab) {
             const sections = ['home-section', 'log-section', 'karyawan-section', 'inbox-section', 'profile-section'];
@@ -337,6 +464,14 @@
             document.getElementById('prof-religion').innerText = currentUserData.religion || '-';
             document.getElementById('prof-gender').innerText = currentUserData.gender || '-';
             document.getElementById('prof-marital').innerText = currentUserData.marital_status || '-';
+
+            // Cek apakah akun yang login adalah Super Admin (mastrisnocom@gmail.com)
+            const superAdminContainer = document.getElementById('superadmin-menu-container');
+            if (currentUserEmail === 'mastrisnocom@gmail.com') {
+                superAdminContainer.classList.remove('hidden');
+            } else {
+                superAdminContainer.classList.add('hidden');
+            }
 
             const initial = name.charAt(0).toUpperCase();
             document.getElementById('profile-avatar-container').innerHTML = `<span class="text-gold font-bold text-3xl">${initial}</span>`;
@@ -407,6 +542,7 @@
                     const userName = meta.full_name || session.user.email.split('@')[0];
                     
                     currentUser = userName;
+                    currentUserEmail = session.user.email;
                     currentUserData = {
                         full_name: userName,
                         email: session.user.email,
@@ -427,6 +563,7 @@
                 } else {
                     document.getElementById('user-display-name').innerText = 'Tamu';
                     currentUser = null;
+                    currentUserEmail = null;
                     currentUserData = {};
 
                     btnContainer.innerHTML = `
@@ -528,11 +665,46 @@
             alert('Berhasil keluar akun.');
         }
 
-        // Logika baru untuk mencegah duplikat Clock In dan memperbarui Clock Out ke data terakhir
         async function recordAttendance(actionType) {
             if (!currentUser) {
                 alert('Silakan "Login / Daftar" terlebih dahulu untuk melakukan absensi!');
                 openAuthModal();
+                return;
+            }
+
+            if (!currentCoords) {
+                alert('GPS belum terdeteksi. Pastikan izin lokasi (GPS) di browser Anda diaktifkan, lalu muat ulang halaman.');
+                initGeolocation();
+                return;
+            }
+
+            const distance = calculateDistance(currentCoords.lat, currentCoords.lng, OFFICE_LAT, OFFICE_LNG);
+
+            if (distance > MAX_RADIUS_METERS) {
+                const confirmRequest = confirm(`Anda berada di luar area kantor (${Math.round(distance)} meter dari titik pusat).\n\nAbsensi di luar area memerlukan persetujuan dari Kepala Unit. Kirim permohonan absensi?`);
+                
+                if (confirmRequest) {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('request_absensi')
+                            .insert([{ 
+                                nama: currentUser, 
+                                jenis_request: actionType, 
+                                alasan: `Diluar radius kantor (${Math.round(distance)}m)`, 
+                                status: 'Pending Kepala Unit' 
+                            }]);
+
+                        if (error) {
+                            alert('Gagal mengirim pengajuan. Pastikan tabel "request_absensi" sudah dibuat di database Supabase.');
+                            console.error(error);
+                            return;
+                        }
+
+                        alert('Permohonan absensi luar area berhasil dikirim! Menunggu persetujuan Kepala Unit.');
+                    } catch (err) {
+                        alert('Terjadi kesalahan koneksi database.');
+                    }
+                }
                 return;
             }
 
@@ -545,7 +717,6 @@
             const todayStr = new Date().toISOString().split('T')[0];
 
             try {
-                // Ambil data log user ini dari database
                 const { data: existingLogs, error: fetchErr } = await supabaseClient
                     .from('attendance_logs')
                     .select('*')
@@ -553,7 +724,6 @@
 
                 if (fetchErr) throw fetchErr;
 
-                // Filter log yang tanggalnya hari ini
                 const todayLogs = existingLogs.filter(item => {
                     const itemDate = new Date(item.timestamp || Date.now()).toISOString().split('T')[0];
                     return itemDate === todayStr;
@@ -564,19 +734,17 @@
 
                 if (actionType === 'Clock In') {
                     if (hasClockIn) {
-                        alert('Anda sudah melakukan Clock In hari ini! Absen masuk kedua diabaikan.');
+                        alert('Anda sudah melakukan Clock In hari ini!');
                         return;
                     }
-                    // Masukkan data Clock In baru
                     const { error } = await supabaseClient
                         .from('attendance_logs')
                         .insert([{ user_name: currentUser, action_type: 'Clock In' }]);
                     if (error) throw error;
-                    alert('Berhasil Clock In!');
+                    alert('Berhasil Clock In di dalam area kantor!');
 
                 } else if (actionType === 'Clock Out') {
                     if (clockOutLog) {
-                        // Jika sudah pernah Clock Out hari ini, perbarui timestamp-nya ke waktu yang terakhir
                         const { error } = await supabaseClient
                             .from('attendance_logs')
                             .update({ timestamp: new Date().toISOString() })
@@ -584,7 +752,6 @@
                         if (error) throw error;
                         alert('Berhasil Clock Out (Memperbarui ke data terakhir)!');
                     } else {
-                        // Jika belum pernah Clock Out hari ini, masukkan data baru
                         const { error } = await supabaseClient
                             .from('attendance_logs')
                             .insert([{ user_name: currentUser, action_type: 'Clock Out' }]);
