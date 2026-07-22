@@ -82,23 +82,14 @@
           </div>
         </div>
 
-        <!-- Floating Shift Card (D1) + JAM DIGITAL SAJA -->
+        <!-- Floating Shift Card (D1) -->
         <div class="px-5 -mt-10">
           <div class="bg-white rounded-2xl p-4 shadow-lg border border-emerald-50 space-y-4">
             
             <div class="flex items-center justify-between">
               <div>
                 <span class="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-black">SHIFT D1</span>
-                <!-- Tanggal Masehi & Hari Jawa -->
-                <h3 id="current-jawa-date" class="text-xs font-extrabold text-appGreenDark mt-2">--</h3>
-                <p id="current-shift-date" class="text-[11px] font-bold text-slate-600">--</p>
-                <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Jam Kerja: (07:30 - 16:30)</p>
-              </div>
-
-              <!-- Component Jam Digital Besar -->
-              <div class="flex flex-col items-end justify-center bg-emerald-50/70 border border-emerald-100 px-3.5 py-2.5 rounded-2xl shadow-inner">
-                <span id="digital-clock-text" class="text-xl font-extrabold font-mono text-appGreenDark tracking-tight">00:00:00</span>
-                <span class="text-[9px] font-black text-emerald-600 tracking-wider mt-0.5">WAKTU LOKAL</span>
+                <p class="text-xs font-bold text-slate-600 mt-2">Status Shift Aktif</p>
               </div>
             </div>
 
@@ -469,23 +460,6 @@
 
   <!-- JAVASCRIPT CORE FAIL-SAFE -->
   <script>
-    // ==================== JAM DIGITAL MANDIRI ====================
-    // Dijalankan langsung agar jam berdetak seketika tanpa terhambat async
-    (function runClock() {
-      function tick() {
-        const textEl = document.getElementById('digital-clock-text');
-        if (textEl) {
-          const now = new Date();
-          const hh = String(now.getHours()).padStart(2, '0');
-          const mm = String(now.getMinutes()).padStart(2, '0');
-          const ss = String(now.getSeconds()).padStart(2, '0');
-          textEl.innerText = `${hh}:${mm}:${ss}`;
-        }
-      }
-      tick();
-      setInterval(tick, 1000);
-    })();
-
     // ==================== UTILITY FUNCTIONS ====================
     window.openGenericModal = function(id) { 
       const el = document.getElementById(id);
@@ -532,7 +506,6 @@
 
     // EVENT DOM CONTENT LOADED
     window.addEventListener("DOMContentLoaded", () => {
-      try { updateShiftDateAndJawa(); } catch(e){ console.error(e); }
       try { checkSupabaseSession(); } catch(e){ console.error(e); }
       try { getLocation(); } catch(e){ console.error(e); }
       try { fetchAbsensiData(); } catch(e){ console.error(e); }
@@ -541,26 +514,6 @@
       const fDate = document.getElementById('filter-date');
       if (fDate) fDate.value = new Date().toISOString().split('T')[0];
     });
-
-    function getPasaranJawa(date) {
-      const pasaran = ['Legi', 'Pahing', 'Pon', 'Wage', 'Kliwon'];
-      const baseDate = new Date(1900, 0, 1);
-      const diffDays = Math.floor((date - baseDate) / (1000 * 60 * 60 * 24));
-      const pasaranIndex = (diffDays + 1) % 5;
-      return pasaran[pasaranIndex < 0 ? pasaranIndex + 5 : pasaranIndex];
-    }
-
-    function updateShiftDateAndJawa() {
-      const now = new Date();
-      const hariArr = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-      const bulanArr = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-      
-      const jawaEl = document.getElementById('current-jawa-date');
-      const shiftEl = document.getElementById('current-shift-date');
-
-      if(jawaEl) jawaEl.innerText = `${hariArr[now.getDay()]} ${getPasaranJawa(now)}`;
-      if(shiftEl) shiftEl.innerText = `${now.getDate()} ${bulanArr[now.getMonth()]} ${now.getFullYear()}`;
-    }
 
     window.handleAuthButtonClick = function() {
       if (window.currentUserSession) {
