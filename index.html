@@ -103,7 +103,7 @@
             <!-- Live Video Feed (Direct Selfie Mode) -->
             <video id="webcam" autoplay playsinline class="w-full h-full object-cover mirror-video"></video>
 
-            <!-- Loading Camera Overlay -->
+            <!-- Loading & Error Overlay -->
             <div id="camera-loading" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center gap-2 text-slate-400 z-20">
               <span class="w-6 h-6 border-2 border-teal-400 border-t-transparent rounded-full animate-spin"></span>
               <p class="text-xs font-medium">Membuka Kamera Selfie...</p>
@@ -324,19 +324,63 @@
       }
     }
 
-    // AUTO-START SELFIE CAMERA DIRECTLY
+    // AUTO-START SELFIE CAMERA DENGAN FALLBACK & DETEKSI ERROR
     async function startSelfieCamera() {
       const loadingEl = document.getElementById('camera-loading');
+      const video = document.getElementById('webcam');
+
+      // Tampilkan kembali animasi loading saat mencoba menghubungkan
+      loadingEl.innerHTML = `
+        <span class="w-6 h-6 border-2 border-teal-400 border-t-transparent rounded-full animate-spin"></span>
+        <p class="text-xs font-medium">Membuka Kamera Selfie...</p>
+      `;
+      loadingEl.classList.remove('hidden');
+
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error("Browser tidak mendukung akses kamera.");
+        }
+
+        // Minta stream kamera selfie
         videoStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 800 } }
+          video: { 
+            facingMode: 'user',
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          },
+          audio: false
         });
-        const video = document.getElementById('webcam');
+
         video.srcObject = videoStream;
-        loadingEl.classList.add('hidden');
+
+        // Hilangkan layar loading saat video sudah berputar
+        video.onloadedmetadata = () => {
+          video.play().catch(e => console.log("Play Error:", e));
+          loadingEl.classList.add('hidden');
+        };
+
       } catch (err) {
         console.error("Camera Error:", err);
-        loadingEl.innerHTML = `<p class="text-xs text-rose-400 px-4 text-center">Gagal membuka kamera selfie. Izinkan akses kamera pada browser HP Anda.</p>`;
+        let userMsg = "Gagal membuka kamera selfie.";
+
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          userMsg = "Akses kamera ditolak. Harap izinkan akses kamera pada pengaturan browser Anda.";
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          userMsg = "Kamera selfie tidak ditemukan pada perangkat ini.";
+        } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+          userMsg = "Kamera sedang digunakan aplikasi lain (WhatsApp/Zoom). Tutup dulu aplikasi tersebut.";
+        } else if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+          userMsg = "Kamera butuh koneksi HTTPS aman. Buka via Live Server atau GitHub Pages.";
+        }
+
+        loadingEl.innerHTML = `
+          <div class="px-4 text-center space-y-2 z-30">
+            <p class="text-xs text-rose-400 font-bold leading-relaxed">${userMsg}</p>
+            <button onclick="startSelfieCamera()" class="px-3 py-1.5 bg-slate-800 text-teal-400 border border-slate-700 rounded-xl text-[10px] font-bold active:scale-95 transition">
+              Coba Lagi
+            </button>
+          </div>
+        `;
       }
     }
 
