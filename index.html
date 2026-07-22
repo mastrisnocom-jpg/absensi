@@ -47,13 +47,13 @@
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex justify-center items-center sm:py-6">
+<body class="bg-slate-900 text-slate-800 font-sans antialiased h-screen w-screen overflow-hidden flex justify-center items-center sm:py-6">
 
   <!-- ==================== ANDROID CONTAINER ==================== -->
-  <div class="w-full max-w-md bg-[#F2F8F5] min-h-screen sm:min-h-[844px] sm:max-h-[844px] sm:rounded-[40px] shadow-2xl flex flex-col relative overflow-hidden sm:border-[8px] sm:border-slate-800">
+  <div class="w-full max-w-md bg-[#F2F8F5] h-full sm:h-[844px] sm:rounded-[40px] shadow-2xl flex flex-col relative overflow-hidden sm:border-[8px] sm:border-slate-800">
     
-    <!-- SCROLLABLE CONTENT (KONTEN UTAMA DENGAN SCROLL INDEPENDEN) -->
-    <div class="flex-1 overflow-y-auto no-scrollbar pb-28">
+    <!-- AREA SCROLL UTAMA (HANYA KONTEN INI YANG BISA DI-SCROLL) -->
+    <div class="flex-1 overflow-y-auto no-scrollbar pb-6">
       
       <!-- ==================== TAB 1: HOME UI ==================== -->
       <section id="tab-content-home" class="block">
@@ -97,7 +97,7 @@
           </div>
         </div>
 
-        <!-- Grid Menu Items (Diperbesar Ukurannya) -->
+        <!-- Grid Menu Items -->
         <div class="px-4 py-6 grid grid-cols-4 gap-y-7 gap-x-2 text-center">
           
           <!-- Menu 1: Daftar Pengajuan -->
@@ -184,50 +184,52 @@
 
     </div>
 
-    <!-- ==================== ANDROID FLOATING BOTTOM NAVIGATION BAR (100% STATIS FIX) ==================== -->
-    <nav class="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-md border border-emerald-100/90 rounded-2xl px-2 py-2 flex justify-around items-center z-40 shadow-xl shadow-emerald-950/15">
-      
-      <!-- Home Button -->
-      <button id="nav-btn-home" onclick="switchMainTab('home')" class="flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95">
-        <div id="nav-icon-home" class="p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain">
-          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <span class="text-[9px]">Home</span>
-      </button>
-      
-      <!-- Karyawan Button -->
-      <button id="nav-btn-karyawan" onclick="openGenericModal('modal-tim')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
-        <div id="nav-icon-karyawan" class="p-1.5 rounded-full text-slate-400">
-          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-        <span class="text-[9px]">Karyawan</span>
-      </button>
-      
-      <!-- Absen Log Button -->
-      <button id="nav-btn-log" onclick="switchMainTab('log')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
-        <div id="nav-icon-log" class="p-1.5 rounded-full text-slate-400">
-          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <span class="text-[9px]">Absen Log</span>
-      </button>
-      
-      <!-- Inbox Button -->
-      <button id="nav-btn-inbox" onclick="showToast('Inbox', 'Belum ada pesan baru', 'success')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
-        <div id="nav-icon-inbox" class="p-1.5 rounded-full text-slate-400">
-          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </div>
-        <span class="text-[9px]">Inbox</span>
-      </button>
-      
-      <!-- Profil Button -->
-      <button id="nav-btn-profil" onclick="openGenericModal('modal-sandi')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
-        <div id="nav-icon-profil" class="p-1.5 rounded-full text-slate-400">
-          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </div>
-        <span class="text-[9px]">Profil</span>
-      </button>
+    <!-- ==================== FLOATING BOTTOM NAV BAR (TERKUNCI STATIS DI LUAR SCROLL) ==================== -->
+    <div class="p-3 bg-transparent shrink-0 z-40">
+      <nav class="bg-white/95 backdrop-blur-md border border-emerald-100/90 rounded-2xl px-2 py-2 flex justify-around items-center shadow-xl shadow-emerald-950/15">
+        
+        <!-- Home Button -->
+        <button id="nav-btn-home" onclick="switchMainTab('home')" class="flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95">
+          <div id="nav-icon-home" class="p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain">
+            <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <span class="text-[9px]">Home</span>
+        </button>
+        
+        <!-- Karyawan Button -->
+        <button id="nav-btn-karyawan" onclick="openGenericModal('modal-tim')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
+          <div id="nav-icon-karyawan" class="p-1.5 rounded-full text-slate-400">
+            <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <span class="text-[9px]">Karyawan</span>
+        </button>
+        
+        <!-- Absen Log Button -->
+        <button id="nav-btn-log" onclick="switchMainTab('log')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
+          <div id="nav-icon-log" class="p-1.5 rounded-full text-slate-400">
+            <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <span class="text-[9px]">Absen Log</span>
+        </button>
+        
+        <!-- Inbox Button -->
+        <button id="nav-btn-inbox" onclick="showToast('Inbox', 'Belum ada pesan baru', 'success')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
+          <div id="nav-icon-inbox" class="p-1.5 rounded-full text-slate-400">
+            <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <span class="text-[9px]">Inbox</span>
+        </button>
+        
+        <!-- Profil Button -->
+        <button id="nav-btn-profil" onclick="openGenericModal('modal-sandi')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
+          <div id="nav-icon-profil" class="p-1.5 rounded-full text-slate-400">
+            <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span class="text-[9px]">Profil</span>
+        </button>
 
-    </nav>
+      </nav>
+    </div>
 
   </div>
 
@@ -316,7 +318,7 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL FITUR ==================== -->
+  <!-- ==================== MODAL FITUR LAINNYA ==================== -->
   <div id="modal-pengajuan" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4">
       <div class="flex justify-between items-center border-b pb-3">
@@ -476,19 +478,17 @@
     function openGenericModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeGenericModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-    // LOGIN SUBMIT HANDLER (MENGUBAH NAMA KARYAWAN)
+    // LOGIN SUBMIT HANDLER
     function handleLoginSubmit(e) {
       e.preventDefault();
       const namaBaru = document.getElementById('login-nama').value.trim();
       const jabatanBaru = document.getElementById('login-jabatan').value.trim();
 
       if (namaBaru && jabatanBaru) {
-        // 1. Update Tampilan Header
         document.getElementById('user-display-name').innerText = namaBaru;
         document.getElementById('user-display-role').innerText = jabatanBaru;
         document.getElementById('login-btn-label').innerText = "Ganti Akun";
 
-        // 2. Update Field Form Absensi & Modal Tim
         document.getElementById('nama').value = namaBaru;
         document.getElementById('jabatan').value = jabatanBaru;
         
@@ -682,7 +682,6 @@
       link.click();
     }
 
-    // Switch Main Tabs & Update Bottom Nav Highlight Dynamic
     function switchMainTab(tab) {
       const isHome = tab === 'home';
       
