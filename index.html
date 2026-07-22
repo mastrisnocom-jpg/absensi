@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi Absensi - ro3.my.id</title>
-    <!-- Tailwind CSS untuk Styling -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome untuk Ikon -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -20,137 +20,247 @@
 </head>
 <body class="bg-gray-100 flex justify-center min-h-screen">
 
-    <!-- Mobile Container -->
-    <div class="w-full max-w-md bg-gray-50 shadow-xl relative pb-20 overflow-hidden">
-        
-        <!-- Header Section -->
-        <div class="bg-primary-dark rounded-b-[40px] pt-10 pb-20 px-6 relative">
-            <div class="flex justify-between items-start">
+    <div class="w-full max-w-md bg-gray-50 shadow-xl relative overflow-hidden flex flex-col">
+
+        <!-- ================= SECTION AUTENTIKASI (LOGIN/REGISTER) ================= -->
+        <div id="auth-section" class="flex-1 flex flex-col justify-center px-8 py-12 bg-white hidden">
+            <div class="text-center mb-8">
+                <i class="fa-solid fa-clock-rotate-left text-5xl text-green-700 mb-4"></i>
+                <h2 id="auth-title" class="text-3xl font-bold text-gray-800">Masuk Akun</h2>
+                <p class="text-gray-500 text-sm mt-1">Aplikasi Absensi Karyawan</p>
+            </div>
+
+            <form id="auth-form" class="space-y-4">
+                <div id="name-field" class="hidden">
+                    <label class="text-sm text-gray-600 font-semibold">Nama Lengkap</label>
+                    <input type="text" id="fullname" placeholder="Masukkan nama Anda" class="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600">
+                </div>
                 <div>
-                    <p class="text-gold text-sm font-semibold mb-1">Selamat bekerja,</p>
-                    <h1 class="text-white text-3xl font-bold mb-1">Sutrisno</h1>
-                    <p class="text-gray-300 text-sm">Staff Operational</p>
+                    <label class="text-sm text-gray-600 font-semibold">Email</label>
+                    <input type="email" id="email" required placeholder="contoh@email.com" class="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600">
                 </div>
-                <button class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition">
-                    <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i> Login / Daftar
+                <div>
+                    <label class="text-sm text-gray-600 font-semibold">Password</label>
+                    <input type="password" id="password" required placeholder="Minimal 6 karakter" class="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600">
+                </div>
+                
+                <button type="submit" id="auth-btn" class="w-full bg-primary-dark hover:bg-green-900 text-white font-bold py-3 rounded-xl transition mt-2 shadow-md">
+                    Masuk
                 </button>
-            </div>
+            </form>
+
+            <p class="text-center text-sm text-gray-600 mt-6">
+                <span id="auth-switch-text">Belum punya akun?</span> 
+                <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-green-700 font-bold hover:underline">Daftar di sini</button>
+            </p>
         </div>
 
-        <!-- Clock In / Out Card -->
-        <div class="px-6 -mt-12 relative z-10">
-            <div class="bg-white rounded-2xl shadow-md p-5">
-                <h2 class="text-gray-700 font-bold text-sm mb-4">Status Shift Aktif</h2>
-                <div class="flex gap-3">
-                    <button onclick="recordAttendance('Clock In')" class="flex-1 bg-green-800 hover:bg-green-700 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition">
-                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Clock In
+        <!-- ================= SECTION DASHBOARD UTAMA ================= -->
+        <div id="dashboard-section" class="hidden flex-1 pb-20">
+            <!-- Header Section -->
+            <div class="bg-primary-dark rounded-b-[40px] pt-10 pb-20 px-6 relative">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gold text-sm font-semibold mb-1">Selamat bekerja,</p>
+                        <h1 id="user-display-name" class="text-white text-3xl font-bold mb-1">Memuat...</h1>
+                        <p class="text-gray-300 text-sm">Staff Operational</p>
+                    </div>
+                    <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/40 text-red-100 text-xs font-semibold py-2 px-4 rounded-full border border-red-400/30 transition">
+                        <i class="fa-solid fa-power-off mr-1"></i> Keluar
                     </button>
-                    <button onclick="recordAttendance('Clock Out')" class="flex-1 bg-primary-dark hover:bg-green-900 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Clock Out
-                    </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Menu Grid -->
-        <div class="grid grid-cols-4 gap-y-6 gap-x-2 p-6 mt-4">
-            <!-- Row 1 -->
-            <div class="flex flex-col items-center cursor-pointer">
-                <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                </div>
-                <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Daftar<br>Pengajuan</span>
-            </div>
-            <div class="flex flex-col items-center cursor-pointer">
-                <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                </div>
-                <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Absensi</span>
-            </div>
-            <div class="flex flex-col items-center cursor-pointer">
-                <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm">
-                    <i class="fa-solid fa-business-time"></i>
-                </div>
-                <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Lembur</span>
-            </div>
-            <div class="flex flex-col items-center cursor-pointer">
-                <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm">
-                    <i class="fa-solid fa-plane-departure"></i>
-                </div>
-                <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Cuti</span>
             </div>
 
-            <!-- Row 2 -->
-            <div class="flex flex-col items-center cursor-pointer">
-                <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm">
-                    <i class="fa-solid fa-users"></i>
+            <!-- Clock In / Out Card -->
+            <div class="px-6 -mt-12 relative z-10">
+                <div class="bg-white rounded-2xl shadow-md p-5">
+                    <h2 class="text-gray-700 font-bold text-sm mb-4">Status Shift Aktif</h2>
+                    <div class="flex gap-3">
+                        <button onclick="recordAttendance('Clock In')" id="btn-in" class="flex-1 bg-green-800 hover:bg-green-700 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Clock In
+                        </button>
+                        <button onclick="recordAttendance('Clock Out')" id="btn-out" class="flex-1 bg-primary-dark hover:bg-green-900 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Clock Out
+                        </button>
+                    </div>
                 </div>
-                <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Tim<br>Kami</span>
             </div>
-            <div class="flex flex-col items-center cursor-pointer">
-                <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm">
-                    <i class="fa-regular fa-user"></i>
-                </div>
-                <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Profil<br>Saya</span>
-            </div>
-            <div class="flex flex-col items-center cursor-pointer">
-                <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm">
-                    <i class="fa-solid fa-money-check-dollar"></i>
-                </div>
-                <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Slip<br>Gaji</span>
-            </div>
-        </div>
 
-        <!-- Bottom Navigation -->
-        <div class="absolute bottom-0 w-full bg-white border-t flex justify-between px-6 py-3">
-            <div class="flex flex-col items-center text-green-700 cursor-pointer">
-                <i class="fa-solid fa-house mb-1"></i>
-                <span class="text-[10px] font-bold">Home</span>
+            <!-- Menu Grid -->
+            <div class="grid grid-cols-4 gap-y-6 gap-x-2 p-6 mt-4">
+                <div class="flex flex-col items-center cursor-pointer">
+                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Daftar<br>Pengajuan</span>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer">
+                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Absensi</span>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer">
+                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-business-time"></i></div>
+                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Lembur</span>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer">
+                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-plane-departure"></i></div>
+                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Cuti</span>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer">
+                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-users"></i></div>
+                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Tim<br>Kami</span>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer">
+                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-regular fa-user"></i></div>
+                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Profil<br>Saya</span>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer">
+                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-money-check-dollar"></i></div>
+                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Slip<br>Gaji</span>
+                </div>
             </div>
-            <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
-                <i class="fa-solid fa-users mb-1"></i>
-                <span class="text-[10px] font-bold">Karyawan</span>
-            </div>
-            <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
-                <i class="fa-regular fa-calendar-check mb-1"></i>
-                <span class="text-[10px] font-bold">Absen Log</span>
-            </div>
-            <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
-                <i class="fa-regular fa-envelope mb-1"></i>
-                <span class="text-[10px] font-bold">Inbox</span>
-            </div>
-            <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
-                <i class="fa-regular fa-user mb-1"></i>
-                <span class="text-[10px] font-bold">Profil</span>
+
+            <!-- Bottom Navigation -->
+            <div class="absolute bottom-0 w-full bg-white border-t flex justify-between px-6 py-3">
+                <div class="flex flex-col items-center text-green-700 cursor-pointer"><i class="fa-solid fa-house mb-1"></i><span class="text-[10px] font-bold">Home</span></div>
+                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-solid fa-users mb-1"></i><span class="text-[10px] font-bold">Karyawan</span></div>
+                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-regular fa-calendar-check mb-1"></i><span class="text-[10px] font-bold">Absen Log</span></div>
+                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-regular fa-envelope mb-1"></i><span class="text-[10px] font-bold">Inbox</span></div>
+                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-regular fa-user mb-1"></i><span class="text-[10px] font-bold">Profil</span></div>
             </div>
         </div>
 
     </div>
 
-    <!-- Script Integrasi Supabase -->
+    <!-- Script Logika & Database -->
     <script>
-        // Konfigurasi API Supabase (Menggunakan kredensial dari Anda)
         const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Fungsi untuk mencatat absensi
-        async function recordAttendance(actionType) {
-            const userName = "Sutrisno"; // Bisa dibuat dinamis jika ada sistem login
+        let isLoginMode = true;
+        let currentUser = null;
+
+        // Cek apakah user sudah login ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', checkSession);
+
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
             
+            if (session) {
+                // User sudah login, tampilkan dashboard
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                document.getElementById('dashboard-section').classList.add('block');
+                
+                // Ambil nama (atau email jika nama tidak diatur)
+                const userName = session.user.user_metadata.full_name || session.user.email.split('@')[0];
+                document.getElementById('user-display-name').innerText = userName;
+                currentUser = userName;
+            } else {
+                // User belum login, tampilkan form login
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('dashboard-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('block');
+                currentUser = null;
+            }
+        }
+
+        // Fungsi Toggle antara Login dan Daftar
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? 'Masuk Akun' : 'Daftar Akun Baru';
+            document.getElementById('auth-btn').innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
+            document.getElementById('auth-switch-text').innerText = isLoginMode ? 'Belum punya akun?' : 'Sudah punya akun?';
+            document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Daftar di sini' : 'Login di sini';
+            
+            // Tampilkan/Sembunyikan kolom Nama Lengkap
+            if (isLoginMode) {
+                document.getElementById('name-field').classList.add('hidden');
+                document.getElementById('fullname').removeAttribute('required');
+            } else {
+                document.getElementById('name-field').classList.remove('hidden');
+                document.getElementById('fullname').setAttribute('required', 'true');
+            }
+        }
+
+        // Fungsi Proses Login / Register
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullname').value;
+            
+            document.getElementById('auth-btn').innerText = "Memproses...";
+            document.getElementById('auth-btn').disabled = true;
+
             try {
+                if (isLoginMode) {
+                    // Proses LOGIN
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password,
+                    });
+                    if (error) throw error;
+                    
+                    alert('Berhasil Login!');
+                    checkSession(); // Segarkan tampilan
+                } else {
+                    // Proses REGISTER
+                    const { data, error } = await supabase.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: {
+                            data: { full_name: fullName } // Simpan nama di metadata
+                        }
+                    });
+                    if (error) throw error;
+                    
+                    alert('Registrasi berhasil! Silakan masuk dengan akun yang baru dibuat.');
+                    toggleAuthMode(); // Balikkan layar ke mode login
+                    document.getElementById('password').value = '';
+                }
+            } catch (error) {
+                alert("Gagal: " + error.message);
+            } finally {
+                document.getElementById('auth-btn').innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
+                document.getElementById('auth-btn').disabled = false;
+            }
+        });
+
+        // Fungsi Keluar (Logout)
+        async function logout() {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                // Bersihkan inputan
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+                checkSession();
+            }
+        }
+
+        // Fungsi mencatat Absensi (Menyimpan sesuai user login)
+        async function recordAttendance(actionType) {
+            if (!currentUser) return alert('Sesi berakhir, silakan login kembali.');
+
+            try {
+                // Nonaktifkan tombol sementara agar tidak dobel klik
+                const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
+                const btnOrigin = document.getElementById(btnId).innerHTML;
+                document.getElementById(btnId).innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+                
                 const { data, error } = await supabase
                     .from('attendance_logs')
                     .insert([
-                        { user_name: userName, action_type: actionType }
+                        { user_name: currentUser, action_type: actionType }
                     ]);
 
                 if (error) throw error;
                 
-                alert(`Berhasil melakukan ${actionType}! Data telah tersimpan di server.`);
+                alert(`Berhasil ${actionType}!`);
+                document.getElementById(btnId).innerHTML = btnOrigin;
             } catch (error) {
                 console.error('Error:', error);
-                alert(`Gagal menyimpan data ${actionType}. Pesan error: ` + error.message);
+                alert(`Gagal menyimpan data. Error: ` + error.message);
             }
         }
     </script>
