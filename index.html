@@ -22,53 +22,22 @@
 
     <div class="w-full max-w-md bg-gray-50 shadow-xl relative overflow-hidden flex flex-col min-h-screen">
 
-        <!-- ================= SECTION AUTENTIKASI (LOGIN/REGISTER) ================= -->
-        <!-- Tidak lagi menggunakan 'hidden' di awal agar tidak blank putih -->
-        <div id="auth-section" class="flex-1 flex flex-col justify-center px-8 py-12 bg-white">
-            <div class="text-center mb-8">
-                <i class="fa-solid fa-clock-rotate-left text-5xl text-green-700 mb-4"></i>
-                <h2 id="auth-title" class="text-3xl font-bold text-gray-800">Masuk Akun</h2>
-                <p class="text-gray-500 text-sm mt-1">Aplikasi Absensi Karyawan</p>
-            </div>
-
-            <form id="auth-form" class="space-y-4">
-                <div id="name-field" class="hidden">
-                    <label class="text-sm text-gray-600 font-semibold">Nama Lengkap</label>
-                    <input type="text" id="fullname" placeholder="Masukkan nama Anda" class="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600">
-                </div>
-                <div>
-                    <label class="text-sm text-gray-600 font-semibold">Email</label>
-                    <input type="email" id="email" required placeholder="contoh@email.com" class="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600">
-                </div>
-                <div>
-                    <label class="text-sm text-gray-600 font-semibold">Password</label>
-                    <input type="password" id="password" required placeholder="Minimal 6 karakter" class="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600">
-                </div>
-                
-                <button type="submit" id="auth-btn" class="w-full bg-primary-dark hover:bg-green-900 text-white font-bold py-3 rounded-xl transition mt-2 shadow-md">
-                    Masuk
-                </button>
-            </form>
-
-            <p class="text-center text-sm text-gray-600 mt-6">
-                <span id="auth-switch-text">Belum punya akun?</span> 
-                <button type="button" onclick="toggleAuthMode()" id="auth-switch-btn" class="text-green-700 font-bold hover:underline">Daftar di sini</button>
-            </p>
-        </div>
-
-        <!-- ================= SECTION DASHBOARD UTAMA ================= -->
-        <div id="dashboard-section" class="hidden flex-1 pb-20">
+        <!-- ================= DASHBOARD UTAMA (SELALU MUNCUL) ================= -->
+        <div id="dashboard-section" class="flex-1 pb-20 relative">
             <!-- Header Section -->
             <div class="bg-primary-dark rounded-b-[40px] pt-10 pb-20 px-6 relative">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-gold text-sm font-semibold mb-1">Selamat bekerja,</p>
-                        <h1 id="user-display-name" class="text-white text-3xl font-bold mb-1">Memuat...</h1>
+                        <h1 id="user-display-name" class="text-white text-3xl font-bold mb-1">Tamu</h1>
                         <p class="text-gray-300 text-sm">Staff Operational</p>
                     </div>
-                    <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/40 text-red-100 text-xs font-semibold py-2 px-4 rounded-full border border-red-400/30 transition">
-                        <i class="fa-solid fa-power-off mr-1"></i> Keluar
-                    </button>
+                    <!-- Tombol Login/Daftar atau Logout tergantung status sesi -->
+                    <div id="auth-action-btn-container">
+                        <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -77,10 +46,10 @@
                 <div class="bg-white rounded-2xl shadow-md p-5">
                     <h2 class="text-gray-700 font-bold text-sm mb-4">Status Shift Aktif</h2>
                     <div class="flex gap-3">
-                        <button onclick="recordAttendance('Clock In')" id="btn-in" class="flex-1 bg-green-800 hover:bg-green-700 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition">
+                        <button onclick="recordAttendance('Clock In')" id="btn-in" class="flex-1 bg-green-800 hover:bg-green-700 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition shadow-sm">
                             <i class="fa-solid fa-arrow-right-to-bracket"></i> Clock In
                         </button>
-                        <button onclick="recordAttendance('Clock Out')" id="btn-out" class="flex-1 bg-primary-dark hover:bg-green-900 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition">
+                        <button onclick="recordAttendance('Clock Out')" id="btn-out" class="flex-1 bg-primary-dark hover:bg-green-900 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition shadow-sm">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i> Clock Out
                         </button>
                     </div>
@@ -129,6 +98,45 @@
             </div>
         </div>
 
+        <!-- ================= MODAL / POP-UP LOGIN & DAFTAR ================= -->
+        <div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative animate-fadeIn">
+                <!-- Tombol Tutup Pop-up -->
+                <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <div class="text-center mb-6 mt-2">
+                    <h2 id="auth-title" class="text-2xl font-bold text-gray-800">Masuk Akun</h2>
+                    <p class="text-gray-500 text-xs mt-1">Silakan masuk untuk mencatat absensi</p>
+                </div>
+
+                <form id="auth-form" class="space-y-4">
+                    <div id="name-field" class="hidden">
+                        <label class="text-xs text-gray-600 font-semibold">Nama Lengkap</label>
+                        <input type="text" id="fullname" placeholder="Masukkan nama Anda" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-600 font-semibold">Email</label>
+                        <input type="email" id="email" required placeholder="contoh@email.com" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-600 font-semibold">Password</label>
+                        <input type="password" id="password" required placeholder="Minimal 6 karakter" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600">
+                    </div>
+                    
+                    <button type="submit" id="auth-btn" class="w-full bg-primary-dark hover:bg-green-900 text-white font-bold py-2.5 rounded-xl transition text-sm shadow-md mt-2">
+                        Masuk
+                    </button>
+                </form>
+
+                <p class="text-center text-xs text-gray-600 mt-5">
+                    <span id="auth-switch-text">Belum punya akun?</span> 
+                    <button type="button" onclick="toggleAuthMode()" id="auth-switch-btn" class="text-green-700 font-bold hover:underline">Daftar di sini</button>
+                </p>
+            </div>
+        </div>
+
     </div>
 
     <!-- Script Logika & Database -->
@@ -136,7 +144,6 @@
         const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
         
-        // Inisialisasi Supabase yang aman
         let supabaseClient = null;
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -151,8 +158,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
                 checkSession();
-            } else {
-                alert("Gagal memuat sistem database.");
             }
         });
 
@@ -161,29 +166,44 @@
                 const { data: { session }, error } = await supabaseClient.auth.getSession();
                 if (error) throw error;
                 
-                const authSection = document.getElementById('auth-section');
-                const dashboardSection = document.getElementById('dashboard-section');
+                const btnContainer = document.getElementById('auth-action-btn-container');
 
                 if (session) {
-                    authSection.classList.add('hidden');
-                    dashboardSection.classList.remove('hidden');
-                    
                     const userName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
                     document.getElementById('user-display-name').innerText = userName;
                     currentUser = userName;
+
+                    // Ubah tombol pojok kanan atas menjadi tombol Keluar (Logout)
+                    btnContainer.innerHTML = `
+                        <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/40 text-red-100 text-xs font-semibold py-2 px-3 rounded-full border border-red-400/30 transition flex items-center gap-1">
+                            <i class="fa-solid fa-power-off"></i> Keluar
+                        </button>
+                    `;
                 } else {
-                    authSection.classList.remove('hidden');
-                    dashboardSection.classList.add('hidden');
+                    document.getElementById('user-display-name').innerText = 'Tamu';
                     currentUser = null;
+
+                    // Kembalikan tombol pojok kanan atas menjadi Login / Daftar
+                    btnContainer.innerHTML = `
+                        <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
+                        </button>
+                    `;
                 }
             } catch (err) {
                 console.error("Sesi error:", err);
-                // Pastikan form login tetap muncul jika terjadi error jaringan/sesi
-                document.getElementById('auth-section').classList.remove('hidden');
-                document.getElementById('dashboard-section').classList.add('hidden');
             }
         }
 
+        // Fungsi Buka/Tutup Pop-up Modal
+        function openAuthModal() {
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        // Toggle Login / Register dalam Modal
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? 'Masuk Akun' : 'Daftar Akun Baru';
@@ -203,6 +223,7 @@
             }
         }
 
+        // Proses Form Submit Login/Register
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -220,6 +241,7 @@
                     if (error) throw error;
                     
                     alert('Berhasil Login!');
+                    closeAuthModal();
                     checkSession();
                 } else {
                     const { error } = await supabaseClient.auth.signUp({
@@ -241,15 +263,22 @@
             }
         });
 
+        // Proses Logout
         async function logout() {
             await supabaseClient.auth.signOut();
             document.getElementById('email').value = '';
             document.getElementById('password').value = '';
             checkSession();
+            alert('Berhasil keluar akun.');
         }
 
+        // Catat Absensi
         async function recordAttendance(actionType) {
-            if (!currentUser) return alert('Sesi berakhir, silakan login kembali.');
+            if (!currentUser) {
+                alert('Silakan "Login / Daftar" terlebih dahulu untuk melakukan absensi!');
+                openAuthModal();
+                return;
+            }
 
             const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
             const btnElement = document.getElementById(btnId);
