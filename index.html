@@ -494,7 +494,12 @@
 
     try {
       if(window.supabase) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false
+          }
+        });
       }
     } catch(e) { console.log("Supabase Init Error:", e); }
 
@@ -745,7 +750,12 @@
       if (!capturedBlob) return window.showToast("Perhatian!", "Harap ambil foto selfie.", "error");
 
       const btnSubmit = document.getElementById('btn-submit');
+      const spinner = document.getElementById('submit-spinner');
+      const textSubmit = document.getElementById('submit-text');
+
       if(btnSubmit) btnSubmit.disabled = true;
+      if(spinner) spinner.classList.remove('hidden');
+      if(textSubmit) textSubmit.innerText = "Mengirim...";
 
       try {
         if(!supabase) throw new Error("Database tidak terhubung.");
@@ -775,6 +785,8 @@
         window.showToast("Gagal!", err.message, "error");
       } finally {
         if(btnSubmit) btnSubmit.disabled = false;
+        if(spinner) spinner.classList.add('hidden');
+        if(textSubmit) textSubmit.innerText = "Kirim Absensi";
       }
     };
 
@@ -856,7 +868,7 @@
         return `
           <div class="bg-white p-3.5 rounded-2xl border border-emerald-100 shadow-sm flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-              ${item.foto_url ? `<img src="${item.foto_url}" class="w-11 h-11 rounded-xl object-cover border" onclick="window.openLightbox('${item.foto_url}', '${escapeHtml(item.nama)}', '${dt.toLocaleTimeString()}')" alt="Selfie" />` : `<div class="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center"><i data-lucide="user" class="w-5 h-5 text-slate-400"></i></div>`}
+              ${item.foto_url ? `<img src="${item.foto_url}" class="w-11 h-11 rounded-xl object-cover border cursor-pointer" onclick="window.openLightbox('${item.foto_url}', '${escapeHtml(item.nama)}', '${dt.toLocaleTimeString()}')" alt="Selfie" />` : `<div class="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center"><i data-lucide="user" class="w-5 h-5 text-slate-400"></i></div>`}
               <div>
                 <h4 class="font-bold text-xs text-slate-900">${escapeHtml(item.nama)}</h4>
                 <p class="text-[10px] text-slate-400">${escapeHtml(item.jabatan)}</p>
