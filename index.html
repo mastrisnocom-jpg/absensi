@@ -512,8 +512,26 @@
     let allRecords = [];
     window.currentUserSession = null;
 
+    // JAM DIGITAL MANDIRI (BERJALAN SEGERA SETELAH ELEMEN TERSEDIA)
+    function startDigitalClock() {
+      function updateClock() {
+        const textEl = document.getElementById('digital-clock-text');
+        if (textEl) {
+          const now = new Date();
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          const seconds = String(now.getSeconds()).padStart(2, '0');
+          textEl.innerText = `${hours}:${minutes}:${seconds}`;
+        }
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+    }
+
+    // JALANKAN JAM DIGITAL SEGERA DI GLOBAL SCOPE
+    startDigitalClock();
+
     document.addEventListener("DOMContentLoaded", () => {
-      try { startDigitalClock(); } catch(e){ console.error(e); }
       try { updateShiftDateAndJawa(); } catch(e){ console.error(e); }
       try { checkSupabaseSession(); } catch(e){ console.error(e); }
       try { getLocation(); } catch(e){ console.error(e); }
@@ -523,19 +541,6 @@
       const fDate = document.getElementById('filter-date');
       if (fDate) fDate.value = new Date().toISOString().split('T')[0];
     });
-
-    function startDigitalClock() {
-      const textEl = document.getElementById('digital-clock-text');
-      if (!textEl) return;
-      function updateClock() {
-        try {
-          const now = new Date();
-          textEl.innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-        } catch (err) {}
-      }
-      updateClock();
-      setInterval(updateClock, 1000);
-    }
 
     function getPasaranJawa(date) {
       const pasaran = ['Legi', 'Pahing', 'Pon', 'Wage', 'Kliwon'];
