@@ -77,16 +77,19 @@
       width: 3.5px;
       height: 26px;
       background-color: #044C38;
+      margin-left: -1.75px;
     }
     .minute-hand {
       width: 2.5px;
       height: 36px;
       background-color: #059669;
+      margin-left: -1.25px;
     }
     .second-hand {
       width: 1.5px;
       height: 40px;
       background-color: #EAA623;
+      margin-left: -0.75px;
       z-index: 12;
     }
     .center-dot {
@@ -526,8 +529,7 @@
     // UNTUK KALKULASI HARI PASARAN JAWA AUTOMATIS
     function getPasaranJawa(date) {
       const pasaran = ['Legi', 'Pahing', 'Pon', 'Wage', 'Kliwon'];
-      // Epoch acuan: 1 Januari 1900 (Pahing)
-      const baseDate = new Date(1900, 0, 1);
+      const baseDate = new Date(1900, 0, 1); // Epoch acuan Pahing
       const diffDays = Math.floor((date - baseDate) / (1000 * 60 * 60 * 24));
       const pasaranIndex = (diffDays + 1) % 5;
       return pasaran[pasaranIndex < 0 ? pasaranIndex + 5 : pasaranIndex];
@@ -550,14 +552,21 @@
       document.getElementById('current-shift-date').innerText = `${tanggal} ${namaBulan} ${tahun}`;
     }
 
-    // UNTUK JAM ANALOG DINDING REALTIME
+    // UNTUK JAM ANALOG DINDING (UTC+7 / WIB PRESISE FIX)
     function startAnalogClock() {
       function updateClock() {
         const now = new Date();
-        const seconds = now.getSeconds();
-        const minutes = now.getMinutes();
-        const hours = now.getHours();
 
+        // Mengambil waktu presisi zona waktu Indonesia Barat (UTC+7 / Asia/Jakarta)
+        const options = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+        const timeString = new Intl.DateTimeFormat('id-ID', options).format(now);
+        const [hoursStr, minutesStr, secondsStr] = timeString.replace(/\./g, ':').split(':');
+
+        const hours = parseInt(hoursStr, 10);
+        const minutes = parseInt(minutesStr, 10);
+        const seconds = parseInt(secondsStr, 10);
+
+        // Kalkulasi Sudut Jarum Jam Analog
         const secondDegrees = (seconds / 60) * 360;
         const minuteDegrees = ((minutes + seconds / 60) / 60) * 360;
         const hourDegrees = (((hours % 12) + minutes / 60) / 12) * 360;
@@ -566,8 +575,8 @@
         document.getElementById('minute-hand').style.transform = `rotate(${minuteDegrees}deg)`;
         document.getElementById('hour-hand').style.transform = `rotate(${hourDegrees}deg)`;
 
-        // Digital Clock Text dibawah Jam Dinding
-        document.getElementById('digital-clock-text').innerText = now.toLocaleTimeString('id-ID', { hour12: false }) + ' WIB';
+        // Digital Clock Text di Bawah Jam Dinding
+        document.getElementById('digital-clock-text').innerText = `${hoursStr.padStart(2, '0')}:${minutesStr.padStart(2, '0')}:${secondsStr.padStart(2, '0')} WIB`;
       }
 
       updateClock();
