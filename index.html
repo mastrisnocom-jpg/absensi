@@ -123,8 +123,8 @@
               <p id="user-display-role" class="text-[10px] text-emerald-200/80 font-medium">Staff Operational</p>
             </div>
             
-            <!-- Tombol Login / Daftar Top Right -->
-            <button onclick="openGenericModal('modal-login')" class="bg-white/15 hover:bg-white/25 active:scale-95 text-white text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20 transition flex items-center gap-1.5 shadow-sm">
+            <!-- Tombol Login / Logout Top Right -->
+            <button id="btn-auth-trigger" onclick="handleAuthButtonClick()" class="bg-white/15 hover:bg-white/25 active:scale-95 text-white text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20 transition flex items-center gap-1.5 shadow-sm">
               <svg class="w-3.5 h-3.5 text-appGold stroke-current" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               <span id="login-btn-label">Login / Daftar</span>
             </button>
@@ -290,27 +290,58 @@
 
   </div>
 
-  <!-- ==================== MODAL 0: FORM LOGIN / REGISTRASI ==================== -->
+  <!-- ==================== MODAL AUTH / LOGIN & DAFTAR (SUPABASE AUTH) ==================== -->
   <div id="modal-login" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
       <div class="flex justify-between items-center border-b pb-3">
-        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
-          <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i> Login Identitas Karyawan
+        <h3 id="auth-modal-title" class="font-bold text-sm text-slate-900 flex items-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4 text-emerald-600"></i> Login Karyawan
         </h3>
         <button onclick="closeGenericModal('modal-login')"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
       </div>
-      <form onsubmit="handleLoginSubmit(event)" class="space-y-3">
+
+      <!-- FORM LOGIN -->
+      <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email *</label>
+          <input type="email" id="login-email" required placeholder="nama@perusahaan.com" class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Password *</label>
+          <input type="password" id="login-password" required placeholder="••••••••" class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <button type="submit" id="btn-login-submit" class="w-full py-3 bg-appGreenDark hover:bg-emerald-950 text-white font-bold rounded-xl text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+          <span>Masuk Sekarang</span>
+        </button>
+        <p class="text-center text-[11px] text-slate-500 pt-2">
+          Belum punya akun? <button type="button" onclick="toggleAuthMode('register')" class="text-appGreenMain font-bold underline">Daftar Baru</button>
+        </p>
+      </form>
+
+      <!-- FORM REGISTRASI -->
+      <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="space-y-3 hidden">
         <div>
           <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama Lengkap *</label>
-          <input type="text" id="login-nama" required placeholder="Masukkan Nama Lengkap Anda..." class="w-full p-2.5 text-xs border rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+          <input type="text" id="reg-nama" required placeholder="Masukkan Nama Lengkap Anda..." class="w-full p-2.5 text-xs border rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
         <div>
           <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Jabatan / Divisi *</label>
-          <input type="text" id="login-jabatan" required placeholder="Contoh: Staff IT / Marketing..." class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+          <input type="text" id="reg-jabatan" required placeholder="Contoh: Staff IT / Marketing..." class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
-        <button type="submit" class="w-full py-3 bg-appGreenDark hover:bg-emerald-950 text-white font-bold rounded-xl text-xs shadow-lg active:scale-95 transition">
-          Simpan Akun Saya
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email *</label>
+          <input type="email" id="reg-email" required placeholder="nama@perusahaan.com" class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Password *</label>
+          <input type="password" id="reg-password" required minlength="6" placeholder="Minimal 6 Karakter" class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <button type="submit" id="btn-reg-submit" class="w-full py-3 bg-appGreenDark hover:bg-emerald-950 text-white font-bold rounded-xl text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+          <span>Buat Akun & Daftar</span>
         </button>
+        <p class="text-center text-[11px] text-slate-500 pt-2">
+          Sudah punya akun? <button type="button" onclick="toggleAuthMode('login')" class="text-appGreenMain font-bold underline">Login Di Sini</button>
+        </p>
       </form>
     </div>
   </div>
@@ -489,7 +520,7 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT -->
+  <!-- JAVASCRIPT CORE -->
   <script>
     const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
@@ -499,10 +530,11 @@
     let capturedBlob = null;
     let currentLocation = "Memuat GPS...";
     let allRecords = [];
+    let currentUserSession = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
-      checkSavedUser(); // Cek sesi login tersimpan
+      checkSupabaseSession(); // Cek status login Supabase saat pertama dimuat
       updateShiftDateAndJawa();
       startAnalogClock();
       getLocation();
@@ -510,20 +542,23 @@
       document.getElementById('filter-date').value = new Date().toISOString().split('T')[0];
     });
 
-    // LOAD LOCAL STORAGE LOGIN DATA
-    function checkSavedUser() {
-      const savedNama = localStorage.getItem('bm_user_nama');
-      const savedJabatan = localStorage.getItem('bm_user_jabatan');
-
-      if (savedNama && savedJabatan) {
-        applyUserData(savedNama, savedJabatan);
+    // ==================== SUPABASE AUTHENTICATION LOGIC ====================
+    async function checkSupabaseSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        currentUserSession = session.user;
+        const meta = currentUserSession.user_metadata || {};
+        applyUserData(meta.nama || currentUserSession.email, meta.jabatan || 'Karyawan');
+      } else {
+        // Fallback jika tidak ada akun login
+        applyUserData('Sutrisno', 'Staff Operational');
+        document.getElementById('login-btn-label').innerText = "Login / Daftar";
       }
     }
 
     function applyUserData(nama, jabatan) {
       document.getElementById('user-display-name').innerText = nama;
       document.getElementById('user-display-role').innerText = jabatan;
-      document.getElementById('login-btn-label').innerText = "Ganti Akun";
 
       document.getElementById('nama').value = nama;
       document.getElementById('jabatan').value = jabatan;
@@ -531,27 +566,119 @@
       document.getElementById('tim-nama').innerText = nama;
       document.getElementById('tim-jabatan').innerText = jabatan + " (You)";
       document.getElementById('tim-avatar').innerText = nama.charAt(0).toUpperCase();
-    }
 
-    // LOGIN SUBMIT HANDLER
-    function handleLoginSubmit(e) {
-      e.preventDefault();
-      const namaBaru = document.getElementById('login-nama').value.trim();
-      const jabatanBaru = document.getElementById('login-jabatan').value.trim();
-
-      if (namaBaru && jabatanBaru) {
-        // Simpan ke LocalStorage agar tersimpan permanen di HP
-        localStorage.setItem('bm_user_nama', namaBaru);
-        localStorage.setItem('bm_user_jabatan', jabatanBaru);
-
-        applyUserData(namaBaru, jabatanBaru);
-
-        showToast("Berhasil Login!", `Selamat datang, ${namaBaru}`, "success");
-        closeGenericModal('modal-login');
+      if (currentUserSession) {
+        document.getElementById('login-btn-label').innerText = "Logout";
       }
     }
 
-    // UNTUK KALKULASI HARI PASARAN JAWA AUTOMATIS
+    function handleAuthButtonClick() {
+      if (currentUserSession) {
+        handleLogout();
+      } else {
+        openGenericModal('modal-login');
+      }
+    }
+
+    function toggleAuthMode(mode) {
+      const formLogin = document.getElementById('form-login');
+      const formReg = document.getElementById('form-register');
+      const title = document.getElementById('auth-modal-title');
+
+      if (mode === 'register') {
+        formLogin.classList.add('hidden');
+        formReg.classList.remove('hidden');
+        title.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i> Buat Akun Karyawan`;
+      } else {
+        formReg.classList.add('hidden');
+        formLogin.classList.remove('hidden');
+        title.innerHTML = `<i data-lucide="log-in" class="w-4 h-4 text-emerald-600"></i> Login Karyawan`;
+      }
+      lucide.createIcons();
+    }
+
+    // LOGIN PROCESS
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('btn-login-submit');
+
+      btn.disabled = true;
+      btn.innerText = "Memproses...";
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (error) throw error;
+
+        currentUserSession = data.user;
+        const meta = currentUserSession.user_metadata || {};
+        const nama = meta.nama || email;
+        const jabatan = meta.jabatan || 'Staff';
+
+        applyUserData(nama, jabatan);
+        showToast("Berhasil Login!", `Selamat datang kembali, ${nama}`, "success");
+        closeGenericModal('modal-login');
+
+      } catch (err) {
+        showToast("Gagal Login!", err.message || "Email atau password salah.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Masuk Sekarang";
+      }
+    }
+
+    // REGISTER PROCESS
+    async function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const nama = document.getElementById('reg-nama').value.trim();
+      const jabatan = document.getElementById('reg-jabatan').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const btn = document.getElementById('btn-reg-submit');
+
+      btn.disabled = true;
+      btn.innerText = "Mendaftarkan...";
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              nama: nama,
+              jabatan: jabatan
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        showToast("Pendaftaran Berhasil!", "Silakan login menggunakan akun baru Anda.", "success");
+        toggleAuthMode('login');
+
+      } catch (err) {
+        showToast("Gagal Mendaftar!", err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Buat Akun & Daftar";
+      }
+    }
+
+    // LOGOUT PROCESS
+    async function handleLogout() {
+      await supabase.auth.signOut();
+      currentUserSession = null;
+      applyUserData('Sutrisno', 'Staff Operational');
+      document.getElementById('login-btn-label').innerText = "Login / Daftar";
+      showToast("Berhasil Keluar", "Sesi Anda telah diakhiri.", "success");
+    }
+
+    // ==================== HARI PASARAN JAWA & JAM ANALOG ====================
     function getPasaranJawa(date) {
       const pasaran = ['Legi', 'Pahing', 'Pon', 'Wage', 'Kliwon'];
       const baseDate = new Date(1900, 0, 1);
@@ -575,33 +702,37 @@
       document.getElementById('current-shift-date').innerText = `${tanggal} ${namaBulan} ${tahun}`;
     }
 
-    // UNTUK JAM ANALOG DINDING (PRESISE FULL DENGAN ROTASI HALUS)
     function startAnalogClock() {
       function updateClock() {
-        const now = new Date();
-        const seconds = now.getSeconds();
-        const minutes = now.getMinutes();
-        const hours = now.getHours();
+        try {
+          const now = new Date();
+          const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+          const wibDate = new Date(utcMs + (3600000 * 7));
 
-        // Sudut Rotasi Derajat Jarum Jam
-        const secondDegrees = (seconds / 60) * 360;
-        const minuteDegrees = ((minutes + seconds / 60) / 60) * 360;
-        const hourDegrees = (((hours % 12) + minutes / 60) / 12) * 360;
+          const hours = wibDate.getHours();
+          const minutes = wibDate.getMinutes();
+          const seconds = wibDate.getSeconds();
 
-        const hourEl = document.getElementById('hour-hand');
-        const minuteEl = document.getElementById('minute-hand');
-        const secondEl = document.getElementById('second-hand');
-        const textEl = document.getElementById('digital-clock-text');
+          const secondDegrees = (seconds / 60) * 360;
+          const minuteDegrees = ((minutes + seconds / 60) / 60) * 360;
+          const hourDegrees = (((hours % 12) + minutes / 60) / 12) * 360;
 
-        if (hourEl) hourEl.style.transform = `rotate(${hourDegrees}deg)`;
-        if (minuteEl) minuteEl.style.transform = `rotate(${minuteDegrees}deg)`;
-        if (secondEl) secondEl.style.transform = `rotate(${secondDegrees}deg)`;
+          const hourEl = document.getElementById('hour-hand');
+          const minuteEl = document.getElementById('minute-hand');
+          const secondEl = document.getElementById('second-hand');
+          const textEl = document.getElementById('digital-clock-text');
 
-        // Update Text Tampilan Jam Digital
-        const hStr = String(hours).padStart(2, '0');
-        const mStr = String(minutes).padStart(2, '0');
-        const sStr = String(seconds).padStart(2, '0');
-        if (textEl) textEl.innerText = `${hStr}:${mStr}:${sStr} WIB`;
+          if (hourEl) hourEl.style.transform = `rotate(${hourDegrees}deg)`;
+          if (minuteEl) minuteEl.style.transform = `rotate(${minuteDegrees}deg)`;
+          if (secondEl) secondEl.style.transform = `rotate(${secondDegrees}deg)`;
+
+          const hStr = String(hours).padStart(2, '0');
+          const mStr = String(minutes).padStart(2, '0');
+          const sStr = String(seconds).padStart(2, '0');
+          if (textEl) textEl.innerText = `${hStr}:${mStr}:${sStr} WIB`;
+        } catch (err) {
+          console.error("Clock error:", err);
+        }
       }
 
       updateClock();
