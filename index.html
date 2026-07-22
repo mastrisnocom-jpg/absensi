@@ -52,55 +52,6 @@
       background-color: #F2F8F5;
       overflow: hidden;
     }
-
-    .clock-face {
-      position: relative;
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: #ffffff;
-      border: 3.5px solid #044C38;
-      box-shadow: inset 0 0 6px rgba(0,0,0,0.1), 0 4px 10px rgba(4,76,56,0.15);
-    }
-    .hand {
-      position: absolute;
-      bottom: 50%;
-      left: 50%;
-      transform-origin: 50% 100%;
-      border-radius: 4px;
-    }
-    .hour-hand {
-      width: 4px;
-      height: 24px;
-      margin-left: -2px;
-      background-color: #044C38;
-      z-index: 10;
-    }
-    .minute-hand {
-      width: 2.5px;
-      height: 33px;
-      margin-left: -1.25px;
-      background-color: #059669;
-      z-index: 11;
-    }
-    .second-hand {
-      width: 1.5px;
-      height: 38px;
-      margin-left: -0.75px;
-      background-color: #EAA623;
-      z-index: 12;
-    }
-    .center-dot {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #044C38;
-      transform: translate(-50%, -50%);
-      z-index: 15;
-    }
   </style>
 </head>
 <body class="font-sans antialiased text-slate-800 flex justify-center items-center">
@@ -123,7 +74,7 @@
               <p id="user-display-role" class="text-[10px] text-emerald-200/80 font-medium">Staff Operational</p>
             </div>
             
-            <!-- Tombol Login / Logout Top Right (Direct Open Form) -->
+            <!-- Tombol Login / Logout Top Right -->
             <button id="btn-auth-trigger" onclick="handleAuthButtonClick()" class="bg-white/20 hover:bg-white/30 active:scale-95 text-white text-[11px] font-bold px-3.5 py-2 rounded-full backdrop-blur-md border border-white/30 transition flex items-center gap-1.5 shadow-md cursor-pointer z-20">
               <svg class="w-3.5 h-3.5 text-appGold stroke-current pointer-events-none" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               <span id="login-btn-label" class="pointer-events-none">Login / Daftar</span>
@@ -131,27 +82,23 @@
           </div>
         </div>
 
-        <!-- Floating Shift Card (D1) -->
+        <!-- Floating Shift Card (D1) + JAM DIGITAL & HARI JAWA -->
         <div class="px-5 -mt-10">
           <div class="bg-white rounded-2xl p-4 shadow-lg border border-emerald-50 space-y-4">
             
             <div class="flex items-center justify-between">
               <div>
                 <span class="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-black">SHIFT D1</span>
+                <!-- Tanggal Masehi & Hari Jawa -->
                 <h3 id="current-jawa-date" class="text-xs font-extrabold text-appGreenDark mt-2">Rabu Wage</h3>
                 <p id="current-shift-date" class="text-[11px] font-bold text-slate-600">22 Juli 2026</p>
                 <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Jam Kerja: (07:30 - 16:30)</p>
               </div>
 
-              <!-- Component Jam Analog Dinding -->
-              <div class="flex flex-col items-center">
-                <div class="clock-face flex items-center justify-center">
-                  <div id="hour-hand" class="hand hour-hand"></div>
-                  <div id="minute-hand" class="hand minute-hand"></div>
-                  <div id="second-hand" class="hand second-hand"></div>
-                  <div class="center-dot"></div>
-                </div>
-                <span id="digital-clock-text" class="text-[10px] font-extrabold font-mono text-appGreenDark mt-1">00:00:00 WIB</span>
+              <!-- Component Jam Digital -->
+              <div class="flex flex-col items-end justify-center bg-emerald-50/70 border border-emerald-100 px-3.5 py-2.5 rounded-2xl shadow-inner">
+                <span id="digital-clock-text" class="text-lg font-extrabold font-mono text-appGreenDark tracking-tight">00:00:00</span>
+                <span class="text-[9px] font-black text-emerald-600 tracking-wider">WIB (UTC+7)</span>
               </div>
             </div>
 
@@ -520,7 +467,7 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT CORE SAFE EXECUTION -->
+  <!-- JAVASCRIPT CORE -->
   <script>
     const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
@@ -541,7 +488,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       try { lucide.createIcons(); } catch(e){}
       updateShiftDateAndJawa();
-      startAnalogClock();
+      startDigitalClock();
       checkSupabaseSession();
       getLocation();
       fetchAbsensiData();
@@ -550,7 +497,7 @@
       if (fDate) fDate.value = new Date().toISOString().split('T')[0];
     });
 
-    // ==================== MODAL HANDLERS (FAIL-SAFE DIRECT) ====================
+    // ==================== MODAL HANDLERS ====================
     function openGenericModal(id) { 
       const el = document.getElementById(id);
       if (el) el.classList.remove('hidden'); 
@@ -704,7 +651,7 @@
       showToast("Berhasil Keluar", "Sesi Anda telah diakhiri.", "success");
     }
 
-    // ==================== JAM ANALOG & PASARAN JAWA REALTIME ====================
+    // ==================== HARI PASARAN JAWA & JAM DIGITAL REALTIME ====================
     function getPasaranJawa(date) {
       const pasaran = ['Legi', 'Pahing', 'Pon', 'Wage', 'Kliwon'];
       const baseDate = new Date(1900, 0, 1);
@@ -731,31 +678,16 @@
       if(shiftEl) shiftEl.innerText = `${tanggal} ${namaBulan} ${tahun}`;
     }
 
-    function startAnalogClock() {
+    function startDigitalClock() {
       function updateClock() {
         try {
           const now = new Date();
-          const hours = now.getHours();
-          const minutes = now.getMinutes();
-          const seconds = now.getSeconds();
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          const seconds = String(now.getSeconds()).padStart(2, '0');
 
-          const secondDegrees = (seconds / 60) * 360;
-          const minuteDegrees = ((minutes + seconds / 60) / 60) * 360;
-          const hourDegrees = (((hours % 12) + minutes / 60) / 12) * 360;
-
-          const hourEl = document.getElementById('hour-hand');
-          const minuteEl = document.getElementById('minute-hand');
-          const secondEl = document.getElementById('second-hand');
           const textEl = document.getElementById('digital-clock-text');
-
-          if (hourEl) hourEl.style.transform = `rotate(${hourDegrees}deg)`;
-          if (minuteEl) minuteEl.style.transform = `rotate(${minuteDegrees}deg)`;
-          if (secondEl) secondEl.style.transform = `rotate(${secondDegrees}deg)`;
-
-          const hStr = String(hours).padStart(2, '0');
-          const mStr = String(minutes).padStart(2, '0');
-          const sStr = String(seconds).padStart(2, '0');
-          if (textEl) textEl.innerText = `${hStr}:${mStr}:${sStr} WIB`;
+          if (textEl) textEl.innerText = `${hours}:${minutes}:${seconds}`;
         } catch (err) {}
       }
 
