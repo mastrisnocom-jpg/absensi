@@ -1,306 +1,1013 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Absensi - ro3.my.id</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>BINAYASA Mobile - Attendance System Green Edition</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            appGreenDark: '#044C38',  /* Dark Emerald */
+            appGreenMain: '#059669',  /* Main Green */
+            appGold: '#EAA623',       /* Gold Header */
+            appBg: '#F2F8F5',         /* Native App Background */
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .mirror-video { transform: scaleX(-1); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .bg-primary-dark { background-color: #0A4D3C; }
-        .text-gold { color: #D4AF37; }
-        .icon-circle { background-color: #10B981; color: white; }
-    </style>
+    .icon-gradient-green {
+      background: linear-gradient(180deg, #34D399 0%, #059669 100%);
+    }
+
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      background-color: #F2F8F5;
+      overflow: hidden;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 flex justify-center min-h-screen">
+<body class="font-sans antialiased text-slate-800 flex justify-center items-center">
 
-    <div class="w-full max-w-md bg-gray-50 shadow-xl relative overflow-hidden flex flex-col min-h-screen">
-
-        <!-- ================= DASHBOARD UTAMA (SELALU MUNCUL) ================= -->
-        <div id="dashboard-section" class="flex-1 pb-20 relative">
-            <!-- Header Section -->
-            <div class="bg-primary-dark rounded-b-[40px] pt-10 pb-20 px-6 relative">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gold text-sm font-semibold mb-1">Selamat bekerja,</p>
-                        <h1 id="user-display-name" class="text-white text-3xl font-bold mb-1">Tamu</h1>
-                        <p class="text-gray-300 text-sm">Staff Operational</p>
-                    </div>
-                    <!-- Tombol Login/Daftar atau Logout tergantung status sesi -->
-                    <div id="auth-action-btn-container">
-                        <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1">
-                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
-                        </button>
-                    </div>
-                </div>
+  <!-- ==================== ANDROID CONTAINER ==================== -->
+  <div class="w-full max-w-md bg-[#F2F8F5] h-full flex flex-col relative overflow-hidden shadow-2xl">
+    
+    <!-- SCROLLABLE CONTENT -->
+    <div class="flex-1 overflow-y-auto no-scrollbar pb-6">
+      
+      <!-- ==================== TAB 1: HOME UI ==================== -->
+      <section id="tab-content-home" class="block">
+        
+        <!-- Header Dark Emerald Green -->
+        <div class="bg-appGreenDark text-white px-6 pt-7 pb-16 rounded-b-[32px] relative shadow-md">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-appGold font-semibold text-xs tracking-wide">Selamat bekerja,</p>
+              <h1 id="user-display-name" class="text-2xl font-bold tracking-tight mt-0.5">Sutrisno</h1>
+              <p id="user-display-role" class="text-[10px] text-emerald-200/80 font-medium">Staff Operational</p>
             </div>
-
-            <!-- Clock In / Out Card -->
-            <div class="px-6 -mt-12 relative z-10">
-                <div class="bg-white rounded-2xl shadow-md p-5">
-                    <h2 class="text-gray-700 font-bold text-sm mb-4">Status Shift Aktif</h2>
-                    <div class="flex gap-3">
-                        <button onclick="recordAttendance('Clock In')" id="btn-in" class="flex-1 bg-green-800 hover:bg-green-700 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition shadow-sm">
-                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Clock In
-                        </button>
-                        <button onclick="recordAttendance('Clock Out')" id="btn-out" class="flex-1 bg-primary-dark hover:bg-green-900 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition shadow-sm">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Clock Out
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Menu Grid -->
-            <div class="grid grid-cols-4 gap-y-6 gap-x-2 p-6 mt-4">
-                <div class="flex flex-col items-center cursor-pointer">
-                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-clipboard-list"></i></div>
-                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Daftar<br>Pengajuan</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer">
-                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Absensi</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer">
-                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-business-time"></i></div>
-                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Lembur</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer">
-                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-plane-departure"></i></div>
-                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Cuti</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer">
-                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-users"></i></div>
-                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Tim<br>Kami</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer">
-                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-regular fa-user"></i></div>
-                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Profil<br>Saya</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer">
-                    <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-money-check-dollar"></i></div>
-                    <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Slip<br>Gaji</span>
-                </div>
-            </div>
-
-            <!-- Bottom Navigation -->
-            <div class="absolute bottom-0 w-full bg-white border-t flex justify-between px-6 py-3">
-                <div class="flex flex-col items-center text-green-700 cursor-pointer"><i class="fa-solid fa-house mb-1"></i><span class="text-[10px] font-bold">Home</span></div>
-                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-solid fa-users mb-1"></i><span class="text-[10px] font-bold">Karyawan</span></div>
-                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-regular fa-calendar-check mb-1"></i><span class="text-[10px] font-bold">Absen Log</span></div>
-                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-regular fa-envelope mb-1"></i><span class="text-[10px] font-bold">Inbox</span></div>
-                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-regular fa-user mb-1"></i><span class="text-[10px] font-bold">Profil</span></div>
-            </div>
+            
+            <!-- Tombol Login / Logout Top Right -->
+            <button id="btn-auth-trigger" onclick="window.handleAuthButtonClick()" class="bg-white/20 hover:bg-white/30 active:scale-95 text-white text-[11px] font-bold px-3.5 py-2 rounded-full backdrop-blur-md border border-white/30 transition flex items-center gap-1.5 shadow-md cursor-pointer z-20">
+              <svg class="w-3.5 h-3.5 text-appGold stroke-current pointer-events-none" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              <span id="login-btn-label" class="pointer-events-none">Login / Daftar</span>
+            </button>
+          </div>
         </div>
 
-        <!-- ================= MODAL / POP-UP LOGIN & DAFTAR ================= -->
-        <div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
-            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative animate-fadeIn">
-                <!-- Tombol Tutup Pop-up -->
-                <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-
-                <div class="text-center mb-6 mt-2">
-                    <h2 id="auth-title" class="text-2xl font-bold text-gray-800">Masuk Akun</h2>
-                    <p class="text-gray-500 text-xs mt-1">Silakan masuk untuk mencatat absensi</p>
-                </div>
-
-                <form id="auth-form" class="space-y-4">
-                    <div id="name-field" class="hidden">
-                        <label class="text-xs text-gray-600 font-semibold">Nama Lengkap</label>
-                        <input type="text" id="fullname" placeholder="Masukkan nama Anda" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-600 font-semibold">Email</label>
-                        <input type="email" id="email" required placeholder="contoh@email.com" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-600 font-semibold">Password</label>
-                        <input type="password" id="password" required placeholder="Minimal 6 karakter" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600">
-                    </div>
-                    
-                    <button type="submit" id="auth-btn" class="w-full bg-primary-dark hover:bg-green-900 text-white font-bold py-2.5 rounded-xl transition text-sm shadow-md mt-2">
-                        Masuk
-                    </button>
-                </form>
-
-                <p class="text-center text-xs text-gray-600 mt-5">
-                    <span id="auth-switch-text">Belum punya akun?</span> 
-                    <button type="button" onclick="toggleAuthMode()" id="auth-switch-btn" class="text-green-700 font-bold hover:underline">Daftar di sini</button>
-                </p>
+        <!-- Floating Shift Card (D1) -->
+        <div class="px-5 -mt-10">
+          <div class="bg-white rounded-2xl p-4 shadow-lg border border-emerald-50 space-y-4">
+            
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-black">SHIFT D1</span>
+                <p class="text-xs font-bold text-slate-600 mt-2">Status Shift Aktif</p>
+              </div>
             </div>
+
+            <!-- Clock In & Clock Out Action Buttons -->
+            <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-100">
+              <button onclick="window.prepareAttendance('Clock In')" class="bg-appGreenDark hover:bg-emerald-950 active:scale-95 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+                <svg class="w-4 h-4 text-emerald-300 stroke-current" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                <span>Clock In</span>
+              </button>
+              <button onclick="window.prepareAttendance('Clock Out')" class="bg-appGreenDark hover:bg-emerald-950 active:scale-95 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+                <svg class="w-4 h-4 text-rose-300 stroke-current" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>Clock Out</span>
+              </button>
+            </div>
+          </div>
         </div>
+
+        <!-- Grid Menu Items -->
+        <div class="px-4 py-6 grid grid-cols-4 gap-y-7 gap-x-2 text-center">
+          
+          <button onclick="openGenericModal('modal-pengajuan')" class="flex flex-col items-center group">
+            <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
+              <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+            </div>
+            <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Daftar<br>Pengajuan</span>
+          </button>
+
+          <button onclick="window.prepareAttendance('Clock In')" class="flex flex-col items-center group">
+            <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
+              <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Request<br>Absensi</span>
+          </button>
+
+          <button onclick="openGenericModal('modal-lembur')" class="flex flex-col items-center group">
+            <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
+              <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><rect x="10.5" y="16.5" width="3" height="1.5" rx="0.5"/></svg>
+            </div>
+            <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Request<br>Lembur</span>
+          </button>
+
+          <button onclick="openGenericModal('modal-cuti')" class="flex flex-col items-center group">
+            <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
+              <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+            </div>
+            <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Request<br>Cuti</span>
+          </button>
+
+          <button onclick="openGenericModal('modal-tim')" class="flex flex-col items-center group">
+            <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
+              <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Tim<br>Kami</span>
+          </button>
+
+          <button onclick="openGenericModal('modal-profil')" class="flex flex-col items-center group">
+            <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
+              <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Profil<br>Saya</span>
+          </button>
+
+          <button onclick="openGenericModal('modal-gaji')" class="flex flex-col items-center group">
+            <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
+              <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="2" y1="7" x2="22" y2="7"/><circle cx="12" cy="12" r="2.5"/></svg>
+            </div>
+            <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Slip<br>Gaji</span>
+          </button>
+
+        </div>
+
+      </section>
+
+      <!-- ==================== TAB 2: ABSEN LOG ==================== -->
+      <section id="tab-content-log" class="hidden p-4 space-y-4">
+        <div class="flex justify-between items-center bg-white p-3.5 rounded-2xl shadow-sm border border-emerald-100">
+          <h2 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4 text-appGreenMain"></i> Riwayat Absen Log
+          </h2>
+          <button onclick="window.exportToCSV()" class="px-3 py-1.5 bg-emerald-600 text-white font-bold rounded-xl text-xs flex items-center gap-1 shadow active:scale-95">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Export
+          </button>
+        </div>
+
+        <div class="bg-white p-3 rounded-2xl border border-emerald-100 shadow-sm space-y-2">
+          <input type="date" id="filter-date" onchange="window.renderDashboard()" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-semibold outline-none" />
+          <div class="relative">
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+            <input type="text" id="search-input" onkeyup="window.renderDashboard()" placeholder="Cari nama / jabatan..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none" />
+          </div>
+        </div>
+
+        <div id="mobile-cards-list" class="space-y-2.5"></div>
+      </section>
 
     </div>
 
-    <!-- Script Logika & Database -->
-    <script>
-        const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
+    <!-- ==================== BOTTOM NAV BAR ==================== -->
+    <nav class="bg-white border-t border-emerald-100/80 px-2 py-2 flex justify-around items-center z-40 shrink-0 shadow-lg">
+      <button id="nav-btn-home" onclick="window.switchMainTab('home')" class="flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95">
+        <div id="nav-icon-home" class="p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain">
+          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <span class="text-[9px]">Home</span>
+      </button>
+      
+      <button id="nav-btn-karyawan" onclick="openGenericModal('modal-tim')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
+        <div id="nav-icon-karyawan" class="p-1.5 rounded-full text-slate-400">
+          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <span class="text-[9px]">Karyawan</span>
+      </button>
+      
+      <button id="nav-btn-log" onclick="window.switchMainTab('log')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
+        <div id="nav-icon-log" class="p-1.5 rounded-full text-slate-400">
+          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <span class="text-[9px]">Absen Log</span>
+      </button>
+      
+      <button id="nav-btn-inbox" onclick="window.showToast('Inbox', 'Belum ada pesan baru', 'success')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
+        <div id="nav-icon-inbox" class="p-1.5 rounded-full text-slate-400">
+          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <span class="text-[9px]">Inbox</span>
+      </button>
+      
+      <button id="nav-btn-profil" onclick="openGenericModal('modal-profil')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
+        <div id="nav-icon-profil" class="p-1.5 rounded-full text-slate-400">
+          <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <span class="text-[9px]">Profil</span>
+      </button>
+
+    </nav>
+
+  </div>
+
+  <!-- ==================== MODAL AUTH / LOGIN & DAFTAR ==================== -->
+  <div id="modal-login" class="hidden fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 id="auth-modal-title" class="font-bold text-sm text-slate-900 flex items-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4 text-emerald-600"></i> Login Karyawan
+        </h3>
+        <button onclick="closeGenericModal('modal-login')" class="p-1 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+      </div>
+
+      <!-- FORM LOGIN SUPABASE -->
+      <form id="form-login" onsubmit="window.handleLoginSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email *</label>
+          <input type="email" id="login-email" required placeholder="nama@perusahaan.com" class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Password *</label>
+          <input type="password" id="login-password" required placeholder="••••••••" class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <button type="submit" id="btn-login-submit" class="w-full py-3 bg-appGreenDark hover:bg-emerald-950 text-white font-bold rounded-xl text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+          <span>Masuk Sekarang</span>
+        </button>
+        <p class="text-center text-[11px] text-slate-500 pt-2">
+          Belum punya akun? <button type="button" onclick="window.toggleAuthMode('register')" class="text-appGreenMain font-bold underline cursor-pointer">Daftar Baru</button>
+        </p>
+      </form>
+
+      <!-- FORM REGISTRASI SUPABASE -->
+      <form id="form-register" onsubmit="window.handleRegisterSubmit(event)" class="space-y-3 hidden">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama Lengkap *</label>
+          <input type="text" id="reg-nama" required placeholder="Masukkan Nama Lengkap Anda..." class="w-full p-2.5 text-xs border rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Jabatan / Divisi *</label>
+          <input type="text" id="reg-jabatan" required placeholder="Contoh: Staff Operational..." class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email *</label>
+          <input type="email" id="reg-email" required placeholder="nama@perusahaan.com" class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Password *</label>
+          <input type="password" id="reg-password" required minlength="6" placeholder="Minimal 6 Karakter" class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <button type="submit" id="btn-reg-submit" class="w-full py-3 bg-appGreenDark hover:bg-emerald-950 text-white font-bold rounded-xl text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+          <span>Buat Akun & Daftar</span>
+        </button>
+        <p class="text-center text-[11px] text-slate-500 pt-2">
+          Sudah punya akun? <button type="button" onclick="window.toggleAuthMode('login')" class="text-appGreenMain font-bold underline cursor-pointer">Login Di Sini</button>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL PRESENSI SELFIE ==================== -->
+  <div id="absen-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
+      <div class="bg-appGreenDark text-white px-5 py-3.5 flex justify-between items-center">
+        <h3 id="modal-title" class="font-bold text-sm flex items-center gap-2">
+          <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i> Presensi Selfie
+        </h3>
+        <button onclick="closeGenericModal('absen-modal'); window.stopCamera();"><i data-lucide="x" class="w-5 h-5 text-white/70 hover:text-white"></i></button>
+      </div>
+
+      <div class="p-4 space-y-3.5 overflow-y-auto no-scrollbar">
+        <div class="relative w-full aspect-[4/3] bg-slate-950 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center border border-slate-800">
+          <div id="camera-reticle" class="absolute inset-4 pointer-events-none border-2 border-dashed border-emerald-400/50 rounded-full z-10"></div>
+          <video id="webcam" autoplay playsinline class="w-full h-full object-cover mirror-video"></video>
+          <div id="camera-loading" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center gap-2 text-slate-400 z-20">
+            <span class="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+            <p class="text-xs font-medium">Membuka Kamera Selfie...</p>
+          </div>
+          <img id="photo-preview" class="w-full h-full object-cover mirror-video hidden" alt="Preview Selfie" />
+          <canvas id="canvas" class="hidden"></canvas>
+        </div>
+
+        <div class="flex justify-between items-center gap-2">
+          <div id="location-status" class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+            <i data-lucide="map-pin" class="w-3 h-3 mr-1 text-emerald-600"></i> Memuat GPS...
+          </div>
+          <div>
+            <button type="button" id="btn-capture" onclick="window.capturePhoto()" class="px-4 py-2 bg-appGreenDark text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow">
+              <i data-lucide="aperture" class="w-3.5 h-3.5 text-emerald-400"></i> Ambil Selfie
+            </button>
+            <button type="button" id="btn-retake" onclick="window.retakePhoto()" class="hidden px-4 py-2 bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 border border-slate-700">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Foto Ulang
+            </button>
+          </div>
+        </div>
+
+        <form id="absensi-form" onsubmit="window.handleFormSubmit(event)" class="space-y-3 pt-2">
+          <input type="hidden" id="tipe_absen_val" value="Clock In" />
+          <div>
+            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Nama Karyawan</label>
+            <input type="text" id="nama" required value="Sutrisno" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 outline-none" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Jabatan / Divisi</label>
+            <input type="text" id="jabatan" required value="Staff Operational" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Catatan (Opsional)</label>
+            <input type="text" id="keterangan" placeholder="Tambahkan catatan lokasi / tugas..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 outline-none" />
+          </div>
+          <button type="submit" id="btn-submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-lg flex items-center justify-center gap-2">
+            <span id="submit-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span id="submit-text">Kirim Absensi</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL FITUR LAINNYA ==================== -->
+  <div id="modal-pengajuan" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-600"></i> Daftar Pengajuan Saya</h3>
+        <button onclick="closeGenericModal('modal-pengajuan')"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="space-y-2 max-h-60 overflow-y-auto no-scrollbar">
+        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex justify-between items-center">
+          <div><p class="font-bold text-xs">Request Cuti Tahunan</p><p class="text-[10px] text-slate-500">Juli 2026</p></div>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800">Pending</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-lembur" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-emerald-600"></i> Form Request Lembur</h3>
+        <button onclick="closeGenericModal('modal-lembur')"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="window.handleLemburSubmit(event)" class="space-y-3">
+        <div><label class="block text-[10px] font-bold text-slate-400">Tanggal Lembur</label><input type="date" required id="lembur-tgl" class="w-full p-2 text-xs border rounded-xl" /></div>
+        <div><label class="block text-[10px] font-bold text-slate-400">Durasi (Jam)</label><input type="number" required id="lembur-jam" placeholder="2" class="w-full p-2 text-xs border rounded-xl" /></div>
+        <div><label class="block text-[10px] font-bold text-slate-400">Alasan Lembur</label><input type="text" required id="lembur-alasan" placeholder="Pekerjaan laporan bulanan..." class="w-full p-2 text-xs border rounded-xl" /></div>
+        <button type="submit" class="w-full py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs shadow">Kirim Request Lembur</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-cuti" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2"><i data-lucide="calendar-off" class="w-4 h-4 text-emerald-600"></i> Form Request Cuti</h3>
+        <button onclick="closeGenericModal('modal-cuti')"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="window.handleCutiSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400">Jenis Cuti</label>
+          <select id="cuti-jenis" class="w-full p-2 text-xs border rounded-xl font-semibold"><option>Cuti Tahunan</option><option>Cuti Sakit</option></select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block text-[10px] font-bold text-slate-400">Mulai</label><input type="date" required id="cuti-mulai" class="w-full p-2 text-xs border rounded-xl" /></div>
+          <div><label class="block text-[10px] font-bold text-slate-400">Selesai</label><input type="date" required id="cuti-selesai" class="w-full p-2 text-xs border rounded-xl" /></div>
+        </div>
+        <div><label class="block text-[10px] font-bold text-slate-400">Alasan Cuti</label><input type="text" required id="cuti-alasan" placeholder="Keperluan keluarga..." class="w-full p-2 text-xs border rounded-xl" /></div>
+        <button type="submit" class="w-full py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs shadow">Kirim Request Cuti</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-tim" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-emerald-600"></i> Anggota Tim Operational</h3>
+        <button onclick="closeGenericModal('modal-tim')"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="space-y-2.5 max-h-60 overflow-y-auto no-scrollbar">
+        <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-xl">
+          <div id="tim-avatar" class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">S</div>
+          <div>
+            <p id="tim-nama" class="font-bold text-xs">Sutrisno</p>
+            <p id="tim-jabatan" class="text-[10px] text-slate-400">Staff Operational (You)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL PROFIL USER LENGKAP ==================== -->
+  <div id="modal-profil" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4 overflow-y-auto max-h-[90vh] no-scrollbar">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2"><i data-lucide="user" class="w-4 h-4 text-emerald-600"></i> Profil Pengguna</h3>
+        <button onclick="closeGenericModal('modal-profil')"><i data-lucide="x" class="w-5 h-5 text-slate-400 hover:text-slate-700"></i></button>
+      </div>
+
+      <!-- Kartu Ringkasan Akun -->
+      <div class="p-4 bg-gradient-to-r from-emerald-900 to-appGreenDark text-white rounded-2xl flex items-center gap-3.5 shadow-md">
+        <div id="profile-card-avatar" class="w-12 h-12 rounded-full bg-appGold text-slate-900 flex items-center justify-center font-black text-lg shadow-md shrink-0">
+          S
+        </div>
+        <div class="overflow-hidden">
+          <h4 id="profile-card-nama" class="font-bold text-sm truncate">Sutrisno</h4>
+          <p id="profile-card-jabatan" class="text-[11px] text-emerald-200/90 font-medium truncate">Staff Operational</p>
+          <span id="profile-card-status" class="inline-block mt-1 px-2 py-0.5 bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 rounded-full text-[9px] font-bold">Default Mode</span>
+        </div>
+      </div>
+
+      <!-- Detail Informasi User yang Terdaftar -->
+      <div class="space-y-2.5 pt-1">
+        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Detail Informasi Saya</h4>
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-2 text-xs">
+          <div class="flex justify-between items-center border-b border-slate-200/60 pb-1.5">
+            <span class="text-slate-500 font-medium">Nama Lengkap</span>
+            <span id="profile-info-nama" class="font-bold text-slate-800">Sutrisno</span>
+          </div>
+          <div class="flex justify-between items-center border-b border-slate-200/60 pb-1.5">
+            <span class="text-slate-500 font-medium">Jabatan / Divisi</span>
+            <span id="profile-info-jabatan" class="font-bold text-slate-800">Staff Operational</span>
+          </div>
+          <div class="flex justify-between items-center border-b border-slate-200/60 pb-1.5">
+            <span class="text-slate-500 font-medium">Alamat Email</span>
+            <span id="profile-info-email" class="font-bold text-slate-800 truncate max-w-[180px]">Belum Login</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 font-medium">ID Pengguna</span>
+            <span id="profile-info-id" class="font-mono text-[10px] font-semibold text-slate-400">Offline</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button Logout / Login -->
+      <div class="pt-2">
+        <button id="profile-btn-action" onclick="window.handleProfileActionButton()" class="w-full py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span id="profile-btn-text">Keluar Akun (Logout)</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="modal-gaji" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2"><i data-lucide="file-badge" class="w-4 h-4 text-emerald-600"></i> Slip Gaji Periode Juli 2026</h3>
+        <button onclick="closeGenericModal('modal-gaji')"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl space-y-2 text-xs">
+        <div class="flex justify-between"><span class="text-slate-500">Gaji Pokok:</span><span class="font-bold text-slate-800">Rp 5.500.000</span></div>
+        <div class="flex justify-between border-t pt-2 font-extrabold text-emerald-800 text-sm"><span>Total Penerimaan:</span><span>Rp 6.700.000</span></div>
+      </div>
+      <button onclick="window.showToast('Unduh', 'Slip Gaji PDF terunduh', 'success')" class="w-full py-2.5 bg-appGreenDark text-white font-bold rounded-xl text-xs shadow">Unduh Slip Gaji (PDF)</button>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX & TOAST -->
+  <div id="lightbox-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xs w-full overflow-hidden shadow-2xl relative">
+      <button onclick="closeGenericModal('lightbox-modal')" class="absolute top-3 right-3 p-1.5 rounded-full bg-slate-900/60 text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      <img id="modal-img" src="" class="w-full aspect-[3/4] object-cover mirror-video" alt="Detail selfie" />
+      <div class="p-4 bg-white space-y-1"><h4 id="modal-nama" class="font-bold text-slate-900 text-sm"></h4><p id="modal-waktu" class="text-xs text-slate-500"></p></div>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed top-5 inset-x-0 mx-auto max-w-xs z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none px-4">
+    <div id="toast-bg" class="flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl text-white text-xs font-semibold">
+      <i id="toast-icon" data-lucide="check-circle" class="w-5 h-5"></i>
+      <div><p id="toast-title" class="font-bold"></p><p id="toast-message" class="text-[11px] opacity-90"></p></div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT CORE -->
+  <script>
+    window.openGenericModal = function(id) { 
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden'); 
+    };
+    
+    window.closeGenericModal = function(id) { 
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden'); 
+    };
+
+    window.showToast = function(title, message, type = "success") {
+      const toast = document.getElementById('toast');
+      const toastBg = document.getElementById('toast-bg');
+      const tTitle = document.getElementById('toast-title');
+      const tMsg = document.getElementById('toast-message');
+
+      if(tTitle) tTitle.innerText = title;
+      if(tMsg) tMsg.innerText = message;
+      if(toastBg) toastBg.className = type === "success" ? "flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl bg-emerald-600 text-white text-xs font-semibold" : "flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl bg-rose-600 text-white text-xs font-semibold";
+
+      if(toast) {
+        toast.classList.remove('-translate-y-20', 'opacity-0');
+        setTimeout(() => toast.classList.add('-translate-y-20', 'opacity-0'), 3500);
+      }
+    };
+
+    // INISIALISASI SUPABASE
+    const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
+    let supabase = null;
+
+    try {
+      if(window.supabase) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true
+          }
+        });
+      }
+    } catch(e) { console.log("Supabase Init Error:", e); }
+
+    let videoStream = null;
+    let capturedBlob = null;
+    let currentLocation = "Memuat GPS...";
+    let allRecords = [];
+    window.currentUserSession = null;
+
+    window.addEventListener("DOMContentLoaded", () => {
+      try { checkSupabaseSession(); } catch(e){ console.error(e); }
+      try { getLocation(); } catch(e){ console.error(e); }
+      try { fetchAbsensiData(); } catch(e){ console.error(e); }
+      try { lucide.createIcons(); } catch(e){ console.error(e); }
+      
+      const fDate = document.getElementById('filter-date');
+      if (fDate) fDate.value = new Date().toISOString().split('T')[0];
+    });
+
+    window.handleAuthButtonClick = function() {
+      if (window.currentUserSession) {
+        window.handleLogout();
+      } else {
+        window.openGenericModal('modal-login');
+      }
+    };
+
+    window.handleProfileActionButton = function() {
+      if (window.currentUserSession) {
+        window.closeGenericModal('modal-profil');
+        window.handleLogout();
+      } else {
+        window.closeGenericModal('modal-profil');
+        window.openGenericModal('modal-login');
+      }
+    };
+
+    async function checkSupabaseSession() {
+      if (!supabase) return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          window.currentUserSession = session.user;
+          const meta = session.user.user_metadata || {};
+          applyUserData(meta.nama || session.user.email, meta.jabatan || 'Staff Operational', session.user.email, session.user.id);
+        } else {
+          applyUserData('Sutrisno', 'Staff Operational', null, null);
+        }
+      } catch(e) { console.error("Session check error:", e); }
+    }
+
+    function applyUserData(nama, jabatan, email = null, userId = null) {
+      const nameEl = document.getElementById('user-display-name');
+      const roleEl = document.getElementById('user-display-role');
+      if (nameEl) nameEl.innerText = nama;
+      if (roleEl) roleEl.innerText = jabatan;
+
+      const inputNama = document.getElementById('nama');
+      const inputJabatan = document.getElementById('jabatan');
+      if (inputNama) inputNama.value = nama;
+      if (inputJabatan) inputJabatan.value = jabatan;
+      
+      const timNama = document.getElementById('tim-nama');
+      const timJabatan = document.getElementById('tim-jabatan');
+      const timAvatar = document.getElementById('tim-avatar');
+
+      if (timNama) timNama.innerText = nama;
+      if (timJabatan) timJabatan.innerText = jabatan + " (You)";
+      if (timAvatar) timAvatar.innerText = nama.charAt(0).toUpperCase();
+
+      const btnLabel = document.getElementById('login-btn-label');
+      if (btnLabel) {
+        btnLabel.innerText = window.currentUserSession ? "Logout" : "Login / Daftar";
+      }
+
+      const profCardAvatar = document.getElementById('profile-card-avatar');
+      const profCardNama = document.getElementById('profile-card-nama');
+      const profCardJabatan = document.getElementById('profile-card-jabatan');
+      const profCardStatus = document.getElementById('profile-card-status');
+      
+      const profInfoNama = document.getElementById('profile-info-nama');
+      const profInfoJabatan = document.getElementById('profile-info-jabatan');
+      const profInfoEmail = document.getElementById('profile-info-email');
+      const profInfoId = document.getElementById('profile-info-id');
+      const profBtnText = document.getElementById('profile-btn-text');
+      const profBtnAction = document.getElementById('profile-btn-action');
+
+      if (profCardAvatar) profCardAvatar.innerText = nama.charAt(0).toUpperCase();
+      if (profCardNama) profCardNama.innerText = nama;
+      if (profCardJabatan) profCardJabatan.innerText = jabatan;
+      
+      if (profInfoNama) profInfoNama.innerText = nama;
+      if (profInfoJabatan) profInfoJabatan.innerText = jabatan;
+
+      if (window.currentUserSession) {
+        if (profCardStatus) {
+          profCardStatus.innerText = "Terautentikasi (Online)";
+          profCardStatus.className = "inline-block mt-1 px-2 py-0.5 bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 rounded-full text-[9px] font-bold";
+        }
+        if (profInfoEmail) profInfoEmail.innerText = email || "-";
+        if (profInfoId) profInfoId.innerText = userId ? userId.substring(0, 13) + '...' : "-";
+        if (profBtnText) profBtnText.innerText = "Keluar Akun (Logout)";
+        if (profBtnAction) profBtnAction.className = "w-full py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2";
+      } else {
+        if (profCardStatus) {
+          profCardStatus.innerText = "Sesi Mode Tamu";
+          profCardStatus.className = "inline-block mt-1 px-2 py-0.5 bg-amber-500/30 text-amber-200 border border-amber-400/30 rounded-full text-[9px] font-bold";
+        }
+        if (profInfoEmail) profInfoEmail.innerText = "Belum Login";
+        if (profInfoId) profInfoId.innerText = "Offline";
+        if (profBtnText) profBtnText.innerText = "Login / Masuk Akun";
+        if (profBtnAction) profBtnAction.className = "w-full py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2";
+      }
+
+      try { lucide.createIcons(); } catch(e){}
+    }
+
+    window.toggleAuthMode = function(mode) {
+      const formLogin = document.getElementById('form-login');
+      const formReg = document.getElementById('form-register');
+      const title = document.getElementById('auth-modal-title');
+
+      if (mode === 'register') {
+        if(formLogin) formLogin.classList.add('hidden');
+        if(formReg) formReg.classList.remove('hidden');
+        if(title) title.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i> Buat Akun Karyawan`;
+      } else {
+        if(formReg) formReg.classList.add('hidden');
+        if(formLogin) formLogin.classList.remove('hidden');
+        if(title) title.innerHTML = `<i data-lucide="log-in" class="w-4 h-4 text-emerald-600"></i> Login Karyawan`;
+      }
+      try { lucide.createIcons(); } catch(e){}
+    };
+
+    window.handleLoginSubmit = async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('btn-login-submit');
+
+      if(btn) btn.disabled = true;
+
+      try {
+        if (!supabase) throw new Error("Database belum terhubung.");
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        window.currentUserSession = data.user;
+        const meta = data.user.user_metadata || {};
+        applyUserData(meta.nama || email, meta.jabatan || 'Staff Operational', data.user.email, data.user.id);
         
-        let supabaseClient = null;
-        try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } catch (err) {
-            console.error("Gagal menginisialisasi Supabase:", err);
-        }
+        window.showToast("Berhasil Login!", "Selamat bekerja.", "success");
+        window.closeGenericModal('modal-login');
+      } catch (err) {
+        window.showToast("Gagal Login!", err.message, "error");
+      } finally {
+        if(btn) btn.disabled = false;
+      }
+    };
 
-        let isLoginMode = true;
-        let currentUser = null;
+    window.handleRegisterSubmit = async function(e) {
+      e.preventDefault();
+      const nama = document.getElementById('reg-nama').value.trim();
+      const jabatan = document.getElementById('reg-jabatan').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const btn = document.getElementById('btn-reg-submit');
 
-        // Cek sesi saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', () => {
-            if (supabaseClient) {
-                checkSession();
-            }
+      if(btn) btn.disabled = true;
+
+      try {
+        if (!supabase) throw new Error("Database belum terhubung.");
+        const { data, error } = await supabase.auth.signUp({
+          email, password,
+          options: { data: { nama, jabatan } }
         });
+        if (error) throw error;
 
-        async function checkSession() {
-            try {
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
-                if (error) throw error;
-                
-                const btnContainer = document.getElementById('auth-action-btn-container');
+        window.showToast("Pendaftaran Berhasil!", "Akun berhasil dibuat. Silakan login.", "success");
+        window.toggleAuthMode('login');
+      } catch (err) {
+        window.showToast("Gagal Mendaftar!", err.message, "error");
+      } finally {
+        if(btn) btn.disabled = false;
+      }
+    };
 
-                if (session) {
-                    const userName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-                    document.getElementById('user-display-name').innerText = userName;
-                    currentUser = userName;
+    window.handleLogout = async function() {
+      if(supabase) await supabase.auth.signOut();
+      window.currentUserSession = null;
+      applyUserData('Sutrisno', 'Staff Operational', null, null);
+      window.showToast("Berhasil Keluar", "Sesi Anda telah diakhiri.", "success");
+    };
 
-                    // Ubah tombol pojok kanan atas menjadi tombol Keluar (Logout)
-                    btnContainer.innerHTML = `
-                        <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/40 text-red-100 text-xs font-semibold py-2 px-3 rounded-full border border-red-400/30 transition flex items-center gap-1">
-                            <i class="fa-solid fa-power-off"></i> Keluar
-                        </button>
-                    `;
-                } else {
-                    document.getElementById('user-display-name').innerText = 'Tamu';
-                    currentUser = null;
+    function getLocation() {
+      const statusEl = document.getElementById('location-status');
+      if ("geolocation" in navigator && statusEl) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            currentLocation = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+            statusEl.innerHTML = `<i data-lucide="check-circle" class="w-3 h-3 text-emerald-600 mr-1"></i> GPS Ready`;
+            try { lucide.createIcons(); } catch(e){}
+          },
+          () => {
+            currentLocation = "GPS Nonaktif";
+            statusEl.innerHTML = `<i data-lucide="alert-circle" class="w-3 h-3 text-amber-500 mr-1"></i> GPS Off`;
+            try { lucide.createIcons(); } catch(e){}
+          }
+        );
+      }
+    }
 
-                    // Kembalikan tombol pojok kanan atas menjadi Login / Daftar
-                    btnContainer.innerHTML = `
-                        <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1">
-                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
-                        </button>
-                    `;
-                }
-            } catch (err) {
-                console.error("Sesi error:", err);
-            }
+    window.prepareAttendance = function(type) {
+      const inputType = document.getElementById('tipe_absen_val');
+      const modalTitle = document.getElementById('modal-title');
+      
+      if (inputType) inputType.value = type;
+      if (modalTitle) {
+        modalTitle.innerHTML = `<i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i> Presensi Selfie (${type})`;
+      }
+
+      window.openGenericModal('absen-modal');
+      window.startSelfieCamera();
+      try { lucide.createIcons(); } catch(e){}
+    };
+
+    window.startSelfieCamera = async function() {
+      const loadingEl = document.getElementById('camera-loading');
+      const video = document.getElementById('webcam');
+      if (loadingEl) loadingEl.classList.remove('hidden');
+
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
+        if (video) {
+          video.srcObject = videoStream;
+          video.onloadedmetadata = () => { video.play(); if (loadingEl) loadingEl.classList.add('hidden'); };
         }
+      } catch (err) {
+        if (loadingEl) loadingEl.innerHTML = `<div class="p-4 text-center text-xs text-rose-400 font-bold">Gagal membuka kamera selfie.</div>`;
+      }
+    };
 
-        // Fungsi Buka/Tutup Pop-up Modal
-        function openAuthModal() {
-            document.getElementById('auth-modal').classList.remove('hidden');
+    window.stopCamera = function() {
+      if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+    };
+
+    window.capturePhoto = function() {
+      const video = document.getElementById('webcam');
+      const canvas = document.getElementById('canvas');
+      if (!video || !canvas) return;
+      
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
+      context.translate(canvas.width, 0); context.scale(-1, 1);
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob((blob) => {
+        capturedBlob = blob;
+        const preview = document.getElementById('photo-preview');
+        if (preview) {
+          preview.src = URL.createObjectURL(blob);
+          preview.classList.remove('hidden');
         }
-        function closeAuthModal() {
-            document.getElementById('auth-modal').classList.add('hidden');
-        }
+        video.classList.add('hidden');
+        
+        const reticle = document.getElementById('camera-reticle');
+        if (reticle) reticle.classList.add('hidden');
+        
+        const btnCap = document.getElementById('btn-capture');
+        const btnRet = document.getElementById('btn-retake');
+        if (btnCap) btnCap.classList.add('hidden');
+        if (btnRet) btnRet.classList.remove('hidden');
+      }, 'image/jpeg', 0.85);
+    };
 
-        // Toggle Login / Register dalam Modal
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? 'Masuk Akun' : 'Daftar Akun Baru';
-            document.getElementById('auth-btn').innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
-            document.getElementById('auth-switch-text').innerText = isLoginMode ? 'Belum punya akun?' : 'Sudah punya akun?';
-            document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Daftar di sini' : 'Login di sini';
-            
-            const nameField = document.getElementById('name-field');
-            const fullnameInput = document.getElementById('fullname');
-            
-            if (isLoginMode) {
-                nameField.classList.add('hidden');
-                fullnameInput.removeAttribute('required');
-            } else {
-                nameField.classList.remove('hidden');
-                fullnameInput.setAttribute('required', 'true');
-            }
-        }
+    window.retakePhoto = function() {
+      capturedBlob = null;
+      const preview = document.getElementById('photo-preview');
+      const video = document.getElementById('webcam');
+      const reticle = document.getElementById('camera-reticle');
+      
+      if(preview) preview.classList.add('hidden');
+      if(video) video.classList.remove('hidden');
+      if(reticle) reticle.classList.remove('hidden');
 
-        // Proses Form Submit Login/Register
-        document.getElementById('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const fullName = document.getElementById('fullname').value;
-            const btn = document.getElementById('auth-btn');
-            
-            btn.innerText = "Memproses...";
-            btn.disabled = true;
+      const btnCap = document.getElementById('btn-capture');
+      const btnRet = document.getElementById('btn-retake');
+      if (btnCap) btnCap.classList.remove('hidden');
+      if (btnRet) btnRet.classList.add('hidden');
+    };
 
-            try {
-                if (isLoginMode) {
-                    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    
-                    alert('Berhasil Login!');
-                    closeAuthModal();
-                    checkSession();
-                } else {
-                    const { error } = await supabaseClient.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: { data: { full_name: fullName } }
-                    });
-                    if (error) throw error;
-                    
-                    alert('Registrasi berhasil! Silakan masuk.');
-                    toggleAuthMode();
-                    document.getElementById('password').value = '';
-                }
-            } catch (error) {
-                alert("Gagal: " + error.message);
-            } finally {
-                btn.innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
-                btn.disabled = false;
-            }
-        });
+    window.handleFormSubmit = async function(e) {
+      e.preventDefault();
+      if (!capturedBlob) return window.showToast("Perhatian!", "Harap ambil foto selfie.", "error");
 
-        // Proses Logout
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            document.getElementById('email').value = '';
-            document.getElementById('password').value = '';
-            checkSession();
-            alert('Berhasil keluar akun.');
-        }
+      const btnSubmit = document.getElementById('btn-submit');
+      const spinner = document.getElementById('submit-spinner');
+      const textSubmit = document.getElementById('submit-text');
 
-        // Catat Absensi
-        async function recordAttendance(actionType) {
-            if (!currentUser) {
-                alert('Silakan "Login / Daftar" terlebih dahulu untuk melakukan absensi!');
-                openAuthModal();
-                return;
-            }
+      if(btnSubmit) btnSubmit.disabled = true;
+      if(spinner) spinner.classList.remove('hidden');
+      if(textSubmit) textSubmit.innerText = "Mengirim...";
 
-            const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
-            const btnElement = document.getElementById(btnId);
-            const originalContent = btnElement.innerHTML;
-            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
-            btnElement.disabled = true;
+      try {
+        if(!supabase) throw new Error("Database tidak terhubung.");
+        const fileName = `selfie_${Date.now()}.jpg`;
+        const { error: uploadError } = await supabase.storage.from('foto-absensi').upload(fileName, capturedBlob, { contentType: 'image/jpeg' });
+        if (uploadError) throw uploadError;
 
-            try {
-                const { error } = await supabaseClient
-                    .from('attendance_logs')
-                    .insert([{ user_name: currentUser, action_type: actionType }]);
+        const { data: urlData } = supabase.storage.from('foto-absensi').getPublicUrl(fileName);
 
-                if (error) throw error;
-                alert(`Berhasil ${actionType}!`);
-            } catch (error) {
-                console.error('Error:', error);
-                alert(`Gagal menyimpan data: ` + error.message);
-            } finally {
-                btnElement.innerHTML = originalContent;
-                btnElement.disabled = false;
-            }
-        }
-    </script>
+        const { error: insertError } = await supabase.from('attendance_logs').insert([{
+          user_name: document.getElementById('nama').value.trim(),
+          action_type: document.getElementById('tipe_absen_val').value,
+          jabatan: document.getElementById('jabatan').value.trim(),
+          foto_url: urlData.publicUrl,
+          lokasi: currentLocation,
+          keterangan: document.getElementById('keterangan').value.trim()
+        }]);
+        if (insertError) throw insertError;
+
+        window.showToast("Berhasil!", "Presensi terisi.", "success");
+        window.closeGenericModal('absen-modal');
+        window.stopCamera();
+        window.retakePhoto();
+        fetchAbsensiData();
+      } catch (err) {
+        window.showToast("Gagal!", err.message, "error");
+      } finally {
+        if(btnSubmit) btnSubmit.disabled = false;
+        if(spinner) spinner.classList.add('hidden');
+        if(textSubmit) textSubmit.innerText = "Kirim Absensi";
+      }
+    };
+
+    window.handleLemburSubmit = async function(e) {
+      e.preventDefault();
+      const currentNama = document.getElementById('user-display-name').innerText;
+      try {
+        if(!supabase) throw new Error("Database terputus");
+        const { error } = await supabase.from('request_lembur').insert([{
+          nama: currentNama,
+          tanggal: document.getElementById('lembur-tgl').value,
+          durasi_jam: parseInt(document.getElementById('lembur-jam').value),
+          alasan: document.getElementById('lembur-alasan').value
+        }]);
+        if (error) throw error;
+        window.showToast("Berhasil!", "Request lembur dikirim", "success");
+        window.closeGenericModal('modal-lembur');
+      } catch (err) { window.showToast("Gagal!", err.message, "error"); }
+    };
+
+    window.handleCutiSubmit = async function(e) {
+      e.preventDefault();
+      const currentNama = document.getElementById('user-display-name').innerText;
+      try {
+        if(!supabase) throw new Error("Database terputus");
+        const { error } = await supabase.from('request_cuti').insert([{
+          nama: currentNama,
+          jenis_cuti: document.getElementById('cuti-jenis').value,
+          tanggal_mulai: document.getElementById('cuti-mulai').value,
+          tanggal_selesai: document.getElementById('cuti-selesai').value,
+          alasan: document.getElementById('cuti-alasan').value
+        }]);
+        if (error) throw error;
+        window.showToast("Berhasil!", "Request cuti dikirim", "success");
+        window.closeGenericModal('modal-cuti');
+      } catch (err) { window.showToast("Gagal!", err.message, "error"); }
+    };
+
+    async function fetchAbsensiData() {
+      try {
+        if(!supabase) return;
+        const { data } = await supabase.from('attendance_logs').select('*').order('timestamp', { ascending: false });
+        allRecords = data || [];
+        window.renderDashboard();
+      } catch(e){}
+    }
+
+    window.renderDashboard = function() {
+      const filterEl = document.getElementById('filter-date');
+      const searchEl = document.getElementById('search-input');
+      const selectedDate = filterEl ? filterEl.value : '';
+      const searchQuery = searchEl ? searchEl.value.toLowerCase() : '';
+
+      const filtered = allRecords.filter(item => {
+        const itemDate = new Date(item.timestamp).toISOString().split('T')[0];
+        return (!selectedDate || itemDate === selectedDate) &&
+               (item.user_name.toLowerCase().includes(searchQuery));
+      });
+
+      const cardsContainer = document.getElementById('mobile-cards-list');
+      if (!cardsContainer) return;
+
+      if (filtered.length === 0) {
+        cardsContainer.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">Belum ada data.</div>`;
+        return;
+      }
+
+      cardsContainer.innerHTML = filtered.map(item => {
+        const dt = new Date(item.timestamp);
+        const isClockIn = item.action_type === 'Clock In';
+        function escapeHtml(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ''; }
+
+        return `
+          <div class="bg-white p-3.5 rounded-2xl border border-emerald-100 shadow-sm flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              ${item.foto_url ? `<img src="${item.foto_url}" class="w-11 h-11 rounded-xl object-cover border cursor-pointer" onclick="window.openLightbox('${item.foto_url}', '${escapeHtml(item.user_name)}', '${dt.toLocaleTimeString()}')" alt="Selfie" />` : `<div class="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center"><i data-lucide="user" class="w-5 h-5 text-slate-400"></i></div>`}
+              <div>
+                <h4 class="font-bold text-xs text-slate-900">${escapeHtml(item.user_name)}</h4>
+                <p class="text-[10px] text-slate-400">${escapeHtml(item.jabatan || 'Staff Operational')}</p>
+                <span class="text-[9px] text-slate-400 font-mono">${dt.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})} WIB</span>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[9px] font-bold ${isClockIn ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${item.action_type}</span>
+          </div>
+        `;
+      }).join('');
+      try { lucide.createIcons(); } catch(e){}
+    };
+
+    window.exportToCSV = function() {
+      if (allRecords.length === 0) return alert("Data kosong!");
+      let csv = 'No,Waktu,Nama,Tipe,Lokasi,URL Foto,Keterangan\n';
+      allRecords.forEach((item, index) => {
+        csv += `"${index + 1}","${new Date(item.timestamp).toLocaleString()}","${item.user_name}","${item.action_type}","${item.lokasi || ''}","${item.foto_url || ''}","${item.keterangan || ''}"\n`;
+      });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      link.download = `Rekap_Absensi_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+    };
+
+    window.switchMainTab = function(tab) {
+      const isHome = tab === 'home';
+      const homeContent = document.getElementById('tab-content-home');
+      const logContent = document.getElementById('tab-content-log');
+
+      if(homeContent) homeContent.classList.toggle('hidden', !isHome);
+      if(logContent) logContent.classList.toggle('hidden', isHome);
+      
+      const btnHome = document.getElementById('nav-btn-home');
+      const btnLog = document.getElementById('nav-btn-log');
+      const iconHome = document.getElementById('nav-icon-home');
+      const iconLog = document.getElementById('nav-icon-log');
+
+      if (isHome) {
+        if(btnHome) btnHome.className = "flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95";
+        if(iconHome) iconHome.className = "p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain";
+        if(btnLog) btnLog.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95";
+        if(iconLog) iconLog.className = "p-1.5 rounded-full text-slate-400";
+      } else {
+        if(btnLog) btnLog.className = "flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95";
+        if(iconLog) iconLog.className = "p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain";
+        if(btnHome) btnHome.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95";
+        if(iconHome) iconHome.className = "p-1.5 rounded-full text-slate-400";
+        fetchAbsensiData();
+      }
+    };
+
+    window.openLightbox = function(url, nama, waktu) {
+      const img = document.getElementById('modal-img');
+      const name = document.getElementById('modal-nama');
+      const time = document.getElementById('modal-waktu');
+      if(img) img.src = url;
+      if(name) name.innerText = nama;
+      if(time) time.innerText = "Waktu: " + waktu;
+      window.openGenericModal('lightbox-modal');
+    };
+  </script>
 </body>
 </html>
