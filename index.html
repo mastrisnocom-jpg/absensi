@@ -23,14 +23,14 @@
     <div class="w-full max-w-md bg-gray-50 shadow-xl relative overflow-hidden flex flex-col min-h-screen">
 
         <!-- ================= DASHBOARD UTAMA (HOME) ================= -->
-        <div id="dashboard-section" class="flex-1 pb-20 relative">
+        <div id="dashboard-section" class="flex-1 pb-24 relative">
             <!-- Header Section -->
             <div class="bg-primary-dark rounded-b-[40px] pt-10 pb-20 px-6 relative">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-gold text-sm font-semibold mb-1">Selamat bekerja,</p>
                         <h1 id="user-display-name" class="text-white text-3xl font-bold mb-1">Tamu</h1>
-                        <p class="text-gray-300 text-sm">Staff Operational</p>
+                        <p id="user-display-role" class="text-gray-300 text-sm">Staff Operational</p>
                     </div>
                     <!-- Tombol Login/Daftar atau Logout -->
                     <div id="auth-action-btn-container">
@@ -78,7 +78,7 @@
                     <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-solid fa-users"></i></div>
                     <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Tim<br>Kami</span>
                 </div>
-                <div class="flex flex-col items-center cursor-pointer">
+                <div onclick="switchTab('profile')" class="flex flex-col items-center cursor-pointer">
                     <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm"><i class="fa-regular fa-user"></i></div>
                     <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Profil<br>Saya</span>
                 </div>
@@ -90,7 +90,7 @@
         </div>
 
         <!-- ================= SECTION ABSEN LOG (RIWAYAT) ================= -->
-        <div id="log-section" class="flex-1 pb-20 relative hidden px-6 py-6">
+        <div id="log-section" class="flex-1 pb-24 relative hidden px-6 py-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-gray-800">Riwayat Absen Log</h2>
                 <button onclick="fetchAttendanceLogs()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-800 transition">
@@ -99,6 +99,57 @@
             </div>
             <div id="log-list" class="space-y-3 overflow-y-auto max-h-[72vh] pb-4">
                 <p class="text-gray-400 text-sm text-center py-10">Klik tombol Refresh atau buka menu ini untuk memuat data.</p>
+            </div>
+        </div>
+
+        <!-- ================= SECTION PROFIL PENGGUNA ================= -->
+        <div id="profile-section" class="flex-1 pb-24 relative hidden px-6 py-6 overflow-y-auto">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Profil Saya</h2>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+                <!-- Foto & Nama Utama -->
+                <div class="flex flex-col items-center border-b pb-4">
+                    <div class="w-20 h-20 rounded-full bg-primary-dark text-gold flex items-center justify-center text-3xl font-bold shadow-inner mb-3 overflow-hidden border-2 border-gold" id="profile-avatar-container">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <h3 id="prof-nama" class="font-bold text-lg text-gray-800">Tamu</h3>
+                    <p id="prof-role" class="text-xs text-green-700 font-semibold">Staff Operational</p>
+                </div>
+
+                <!-- Detail Data Diri -->
+                <div class="space-y-3 text-xs">
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-400 font-medium"><i class="fa-solid fa-id-card w-5 text-green-700"></i> NIP</span>
+                        <span id="prof-nip" class="font-bold text-gray-700">-</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-400 font-medium"><i class="fa-solid fa-envelope w-5 text-green-700"></i> Email</span>
+                        <span id="prof-email" class="font-bold text-gray-700">Belum Login</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-400 font-medium"><i class="fa-solid fa-phone w-5 text-green-700"></i> No Handphone</span>
+                        <span id="prof-phone" class="font-bold text-gray-700">-</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-400 font-medium"><i class="fa-solid fa-hands-praying w-5 text-green-700"></i> Agama</span>
+                        <span id="prof-religion" class="font-bold text-gray-700">-</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-400 font-medium"><i class="fa-solid fa-venus-mars w-5 text-green-700"></i> Jenis Kelamin</span>
+                        <span id="prof-gender" class="font-bold text-gray-700">-</span>
+                    </div>
+                    <div class="flex justify-between pb-1">
+                        <span class="text-gray-400 font-medium"><i class="fa-solid fa-ring w-5 text-green-700"></i> Pernikahan</span>
+                        <span id="prof-marital" class="font-bold text-gray-700">-</span>
+                    </div>
+                </div>
+
+                <!-- Tombol Keluar dari Profil -->
+                <div class="pt-2">
+                    <button onclick="logout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl transition text-xs border border-red-200">
+                        <i class="fa-solid fa-power-off mr-1"></i> Keluar Akun
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -116,35 +167,75 @@
             <div onclick="switchTab('home')" class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
                 <i class="fa-regular fa-envelope mb-1"></i><span class="text-[10px] font-bold">Inbox</span>
             </div>
-            <div onclick="switchTab('home')" class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
+            <div onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
                 <i class="fa-regular fa-user mb-1"></i><span class="text-[10px] font-bold">Profil</span>
             </div>
         </div>
 
         <!-- ================= MODAL / POP-UP LOGIN & DAFTAR ================= -->
-        <div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
-            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative animate-fadeIn">
+        <div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative animate-fadeIn my-auto">
                 <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
 
-                <div class="text-center mb-6 mt-2">
+                <div class="text-center mb-5 mt-1">
                     <h2 id="auth-title" class="text-2xl font-bold text-gray-800">Masuk Akun</h2>
                     <p class="text-gray-500 text-xs mt-1">Silakan masuk untuk mencatat absensi</p>
                 </div>
 
-                <form id="auth-form" class="space-y-4">
-                    <div id="name-field" class="hidden">
-                        <label class="text-xs text-gray-600 font-semibold">Nama Lengkap</label>
-                        <input type="text" id="fullname" placeholder="Masukkan nama Anda" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600">
+                <form id="auth-form" class="space-y-3">
+                    <!-- Form Tambahan Khusus Registrasi -->
+                    <div id="register-fields" class="space-y-3 hidden">
+                        <div>
+                            <label class="text-xs text-gray-600 font-semibold">Nama Lengkap</label>
+                            <input type="text" id="fullname" placeholder="Nama lengkap" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-600 font-semibold">NIP</label>
+                            <input type="text" id="nip" placeholder="Nomor Induk Pegawai" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-600 font-semibold">No Handphone</label>
+                            <input type="tel" id="phone" placeholder="08xxxxxxxxxx" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-xs text-gray-600 font-semibold">Agama</label>
+                                <select id="religion" class="w-full mt-1 border border-gray-300 rounded-lg px-2 py-2 text-xs focus:outline-none focus:border-green-600 bg-white">
+                                    <option value="Islam">Islam</option>
+                                    <option value="Kristen">Kristen</option>
+                                    <option value="Katolik">Katolik</option>
+                                    <option value="Hindu">Hindu</option>
+                                    <option value="Buddha">Buddha</option>
+                                    <option value="Konghucu">Konghucu</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-600 font-semibold">Jenis Kelamin</label>
+                                <select id="gender" class="w-full mt-1 border border-gray-300 rounded-lg px-2 py-2 text-xs focus:outline-none focus:border-green-600 bg-white">
+                                    <option value="Laki-laki">Laki-laki</option>
+                                    <option value="Perempuan">Perempuan</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-600 font-semibold">Status Pernikahan</label>
+                            <select id="marital" class="w-full mt-1 border border-gray-300 rounded-lg px-2 py-2 text-xs focus:outline-none focus:border-green-600 bg-white">
+                                <option value="Belum Menikah">Belum Menikah</option>
+                                <option value="Menikah">Menikah</option>
+                                <option value="Cerai">Cerai</option>
+                            </select>
+                        </div>
                     </div>
+
                     <div>
                         <label class="text-xs text-gray-600 font-semibold">Email</label>
-                        <input type="email" id="email" required placeholder="contoh@email.com" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600">
+                        <input type="email" id="email" required placeholder="contoh@email.com" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
                     </div>
                     <div>
                         <label class="text-xs text-gray-600 font-semibold">Password</label>
-                        <input type="password" id="password" required placeholder="Minimal 6 karakter" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600">
+                        <input type="password" id="password" required placeholder="Minimal 6 karakter" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
                     </div>
                     
                     <button type="submit" id="auth-btn" class="w-full bg-primary-dark hover:bg-green-900 text-white font-bold py-2.5 rounded-xl transition text-sm shadow-md mt-2">
@@ -152,9 +243,9 @@
                     </button>
                 </form>
 
-                <p class="text-center text-xs text-gray-600 mt-5">
+                <p class="text-center text-xs text-gray-600 mt-4">
                     <span id="auth-switch-text">Belum punya akun?</span> 
-                    <button type="button" onclick="toggleAuthMode()" id="auth-switch-btn" class="text-green-700 font-bold hover:underline">Daftar di sini</button>
+                    <button type="button" onclick="toggleAuthMode()" id="auth-switch-btn" class="text-green-700 font-bold underline cursor-pointer">Daftar di sini</button>
                 </p>
             </div>
         </div>
@@ -175,6 +266,7 @@
 
         let isLoginMode = true;
         let currentUser = null;
+        let currentUserData = {};
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
@@ -182,25 +274,58 @@
             }
         });
 
-        // Navigasi Antar Tab (Home & Absen Log)
+        // Navigasi Antar Tab (Home, Log, Profile)
         function switchTab(tab) {
             const dashboardSec = document.getElementById('dashboard-section');
             const logSec = document.getElementById('log-section');
+            const profileSec = document.getElementById('profile-section');
+            
             const navHome = document.getElementById('nav-home');
             const navLog = document.getElementById('nav-log');
+            const navProfile = document.getElementById('nav-profile');
+
+            // Sembunyikan semua dulu
+            dashboardSec.classList.add('hidden');
+            logSec.classList.add('hidden');
+            profileSec.classList.add('hidden');
+            
+            navHome.className = "flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700";
+            navLog.className = "flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700";
+            navProfile.className = "flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700";
 
             if (tab === 'home') {
                 dashboardSec.classList.remove('hidden');
-                logSec.classList.add('hidden');
                 navHome.className = "flex flex-col items-center text-green-700 cursor-pointer";
-                navLog.className = "flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700";
             } else if (tab === 'log') {
-                dashboardSec.classList.add('hidden');
                 logSec.classList.remove('hidden');
                 navLog.className = "flex flex-col items-center text-green-700 cursor-pointer";
-                navHome.className = "flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700";
-                fetchAttendanceLogs(); // Muat data riwayat saat tab diklik
+                fetchAttendanceLogs();
+            } else if (tab === 'profile') {
+                if (!currentUser) {
+                    alert('Silakan login terlebih dahulu untuk melihat profil!');
+                    openAuthModal();
+                    switchTab('home');
+                    return;
+                }
+                profileSec.classList.remove('hidden');
+                navProfile.className = "flex flex-col items-center text-green-700 cursor-pointer";
+                renderProfileData();
             }
+        }
+
+        // Tampilkan data profil ke UI
+        function renderProfileData() {
+            document.getElementById('prof-nama').innerText = currentUserData.full_name || currentUser || 'Tamu';
+            document.getElementById('prof-email').innerText = currentUserData.email || '-';
+            document.getElementById('prof-nip').innerText = currentUserData.nip || '-';
+            document.getElementById('prof-phone').innerText = currentUserData.phone || '-';
+            document.getElementById('prof-religion').innerText = currentUserData.religion || '-';
+            document.getElementById('prof-gender').innerText = currentUserData.gender || '-';
+            document.getElementById('prof-marital').innerText = currentUserData.marital_status || '-';
+
+            // Inisial foto profil
+            const initial = (currentUserData.full_name || currentUser || 'T').charAt(0).toUpperCase();
+            document.getElementById('profile-avatar-container').innerHTML = `<span class="text-gold font-bold text-3xl">${initial}</span>`;
         }
 
         // Ambil data riwayat dari Supabase
@@ -259,9 +384,21 @@
                 const btnContainer = document.getElementById('auth-action-btn-container');
 
                 if (session) {
-                    const userName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-                    document.getElementById('user-display-name').innerText = userName;
+                    const meta = session.user.user_metadata || {};
+                    const userName = meta.full_name || session.user.email.split('@')[0];
+                    
                     currentUser = userName;
+                    currentUserData = {
+                        full_name: userName,
+                        email: session.user.email,
+                        nip: meta.nip,
+                        phone: meta.phone,
+                        religion: meta.religion,
+                        gender: meta.gender,
+                        marital_status: meta.marital_status
+                    };
+
+                    document.getElementById('user-display-name').innerText = userName;
 
                     btnContainer.innerHTML = `
                         <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/40 text-red-100 text-xs font-semibold py-2 px-3 rounded-full border border-red-400/30 transition flex items-center gap-1">
@@ -271,6 +408,7 @@
                 } else {
                     document.getElementById('user-display-name').innerText = 'Tamu';
                     currentUser = null;
+                    currentUserData = {};
 
                     btnContainer.innerHTML = `
                         <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1">
@@ -297,15 +435,14 @@
             document.getElementById('auth-switch-text').innerText = isLoginMode ? 'Belum punya akun?' : 'Sudah punya akun?';
             document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Daftar di sini' : 'Login di sini';
             
-            const nameField = document.getElementById('name-field');
-            const fullnameInput = document.getElementById('fullname');
+            const registerFields = document.getElementById('register-fields');
             
             if (isLoginMode) {
-                nameField.classList.add('hidden');
-                fullnameInput.removeAttribute('required');
+                registerFields.classList.add('hidden');
+                document.getElementById('fullname').removeAttribute('required');
             } else {
-                nameField.classList.remove('hidden');
-                fullnameInput.setAttribute('required', 'true');
+                registerFields.classList.remove('hidden');
+                document.getElementById('fullname').setAttribute('required', 'true');
             }
         }
 
@@ -314,7 +451,6 @@
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const fullName = document.getElementById('fullname').value;
             const btn = document.getElementById('auth-btn');
             
             btn.innerText = "Memproses...";
@@ -329,10 +465,26 @@
                     closeAuthModal();
                     checkSession();
                 } else {
+                    const fullName = document.getElementById('fullname').value;
+                    const nip = document.getElementById('nip').value;
+                    const phone = document.getElementById('phone').value;
+                    const religion = document.getElementById('religion').value;
+                    const gender = document.getElementById('gender').value;
+                    const marital = document.getElementById('marital').value;
+
                     const { error } = await supabaseClient.auth.signUp({
                         email: email,
                         password: password,
-                        options: { data: { full_name: fullName } }
+                        options: { 
+                            data: { 
+                                full_name: fullName,
+                                nip: nip,
+                                phone: phone,
+                                religion: religion,
+                                gender: gender,
+                                marital_status: marital
+                            } 
+                        }
                     });
                     if (error) throw error;
                     
@@ -353,6 +505,7 @@
             document.getElementById('email').value = '';
             document.getElementById('password').value = '';
             checkSession();
+            switchTab('home');
             alert('Berhasil keluar akun.');
         }
 
