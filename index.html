@@ -26,7 +26,7 @@
         <!-- ================= KONTEN UTAMA (SCROLLABLE) ================= -->
         <div class="flex-1 pb-24 overflow-y-auto">
             
-            <!-- 1. HOME TAB (Sudah diperbaiki ID-nya menjadi home-section) -->
+            <!-- 1. HOME TAB -->
             <div id="home-section" class="block">
                 <!-- Header Section -->
                 <div class="bg-primary-dark rounded-b-[40px] pt-10 pb-20 px-6 relative">
@@ -178,7 +178,7 @@
 
         </div>
 
-        <!-- ================= BOTTOM NAVIGATION (FIXED & SCALED TO CONTAINER) ================= -->
+        <!-- ================= BOTTOM NAVIGATION ================= -->
         <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-gray-200 flex justify-between px-6 py-3 z-50 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             <div onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-green-700 cursor-pointer transition select-none">
                 <i class="fa-solid fa-house mb-1 text-base"></i><span class="text-[10px] font-bold">Home</span>
@@ -298,7 +298,6 @@
             }
         });
 
-        // Diperbaiki: Array tab section merujuk ke 'home-section'
         function switchTab(tab) {
             const sections = ['home-section', 'log-section', 'karyawan-section', 'inbox-section', 'profile-section'];
             sections.forEach(sec => document.getElementById(sec).classList.add('hidden'));
@@ -310,7 +309,6 @@
                 el.querySelector('span').className = "text-[10px] font-medium";
             });
 
-            // Aktifkan tab tujuan
             document.getElementById(tab + '-section').classList.remove('hidden');
             const activeNav = document.getElementById('nav-' + tab);
             activeNav.className = "flex flex-col items-center text-green-700 cursor-pointer transition select-none";
@@ -530,6 +528,7 @@
             alert('Berhasil keluar akun.');
         }
 
+        // Logika baru untuk mencegah duplikat Clock In dan memperbarui Clock Out ke data terakhir
         async function recordAttendance(actionType) {
             if (!currentUser) {
                 alert('Silakan "Login / Daftar" terlebih dahulu untuk melakukan absensi!');
@@ -543,13 +542,56 @@
             btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
             btnElement.disabled = true;
 
-            try {
-                const { error } = await supabaseClient
-                    .from('attendance_logs')
-                    .insert([{ user_name: currentUser, action_type: actionType }]);
+            const todayStr = new Date().toISOString().split('T')[0];
 
-                if (error) throw error;
-                alert(`Berhasil ${actionType}!`);
+            try {
+                // Ambil data log user ini dari database
+                const { data: existingLogs, error: fetchErr } = await supabaseClient
+                    .from('attendance_logs')
+                    .select('*')
+                    .eq('user_name', currentUser);
+
+                if (fetchErr) throw fetchErr;
+
+                // Filter log yang tanggalnya hari ini
+                const todayLogs = existingLogs.filter(item => {
+                    const itemDate = new Date(item.timestamp || Date.now()).toISOString().split('T')[0];
+                    return itemDate === todayStr;
+                });
+
+                const hasClockIn = todayLogs.some(item => item.action_type === 'Clock In');
+                const clockOutLog = todayLogs.find(item => item.action_type === 'Clock Out');
+
+                if (actionType === 'Clock In') {
+                    if (hasClockIn) {
+                        alert('Anda sudah melakukan Clock In hari ini! Absen masuk kedua diabaikan.');
+                        return;
+                    }
+                    // Masukkan data Clock In baru
+                    const { error } = await supabaseClient
+                        .from('attendance_logs')
+                        .insert([{ user_name: currentUser, action_type: 'Clock In' }]);
+                    if (error) throw error;
+                    alert('Berhasil Clock In!');
+
+                } else if (actionType === 'Clock Out') {
+                    if (clockOutLog) {
+                        // Jika sudah pernah Clock Out hari ini, perbarui timestamp-nya ke waktu yang terakhir
+                        const { error } = await supabaseClient
+                            .from('attendance_logs')
+                            .update({ timestamp: new Date().toISOString() })
+                            .eq('id', clockOutLog.id);
+                        if (error) throw error;
+                        alert('Berhasil Clock Out (Memperbarui ke data terakhir)!');
+                    } else {
+                        // Jika belum pernah Clock Out hari ini, masukkan data baru
+                        const { error } = await supabaseClient
+                            .from('attendance_logs')
+                            .insert([{ user_name: currentUser, action_type: 'Clock Out' }]);
+                        if (error) throw error;
+                        alert('Berhasil Clock Out!');
+                    }
+                }
             } catch (error) {
                 console.error('Error:', error);
                 alert(`Gagal menyimpan data: ` + error.message);
