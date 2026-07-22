@@ -123,10 +123,10 @@
               <p id="user-display-role" class="text-[10px] text-emerald-200/80 font-medium">Staff Operational</p>
             </div>
             
-            <!-- Tombol Login / Logout Top Right -->
-            <button id="btn-auth-trigger" onclick="handleAuthButtonClick()" class="bg-white/15 hover:bg-white/25 active:scale-95 text-white text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20 transition flex items-center gap-1.5 shadow-sm">
-              <svg class="w-3.5 h-3.5 text-appGold stroke-current" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-              <span id="login-btn-label">Login / Daftar</span>
+            <!-- Tombol Login / Logout Top Right (Direct Open Form) -->
+            <button id="btn-auth-trigger" onclick="handleAuthButtonClick()" class="bg-white/20 hover:bg-white/30 active:scale-95 text-white text-[11px] font-bold px-3.5 py-2 rounded-full backdrop-blur-md border border-white/30 transition flex items-center gap-1.5 shadow-md cursor-pointer z-20">
+              <svg class="w-3.5 h-3.5 text-appGold stroke-current pointer-events-none" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              <span id="login-btn-label" class="pointer-events-none">Login / Daftar</span>
             </button>
           </div>
         </div>
@@ -290,14 +290,14 @@
 
   </div>
 
-  <!-- ==================== MODAL AUTH / LOGIN & DAFTAR (SUPABASE AUTH) ==================== -->
-  <div id="modal-login" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <!-- ==================== MODAL AUTH / LOGIN & DAFTAR ==================== -->
+  <div id="modal-login" class="hidden fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
       <div class="flex justify-between items-center border-b pb-3">
         <h3 id="auth-modal-title" class="font-bold text-sm text-slate-900 flex items-center gap-2">
           <i data-lucide="log-in" class="w-4 h-4 text-emerald-600"></i> Login Karyawan
         </h3>
-        <button onclick="closeGenericModal('modal-login')"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+        <button onclick="closeGenericModal('modal-login')" class="p-1 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
       </div>
 
       <!-- FORM LOGIN -->
@@ -314,7 +314,7 @@
           <span>Masuk Sekarang</span>
         </button>
         <p class="text-center text-[11px] text-slate-500 pt-2">
-          Belum punya akun? <button type="button" onclick="toggleAuthMode('register')" class="text-appGreenMain font-bold underline">Daftar Baru</button>
+          Belum punya akun? <button type="button" onclick="toggleAuthMode('register')" class="text-appGreenMain font-bold underline cursor-pointer">Daftar Baru</button>
         </p>
       </form>
 
@@ -340,7 +340,7 @@
           <span>Buat Akun & Daftar</span>
         </button>
         <p class="text-center text-[11px] text-slate-500 pt-2">
-          Sudah punya akun? <button type="button" onclick="toggleAuthMode('login')" class="text-appGreenMain font-bold underline">Login Di Sini</button>
+          Sudah punya akun? <button type="button" onclick="toggleAuthMode('login')" class="text-appGreenMain font-bold underline cursor-pointer">Login Di Sini</button>
         </p>
       </form>
     </div>
@@ -520,11 +520,17 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT CORE -->
+  <!-- JAVASCRIPT CORE SAFE EXECUTION -->
   <script>
     const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let supabase = null;
+
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e) {
+      console.log("Supabase Client Init Warning:", e);
+    }
 
     let videoStream = null;
     let capturedBlob = null;
@@ -533,43 +539,26 @@
     let currentUserSession = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-      lucide.createIcons();
-      checkSupabaseSession(); // Cek status login Supabase saat pertama dimuat
+      try { lucide.createIcons(); } catch(e){}
       updateShiftDateAndJawa();
       startAnalogClock();
+      checkSupabaseSession();
       getLocation();
       fetchAbsensiData();
-      document.getElementById('filter-date').value = new Date().toISOString().split('T')[0];
+
+      const fDate = document.getElementById('filter-date');
+      if (fDate) fDate.value = new Date().toISOString().split('T')[0];
     });
 
-    // ==================== SUPABASE AUTHENTICATION LOGIC ====================
-    async function checkSupabaseSession() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        currentUserSession = session.user;
-        const meta = currentUserSession.user_metadata || {};
-        applyUserData(meta.nama || currentUserSession.email, meta.jabatan || 'Karyawan');
-      } else {
-        // Fallback jika tidak ada akun login
-        applyUserData('Sutrisno', 'Staff Operational');
-        document.getElementById('login-btn-label').innerText = "Login / Daftar";
-      }
+    // ==================== MODAL HANDLERS (FAIL-SAFE DIRECT) ====================
+    function openGenericModal(id) { 
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden'); 
     }
-
-    function applyUserData(nama, jabatan) {
-      document.getElementById('user-display-name').innerText = nama;
-      document.getElementById('user-display-role').innerText = jabatan;
-
-      document.getElementById('nama').value = nama;
-      document.getElementById('jabatan').value = jabatan;
-      
-      document.getElementById('tim-nama').innerText = nama;
-      document.getElementById('tim-jabatan').innerText = jabatan + " (You)";
-      document.getElementById('tim-avatar').innerText = nama.charAt(0).toUpperCase();
-
-      if (currentUserSession) {
-        document.getElementById('login-btn-label').innerText = "Logout";
-      }
+    
+    function closeGenericModal(id) { 
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden'); 
     }
 
     function handleAuthButtonClick() {
@@ -580,34 +569,77 @@
       }
     }
 
+    // ==================== SUPABASE AUTHENTICATION LOGIC ====================
+    async function checkSupabaseSession() {
+      try {
+        if (!supabase) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          currentUserSession = session.user;
+          const meta = currentUserSession.user_metadata || {};
+          applyUserData(meta.nama || currentUserSession.email, meta.jabatan || 'Karyawan');
+        } else {
+          applyUserData('Sutrisno', 'Staff Operational');
+          const btnLabel = document.getElementById('login-btn-label');
+          if (btnLabel) btnLabel.innerText = "Login / Daftar";
+        }
+      } catch(err) {
+        console.log("Session check error:", err);
+      }
+    }
+
+    function applyUserData(nama, jabatan) {
+      const nameEl = document.getElementById('user-display-name');
+      const roleEl = document.getElementById('user-display-role');
+      if (nameEl) nameEl.innerText = nama;
+      if (roleEl) roleEl.innerText = jabatan;
+
+      const inputNama = document.getElementById('nama');
+      const inputJabatan = document.getElementById('jabatan');
+      if (inputNama) inputNama.value = nama;
+      if (inputJabatan) inputJabatan.value = jabatan;
+      
+      const timNama = document.getElementById('tim-nama');
+      const timJabatan = document.getElementById('tim-jabatan');
+      const timAvatar = document.getElementById('tim-avatar');
+
+      if (timNama) timNama.innerText = nama;
+      if (timJabatan) timJabatan.innerText = jabatan + " (You)";
+      if (timAvatar) timAvatar.innerText = nama.charAt(0).toUpperCase();
+
+      const btnLabel = document.getElementById('login-btn-label');
+      if (btnLabel && currentUserSession) {
+        btnLabel.innerText = "Logout";
+      }
+    }
+
     function toggleAuthMode(mode) {
       const formLogin = document.getElementById('form-login');
       const formReg = document.getElementById('form-register');
       const title = document.getElementById('auth-modal-title');
 
       if (mode === 'register') {
-        formLogin.classList.add('hidden');
-        formReg.classList.remove('hidden');
-        title.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i> Buat Akun Karyawan`;
+        if(formLogin) formLogin.classList.add('hidden');
+        if(formReg) formReg.classList.remove('hidden');
+        if(title) title.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i> Buat Akun Karyawan`;
       } else {
-        formReg.classList.add('hidden');
-        formLogin.classList.remove('hidden');
-        title.innerHTML = `<i data-lucide="log-in" class="w-4 h-4 text-emerald-600"></i> Login Karyawan`;
+        if(formReg) formReg.classList.add('hidden');
+        if(formLogin) formLogin.classList.remove('hidden');
+        if(title) title.innerHTML = `<i data-lucide="log-in" class="w-4 h-4 text-emerald-600"></i> Login Karyawan`;
       }
-      lucide.createIcons();
+      try { lucide.createIcons(); } catch(e){}
     }
 
-    // LOGIN PROCESS
     async function handleLoginSubmit(e) {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
       const password = document.getElementById('login-password').value;
       const btn = document.getElementById('btn-login-submit');
 
-      btn.disabled = true;
-      btn.innerText = "Memproses...";
+      if(btn) btn.disabled = true;
 
       try {
+        if (!supabase) throw new Error("Koneksi database tidak tersedia.");
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email,
           password: password
@@ -625,14 +657,12 @@
         closeGenericModal('modal-login');
 
       } catch (err) {
-        showToast("Gagal Login!", err.message || "Email atau password salah.", "error");
+        showToast("Gagal Login!", err.message || "Email/Password salah.", "error");
       } finally {
-        btn.disabled = false;
-        btn.innerText = "Masuk Sekarang";
+        if(btn) btn.disabled = false;
       }
     }
 
-    // REGISTER PROCESS
     async function handleRegisterSubmit(e) {
       e.preventDefault();
       const nama = document.getElementById('reg-nama').value.trim();
@@ -641,18 +671,15 @@
       const password = document.getElementById('reg-password').value;
       const btn = document.getElementById('btn-reg-submit');
 
-      btn.disabled = true;
-      btn.innerText = "Mendaftarkan...";
+      if(btn) btn.disabled = true;
 
       try {
+        if (!supabase) throw new Error("Koneksi database tidak tersedia.");
         const { data, error } = await supabase.auth.signUp({
           email: email,
           password: password,
           options: {
-            data: {
-              nama: nama,
-              jabatan: jabatan
-            }
+            data: { nama: nama, jabatan: jabatan }
           }
         });
 
@@ -664,21 +691,20 @@
       } catch (err) {
         showToast("Gagal Mendaftar!", err.message, "error");
       } finally {
-        btn.disabled = false;
-        btn.innerText = "Buat Akun & Daftar";
+        if(btn) btn.disabled = false;
       }
     }
 
-    // LOGOUT PROCESS
     async function handleLogout() {
-      await supabase.auth.signOut();
+      if(supabase) await supabase.auth.signOut();
       currentUserSession = null;
       applyUserData('Sutrisno', 'Staff Operational');
-      document.getElementById('login-btn-label').innerText = "Login / Daftar";
+      const btnLabel = document.getElementById('login-btn-label');
+      if(btnLabel) btnLabel.innerText = "Login / Daftar";
       showToast("Berhasil Keluar", "Sesi Anda telah diakhiri.", "success");
     }
 
-    // ==================== HARI PASARAN JAWA & JAM ANALOG ====================
+    // ==================== JAM ANALOG & PASARAN JAWA REALTIME ====================
     function getPasaranJawa(date) {
       const pasaran = ['Legi', 'Pahing', 'Pon', 'Wage', 'Kliwon'];
       const baseDate = new Date(1900, 0, 1);
@@ -698,20 +724,20 @@
       const namaBulan = bulanArr[now.getMonth()];
       const tahun = now.getFullYear();
 
-      document.getElementById('current-jawa-date').innerText = `${namaHari} ${pasaran}`;
-      document.getElementById('current-shift-date').innerText = `${tanggal} ${namaBulan} ${tahun}`;
+      const jawaEl = document.getElementById('current-jawa-date');
+      const shiftEl = document.getElementById('current-shift-date');
+
+      if(jawaEl) jawaEl.innerText = `${namaHari} ${pasaran}`;
+      if(shiftEl) shiftEl.innerText = `${tanggal} ${namaBulan} ${tahun}`;
     }
 
     function startAnalogClock() {
       function updateClock() {
         try {
           const now = new Date();
-          const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-          const wibDate = new Date(utcMs + (3600000 * 7));
-
-          const hours = wibDate.getHours();
-          const minutes = wibDate.getMinutes();
-          const seconds = wibDate.getSeconds();
+          const hours = now.getHours();
+          const minutes = now.getMinutes();
+          const seconds = now.getSeconds();
 
           const secondDegrees = (seconds / 60) * 360;
           const minuteDegrees = ((minutes + seconds / 60) / 60) * 360;
@@ -730,9 +756,7 @@
           const mStr = String(minutes).padStart(2, '0');
           const sStr = String(seconds).padStart(2, '0');
           if (textEl) textEl.innerText = `${hStr}:${mStr}:${sStr} WIB`;
-        } catch (err) {
-          console.error("Clock error:", err);
-        }
+        } catch (err) {}
       }
 
       updateClock();
@@ -741,50 +765,50 @@
 
     function getLocation() {
       const statusEl = document.getElementById('location-status');
-      if ("geolocation" in navigator) {
+      if ("geolocation" in navigator && statusEl) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             currentLocation = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
             statusEl.innerHTML = `<i data-lucide="check-circle" class="w-3 h-3 text-emerald-600 mr-1"></i> GPS Ready`;
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch(e){}
           },
           () => {
             currentLocation = "GPS Nonaktif";
             statusEl.innerHTML = `<i data-lucide="alert-circle" class="w-3 h-3 text-amber-500 mr-1"></i> GPS Off`;
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch(e){}
           }
         );
       }
     }
 
-    // Modal Handlers
-    function openGenericModal(id) { document.getElementById(id).classList.remove('hidden'); }
-    function closeGenericModal(id) { document.getElementById(id).classList.add('hidden'); }
-
     function openAbsenModal(type) {
-      document.getElementById('tipe_absen_val').value = type;
-      document.getElementById('modal-title').innerText = `Presensi Selfie (${type})`;
-      document.getElementById('absen-modal').classList.remove('hidden');
+      const valEl = document.getElementById('tipe_absen_val');
+      const titleEl = document.getElementById('modal-title');
+      if(valEl) valEl.value = type;
+      if(titleEl) titleEl.innerText = `Presensi Selfie (${type})`;
+      openGenericModal('absen-modal');
       startSelfieCamera();
     }
 
     function closeAbsenModal() {
       stopCamera();
-      document.getElementById('absen-modal').classList.add('hidden');
+      closeGenericModal('absen-modal');
       retakePhoto();
     }
 
     async function startSelfieCamera() {
       const loadingEl = document.getElementById('camera-loading');
       const video = document.getElementById('webcam');
-      loadingEl.classList.remove('hidden');
+      if (loadingEl) loadingEl.classList.remove('hidden');
 
       try {
         videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
-        video.srcObject = videoStream;
-        video.onloadedmetadata = () => { video.play(); loadingEl.classList.add('hidden'); };
+        if (video) {
+          video.srcObject = videoStream;
+          video.onloadedmetadata = () => { video.play(); if (loadingEl) loadingEl.classList.add('hidden'); };
+        }
       } catch (err) {
-        loadingEl.innerHTML = `<div class="p-4 text-center text-xs text-rose-400 font-bold">Gagal membuka kamera selfie.</div>`;
+        if (loadingEl) loadingEl.innerHTML = `<div class="p-4 text-center text-xs text-rose-400 font-bold">Gagal membuka kamera selfie.</div>`;
       }
     }
 
@@ -793,6 +817,7 @@
     function capturePhoto() {
       const video = document.getElementById('webcam');
       const canvas = document.getElementById('canvas');
+      if (!video || !canvas) return;
       const context = canvas.getContext('2d');
       canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
       context.translate(canvas.width, 0); context.scale(-1, 1);
@@ -800,22 +825,35 @@
 
       canvas.toBlob((blob) => {
         capturedBlob = blob;
-        document.getElementById('photo-preview').src = URL.createObjectURL(blob);
-        document.getElementById('photo-preview').classList.remove('hidden');
+        const preview = document.getElementById('photo-preview');
+        if (preview) {
+          preview.src = URL.createObjectURL(blob);
+          preview.classList.remove('hidden');
+        }
         video.classList.add('hidden');
-        document.getElementById('camera-reticle').classList.add('hidden');
-        document.getElementById('btn-capture').classList.add('hidden');
-        document.getElementById('btn-retake').classList.remove('hidden');
+        const reticle = document.getElementById('camera-reticle');
+        if (reticle) reticle.classList.add('hidden');
+        
+        const btnCap = document.getElementById('btn-capture');
+        const btnRet = document.getElementById('btn-retake');
+        if (btnCap) btnCap.classList.add('hidden');
+        if (btnRet) btnRet.classList.remove('hidden');
       }, 'image/jpeg', 0.85);
     }
 
     function retakePhoto() {
       capturedBlob = null;
-      document.getElementById('photo-preview').classList.add('hidden');
-      document.getElementById('webcam').classList.remove('hidden');
-      document.getElementById('camera-reticle').classList.remove('hidden');
-      document.getElementById('btn-capture').classList.remove('hidden');
-      document.getElementById('btn-retake').classList.add('hidden');
+      const preview = document.getElementById('photo-preview');
+      const video = document.getElementById('webcam');
+      const reticle = document.getElementById('camera-reticle');
+      if(preview) preview.classList.add('hidden');
+      if(video) video.classList.remove('hidden');
+      if(reticle) reticle.classList.remove('hidden');
+
+      const btnCap = document.getElementById('btn-capture');
+      const btnRet = document.getElementById('btn-retake');
+      if (btnCap) btnCap.classList.remove('hidden');
+      if (btnRet) btnRet.classList.add('hidden');
     }
 
     async function handleFormSubmit(e) {
@@ -823,10 +861,10 @@
       if (!capturedBlob) return showToast("Perhatian!", "Harap ambil foto selfie.", "error");
 
       const btnSubmit = document.getElementById('btn-submit');
-      btnSubmit.disabled = true;
-      document.getElementById('submit-spinner').classList.remove('hidden');
+      if(btnSubmit) btnSubmit.disabled = true;
 
       try {
+        if(!supabase) throw new Error("Database tidak terhubung");
         const fileName = `selfie_${Date.now()}.jpg`;
         await supabase.storage.from('foto-absensi').upload(fileName, capturedBlob, { contentType: 'image/jpeg' });
         const { data: urlData } = supabase.storage.from('foto-absensi').getPublicUrl(fileName);
@@ -845,10 +883,9 @@
         closeAbsenModal();
         fetchAbsensiData();
       } catch (err) {
-        showToast("Gagal!", err.message, "error");
+        showToast("Gagal!", err.message || "Gagal menyimpan absensi.", "error");
       } finally {
-        btnSubmit.disabled = false;
-        document.getElementById('submit-spinner').classList.add('hidden');
+        if(btnSubmit) btnSubmit.disabled = false;
       }
     }
 
@@ -856,6 +893,7 @@
       e.preventDefault();
       const currentNama = document.getElementById('user-display-name').innerText;
       try {
+        if(!supabase) throw new Error("Database tidak terhubung");
         await supabase.from('request_lembur').insert([{
           nama: currentNama,
           tanggal: document.getElementById('lembur-tgl').value,
@@ -871,6 +909,7 @@
       e.preventDefault();
       const currentNama = document.getElementById('user-display-name').innerText;
       try {
+        if(!supabase) throw new Error("Database tidak terhubung");
         await supabase.from('request_cuti').insert([{
           nama: currentNama,
           jenis_cuti: document.getElementById('cuti-jenis').value,
@@ -890,14 +929,20 @@
     }
 
     async function fetchAbsensiData() {
-      const { data } = await supabase.from('absensi').select('*').order('created_at', { ascending: false });
-      allRecords = data || [];
-      renderDashboard();
+      try {
+        if(!supabase) return;
+        const { data } = await supabase.from('absensi').select('*').order('created_at', { ascending: false });
+        allRecords = data || [];
+        renderDashboard();
+      } catch(e){}
     }
 
     function renderDashboard() {
-      const selectedDate = document.getElementById('filter-date').value;
-      const searchQuery = document.getElementById('search-input').value.toLowerCase();
+      const filterEl = document.getElementById('filter-date');
+      const searchEl = document.getElementById('search-input');
+      const selectedDate = filterEl ? filterEl.value : '';
+      const searchQuery = searchEl ? searchEl.value.toLowerCase() : '';
+
       const filtered = allRecords.filter(item => {
         const itemDate = new Date(item.created_at).toISOString().split('T')[0];
         return (!selectedDate || itemDate === selectedDate) &&
@@ -905,6 +950,8 @@
       });
 
       const cardsContainer = document.getElementById('mobile-cards-list');
+      if (!cardsContainer) return;
+
       if (filtered.length === 0) {
         cardsContainer.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">Belum ada data.</div>`;
         return;
@@ -927,7 +974,7 @@
           </div>
         `;
       }).join('');
-      lucide.createIcons();
+      try { lucide.createIcons(); } catch(e){}
     }
 
     function exportToCSV() {
@@ -945,47 +992,60 @@
     function switchMainTab(tab) {
       const isHome = tab === 'home';
       
-      document.getElementById('tab-content-home').classList.toggle('hidden', !isHome);
-      document.getElementById('tab-content-log').classList.toggle('hidden', isHome);
+      const homeContent = document.getElementById('tab-content-home');
+      const logContent = document.getElementById('tab-content-log');
+
+      if(homeContent) homeContent.classList.toggle('hidden', !isHome);
+      if(logContent) logContent.classList.toggle('hidden', isHome);
       
       const btnHome = document.getElementById('nav-btn-home');
       const btnLog = document.getElementById('nav-btn-log');
-
       const iconHome = document.getElementById('nav-icon-home');
       const iconLog = document.getElementById('nav-icon-log');
 
       if (isHome) {
-        btnHome.className = "flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95";
-        iconHome.className = "p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain";
+        if(btnHome) btnHome.className = "flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95";
+        if(iconHome) iconHome.className = "p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain";
         
-        btnLog.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95";
-        iconLog.className = "p-1.5 rounded-full text-slate-400";
+        if(btnLog) btnLog.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95";
+        if(iconLog) iconLog.className = "p-1.5 rounded-full text-slate-400";
       } else {
-        btnLog.className = "flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95";
-        iconLog.className = "p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain";
+        if(btnLog) btnLog.className = "flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95";
+        if(iconLog) iconLog.className = "p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain";
         
-        btnHome.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95";
-        iconHome.className = "p-1.5 rounded-full text-slate-400";
+        if(btnHome) btnHome.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95";
+        if(iconHome) iconHome.className = "p-1.5 rounded-full text-slate-400";
         
         fetchAbsensiData();
       }
     }
 
     function openLightbox(url, nama, waktu) {
-      document.getElementById('modal-img').src = url;
-      document.getElementById('modal-nama').innerText = nama;
-      document.getElementById('modal-waktu').innerText = "Waktu: " + waktu;
-      document.getElementById('lightbox-modal').classList.remove('hidden');
+      const img = document.getElementById('modal-img');
+      const name = document.getElementById('modal-nama');
+      const time = document.getElementById('modal-waktu');
+      if(img) img.src = url;
+      if(name) name.innerText = nama;
+      if(time) time.innerText = "Waktu: " + waktu;
+      openGenericModal('lightbox-modal');
     }
-    function closeLightbox() { document.getElementById('lightbox-modal').classList.add('hidden'); }
+    
+    function closeLightbox() { closeGenericModal('lightbox-modal'); }
 
     function showToast(title, message, type = "success") {
       const toast = document.getElementById('toast');
-      document.getElementById('toast-title').innerText = title;
-      document.getElementById('toast-message').innerText = message;
-      document.getElementById('toast-bg').className = type === "success" ? "flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl bg-emerald-600 text-white text-xs font-semibold" : "flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl bg-rose-600 text-white text-xs font-semibold";
-      toast.classList.remove('-translate-y-20', 'opacity-0');
-      setTimeout(() => toast.classList.add('-translate-y-20', 'opacity-0'), 3500);
+      const toastBg = document.getElementById('toast-bg');
+      const tTitle = document.getElementById('toast-title');
+      const tMsg = document.getElementById('toast-message');
+
+      if(tTitle) tTitle.innerText = title;
+      if(tMsg) tMsg.innerText = message;
+      if(toastBg) toastBg.className = type === "success" ? "flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl bg-emerald-600 text-white text-xs font-semibold" : "flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl bg-rose-600 text-white text-xs font-semibold";
+
+      if(toast) {
+        toast.classList.remove('-translate-y-20', 'opacity-0');
+        setTimeout(() => toast.classList.add('-translate-y-20', 'opacity-0'), 3500);
+      }
     }
 
     function escapeHtml(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ''; }
