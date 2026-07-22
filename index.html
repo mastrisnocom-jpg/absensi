@@ -334,7 +334,6 @@
         let currentUserData = {};
         let currentCoords = null;
 
-        // Load Koordinat Kantor dari localStorage (Default: Jakarta / Koordinat Default)
         let OFFICE_LAT = parseFloat(localStorage.getItem('office_lat')) || -6.200000;
         let OFFICE_LNG = parseFloat(localStorage.getItem('office_lng')) || 106.816666;
         let MAX_RADIUS_METERS = parseInt(localStorage.getItem('office_radius')) || 100;
@@ -346,7 +345,6 @@
             initGeolocation();
         });
 
-        // Buka / Tutup Modal Pengaturan Super Admin
         function openSettingsModal() {
             document.getElementById('setting-lat').value = OFFICE_LAT;
             document.getElementById('setting-lng').value = OFFICE_LNG;
@@ -357,7 +355,6 @@
             document.getElementById('settings-modal').classList.add('hidden');
         }
 
-        // Simpan Pengaturan Koordinat Kantor oleh Super Admin
         function saveOfficeSettings() {
             const lat = parseFloat(document.getElementById('setting-lat').value);
             const lng = parseFloat(document.getElementById('setting-lng').value);
@@ -378,7 +375,7 @@
 
             alert('Pengaturan koordinat kantor berhasil disimpan!');
             closeSettingsModal();
-            initGeolocation(); // Refresh perhitungan GPS
+            initGeolocation(); 
         }
 
         function initGeolocation() {
@@ -465,7 +462,6 @@
             document.getElementById('prof-gender').innerText = currentUserData.gender || '-';
             document.getElementById('prof-marital').innerText = currentUserData.marital_status || '-';
 
-            // Cek apakah akun yang login adalah Super Admin (mastrisnocom@gmail.com)
             const superAdminContainer = document.getElementById('superadmin-menu-container');
             if (currentUserEmail === 'mastrisnocom@gmail.com') {
                 superAdminContainer.classList.remove('hidden');
@@ -602,6 +598,7 @@
             }
         }
 
+        // --- PENANGANAN ERROR AUTHENTICATION DIPERBAIKI ---
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -649,7 +646,15 @@
                     document.getElementById('password').value = '';
                 }
             } catch (error) {
-                alert("Gagal: " + error.message);
+                console.error("Auth Error Detail:", error);
+                
+                // Cek isi pesan error agar tidak blank {}
+                let errorMessage = error.message || error.msg || JSON.stringify(error);
+                if (errorMessage === '{}' || error.status === 422) {
+                    errorMessage = "Email ini mungkin sudah pernah didaftarkan, atau format email/password tidak sesuai (password minimal 6 karakter).";
+                }
+                
+                alert("Gagal: " + errorMessage);
             } finally {
                 btn.innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
                 btn.disabled = false;
