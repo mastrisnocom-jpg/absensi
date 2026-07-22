@@ -228,7 +228,7 @@
 
   </div>
 
-  <!-- ==================== MODAL AUTH / LOGIN & DAFTAR ==================== -->
+  <!-- ==================== MODAL AUTH / LOGIN & DAFTAR (SUPABASE AUTH) ==================== -->
   <div id="modal-login" class="hidden fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
       <div class="flex justify-between items-center border-b pb-3">
@@ -238,7 +238,7 @@
         <button onclick="closeGenericModal('modal-login')" class="p-1 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
       </div>
 
-      <!-- FORM LOGIN -->
+      <!-- FORM LOGIN SUPABASE -->
       <form id="form-login" onsubmit="window.handleLoginSubmit(event)" class="space-y-3">
         <div>
           <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email *</label>
@@ -256,7 +256,7 @@
         </p>
       </form>
 
-      <!-- FORM REGISTRASI -->
+      <!-- FORM REGISTRASI SUPABASE -->
       <form id="form-register" onsubmit="window.handleRegisterSubmit(event)" class="space-y-3 hidden">
         <div>
           <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama Lengkap *</label>
@@ -515,6 +515,7 @@
       if (fDate) fDate.value = new Date().toISOString().split('T')[0];
     });
 
+    // ==================== AUTHENTICATION DENGAN SUPABASE ====================
     window.handleAuthButtonClick = function() {
       if (window.currentUserSession) {
         window.handleLogout();
@@ -533,8 +534,6 @@
           applyUserData(meta.nama || session.user.email, meta.jabatan || 'Karyawan');
         } else {
           applyUserData('Sutrisno', 'Staff Operational');
-          const btnLabel = document.getElementById('login-btn-label');
-          if (btnLabel) btnLabel.innerText = "Login / Daftar";
         }
       } catch(e) { console.error("Session check error:", e); }
     }
@@ -581,6 +580,7 @@
       try { lucide.createIcons(); } catch(e){}
     };
 
+    // PROSES LOGIN SUPABASE
     window.handleLoginSubmit = async function(e) {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
@@ -607,6 +607,7 @@
       }
     };
 
+    // PROSES REGISTRASI SUPABASE
     window.handleRegisterSubmit = async function(e) {
       e.preventDefault();
       const nama = document.getElementById('reg-nama').value.trim();
@@ -634,6 +635,7 @@
       }
     };
 
+    // PROSES LOGOUT SUPABASE
     window.handleLogout = async function() {
       if(supabase) await supabase.auth.signOut();
       window.currentUserSession = null;
