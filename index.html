@@ -22,7 +22,7 @@
 
     <div class="w-full max-w-md bg-gray-50 shadow-xl relative overflow-hidden flex flex-col min-h-screen">
 
-        <!-- ================= DASHBOARD UTAMA (SELALU MUNCUL) ================= -->
+        <!-- ================= DASHBOARD UTAMA (HOME) ================= -->
         <div id="dashboard-section" class="flex-1 pb-20 relative">
             <!-- Header Section -->
             <div class="bg-primary-dark rounded-b-[40px] pt-10 pb-20 px-6 relative">
@@ -32,7 +32,7 @@
                         <h1 id="user-display-name" class="text-white text-3xl font-bold mb-1">Tamu</h1>
                         <p class="text-gray-300 text-sm">Staff Operational</p>
                     </div>
-                    <!-- Tombol Login/Daftar atau Logout tergantung status sesi -->
+                    <!-- Tombol Login/Daftar atau Logout -->
                     <div id="auth-action-btn-container">
                         <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1">
                             <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
@@ -87,21 +87,43 @@
                     <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Slip<br>Gaji</span>
                 </div>
             </div>
+        </div>
 
-            <!-- Bottom Navigation -->
-            <div class="absolute bottom-0 w-full bg-white border-t flex justify-between px-6 py-3">
-                <div class="flex flex-col items-center text-green-700 cursor-pointer"><i class="fa-solid fa-house mb-1"></i><span class="text-[10px] font-bold">Home</span></div>
-                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-solid fa-users mb-1"></i><span class="text-[10px] font-bold">Karyawan</span></div>
-                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-regular fa-calendar-check mb-1"></i><span class="text-[10px] font-bold">Absen Log</span></div>
-                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-regular fa-envelope mb-1"></i><span class="text-[10px] font-bold">Inbox</span></div>
-                <div class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700"><i class="fa-regular fa-user mb-1"></i><span class="text-[10px] font-bold">Profil</span></div>
+        <!-- ================= SECTION ABSEN LOG (RIWAYAT) ================= -->
+        <div id="log-section" class="flex-1 pb-20 relative hidden px-6 py-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Riwayat Absen Log</h2>
+                <button onclick="fetchAttendanceLogs()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-800 transition">
+                    <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                </button>
+            </div>
+            <div id="log-list" class="space-y-3 overflow-y-auto max-h-[72vh] pb-4">
+                <p class="text-gray-400 text-sm text-center py-10">Klik tombol Refresh atau buka menu ini untuk memuat data.</p>
+            </div>
+        </div>
+
+        <!-- ================= BOTTOM NAVIGATION ================= -->
+        <div class="absolute bottom-0 w-full bg-white border-t flex justify-between px-6 py-3 z-30">
+            <div onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-green-700 cursor-pointer">
+                <i class="fa-solid fa-house mb-1"></i><span class="text-[10px] font-bold">Home</span>
+            </div>
+            <div onclick="switchTab('home')" class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
+                <i class="fa-solid fa-users mb-1"></i><span class="text-[10px] font-bold">Karyawan</span>
+            </div>
+            <div onclick="switchTab('log')" id="nav-log" class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
+                <i class="fa-regular fa-calendar-check mb-1"></i><span class="text-[10px] font-bold">Absen Log</span>
+            </div>
+            <div onclick="switchTab('home')" class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
+                <i class="fa-regular fa-envelope mb-1"></i><span class="text-[10px] font-bold">Inbox</span>
+            </div>
+            <div onclick="switchTab('home')" class="flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700">
+                <i class="fa-regular fa-user mb-1"></i><span class="text-[10px] font-bold">Profil</span>
             </div>
         </div>
 
         <!-- ================= MODAL / POP-UP LOGIN & DAFTAR ================= -->
         <div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative animate-fadeIn">
-                <!-- Tombol Tutup Pop-up -->
                 <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -154,12 +176,80 @@
         let isLoginMode = true;
         let currentUser = null;
 
-        // Cek sesi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
                 checkSession();
             }
         });
+
+        // Navigasi Antar Tab (Home & Absen Log)
+        function switchTab(tab) {
+            const dashboardSec = document.getElementById('dashboard-section');
+            const logSec = document.getElementById('log-section');
+            const navHome = document.getElementById('nav-home');
+            const navLog = document.getElementById('nav-log');
+
+            if (tab === 'home') {
+                dashboardSec.classList.remove('hidden');
+                logSec.classList.add('hidden');
+                navHome.className = "flex flex-col items-center text-green-700 cursor-pointer";
+                navLog.className = "flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700";
+            } else if (tab === 'log') {
+                dashboardSec.classList.add('hidden');
+                logSec.classList.remove('hidden');
+                navLog.className = "flex flex-col items-center text-green-700 cursor-pointer";
+                navHome.className = "flex flex-col items-center text-gray-400 cursor-pointer hover:text-green-700";
+                fetchAttendanceLogs(); // Muat data riwayat saat tab diklik
+            }
+        }
+
+        // Ambil data riwayat dari Supabase
+        async function fetchAttendanceLogs() {
+            const logList = document.getElementById('log-list');
+            logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data riwayat...</p>';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('attendance_logs')
+                    .select('*')
+                    .order('timestamp', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi.</p>';
+                    return;
+                }
+
+                logList.innerHTML = data.map(item => {
+                    const timeStr = new Date(item.timestamp || Date.now()).toLocaleString('id-ID', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                    });
+                    const isIn = item.action_type === 'Clock In';
+                    const badgeColor = isIn ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                    const iconClass = isIn ? 'fa-arrow-right-to-bracket text-green-700' : 'fa-arrow-right-from-bracket text-red-700';
+
+                    return `
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                    <i class="fa-solid ${iconClass}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-gray-800">${item.user_name || 'Karyawan'}</h4>
+                                    <p class="text-[11px] text-gray-400">${timeStr}</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${badgeColor}">${item.action_type}</span>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error("Gagal memuat log:", err);
+                logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data: ${err.message}</p>`;
+            }
+        }
 
         async function checkSession() {
             try {
@@ -173,7 +263,6 @@
                     document.getElementById('user-display-name').innerText = userName;
                     currentUser = userName;
 
-                    // Ubah tombol pojok kanan atas menjadi tombol Keluar (Logout)
                     btnContainer.innerHTML = `
                         <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/40 text-red-100 text-xs font-semibold py-2 px-3 rounded-full border border-red-400/30 transition flex items-center gap-1">
                             <i class="fa-solid fa-power-off"></i> Keluar
@@ -183,7 +272,6 @@
                     document.getElementById('user-display-name').innerText = 'Tamu';
                     currentUser = null;
 
-                    // Kembalikan tombol pojok kanan atas menjadi Login / Daftar
                     btnContainer.innerHTML = `
                         <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1">
                             <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
@@ -195,7 +283,6 @@
             }
         }
 
-        // Fungsi Buka/Tutup Pop-up Modal
         function openAuthModal() {
             document.getElementById('auth-modal').classList.remove('hidden');
         }
@@ -203,7 +290,6 @@
             document.getElementById('auth-modal').classList.add('hidden');
         }
 
-        // Toggle Login / Register dalam Modal
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('auth-title').innerText = isLoginMode ? 'Masuk Akun' : 'Daftar Akun Baru';
@@ -223,7 +309,6 @@
             }
         }
 
-        // Proses Form Submit Login/Register
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -263,7 +348,6 @@
             }
         });
 
-        // Proses Logout
         async function logout() {
             await supabaseClient.auth.signOut();
             document.getElementById('email').value = '';
@@ -272,7 +356,6 @@
             alert('Berhasil keluar akun.');
         }
 
-        // Catat Absensi
         async function recordAttendance(actionType) {
             if (!currentUser) {
                 alert('Silakan "Login / Daftar" terlebih dahulu untuk melakukan absensi!');
