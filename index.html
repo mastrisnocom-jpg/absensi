@@ -140,7 +140,6 @@
                         <div class="w-20 h-20 rounded-full bg-primary-dark text-gold flex items-center justify-center text-3xl font-bold shadow-inner mb-3 overflow-hidden border-2 border-gold relative group" id="profile-avatar-container">
                             <i class="fa-solid fa-user"></i>
                         </div>
-                        <!-- Tombol Upload Foto Profil -->
                         <label class="text-[11px] bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold px-3 py-1 rounded-full cursor-pointer transition mb-2">
                             <i class="fa-solid fa-camera mr-1"></i> Ganti Foto Profil
                             <input type="file" id="upload-foto-input" accept="image/*" class="hidden" onchange="uploadProfilePhoto(event)" />
@@ -184,16 +183,19 @@
                         </div>
                     </div>
 
-                    <!-- Tombol Pengaturan Super Admin (Hanya mastrisnobpb@gmail.com) -->
+                    <!-- Tombol Pengaturan Super Admin -->
                     <div id="superadmin-menu-container" class="hidden pt-2 border-t space-y-2">
                         <button onclick="openSettingsModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold py-2.5 rounded-xl transition text-xs border border-amber-300 cursor-pointer flex items-center justify-center gap-2">
                             <i class="fa-solid fa-gear"></i> Kelola Titik Lokasi Kantor Per Unit
                         </button>
                     </div>
 
-                    <div class="pt-2">
-                        <button onclick="logout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl transition text-xs border border-red-200 cursor-pointer">
-                            <i class="fa-solid fa-power-off mr-1"></i> Keluar Akun
+                    <div class="pt-2 space-y-2">
+                        <button onclick="logout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl transition text-xs border border-red-200 cursor-pointer flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-power-off"></i> Keluar Akun
+                        </button>
+                        <button onclick="deleteAccount()" class="w-full bg-gray-100 hover:bg-red-600 hover:text-white text-gray-600 font-bold py-2.5 rounded-xl transition text-xs border border-gray-200 cursor-pointer flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-trash-can"></i> Hapus Akun Permanen
                         </button>
                     </div>
                 </div>
@@ -276,6 +278,24 @@
             </div>
         </div>
 
+        <!-- ================= MODAL LUPA PASSWORD (RESET) ================= -->
+        <div id="reset-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative space-y-4">
+                <button onclick="closeResetModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <div class="text-center">
+                    <h3 class="text-lg font-bold text-gray-800">Reset Password</h3>
+                    <p class="text-gray-500 text-xs mt-0.5">Masukkan email Anda untuk instruksi pemulihan</p>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-gray-600">Email Akun</label>
+                        <input type="email" id="reset-email" placeholder="nama@email.com" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-green-600" />
+                    </div>
+                    <button onclick="sendPasswordReset()" class="w-full bg-primary-dark text-white font-bold py-2.5 rounded-xl shadow transition cursor-pointer">Kirim Link Reset</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ================= MODAL / POP-UP LOGIN & DAFTAR ================= -->
         <div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative animate-fadeIn my-auto">
@@ -340,6 +360,11 @@
                         <label class="text-xs text-gray-600 font-semibold">Password</label>
                         <input type="password" id="password" required placeholder="Minimal 6 karakter" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
                     </div>
+
+                    <!-- Tombol Lupa Password -->
+                    <div id="forgot-password-link" class="text-right">
+                        <button type="button" onclick="openResetModal()" class="text-[11px] text-green-700 hover:underline font-semibold cursor-pointer">Lupa Password?</button>
+                    </div>
                     
                     <button type="submit" id="auth-btn" class="w-full bg-primary-dark hover:bg-green-900 active:scale-95 text-white font-bold py-2.5 rounded-xl transition text-sm shadow-md mt-2 cursor-pointer">
                         Masuk
@@ -382,14 +407,12 @@
             initGeolocation();
         });
 
-        // Ambil daftar kantor unit dari database Supabase
         async function fetchOfficeLocations() {
             try {
                 const { data, error } = await supabaseClient.from('offices').select('*');
                 if (error) throw error;
                 officeLocations = data || [];
                 
-                // Isi dropdown unit di form register jika ada
                 const selectUnit = document.getElementById('reg-unit');
                 if (selectUnit) {
                     selectUnit.innerHTML = '<option value="">-- Pilih Unit Kantor --</option>' + 
@@ -406,7 +429,7 @@
             const radius = parseInt(document.getElementById('admin-unit-radius').value) || 100;
 
             if (!name || isNaN(lat) || isNaN(lng)) {
-                alert('Nama unit, latitude, dan longitude harus diisi dengan benar!');
+                alert('Nama unit, latitude, dan longitude harus diisi!');
                 return;
             }
 
@@ -446,26 +469,46 @@
             `).join('');
         }
 
-        function openSettingsModal() {
-            renderAdminOfficeList();
-            document.getElementById('settings-modal').classList.remove('hidden');
-        }
+        function openSettingsModal() { renderAdminOfficeList(); document.getElementById('settings-modal').classList.remove('hidden'); }
         function closeSettingsModal() { document.getElementById('settings-modal').classList.add('hidden'); }
 
-        function openEditRoleModal() {
-            document.getElementById('new-role-input').value = currentUserData.jabatan || 'Staff Operational';
-            document.getElementById('edit-role-modal').classList.remove('hidden');
+        function openResetModal() { closeAuthModal(); document.getElementById('reset-modal').classList.remove('hidden'); }
+        function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden'); }
+
+        async function sendPasswordReset() {
+            const email = document.getElementById('reset-email').value.trim();
+            if (!email) return alert('Masukkan email Anda!');
+            try {
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+                if (error) throw error;
+                alert('Instruksi pemulihan password telah dikirim ke email Anda.');
+                closeResetModal();
+            } catch(err) { alert('Gagal mengirim reset password: ' + err.message); }
         }
+
+        async function deleteAccount() {
+            if (!confirm('PERINGATAN: Apakah Anda yakin ingin menghapus akun ini secara permanen dari sistem?')) return;
+            
+            try {
+                // Catatan: Penghapusan akun secara penuh di sisi klien memerlukan fungsi RPC atau kebijakan auth Supabase. 
+                // Untuk sesi lokal, kita lakukan signOut dan hapus sesi data.
+                await supabaseClient.auth.signOut();
+                alert('Sesi akun Anda telah dihapus dari perangkat ini.');
+                checkSession();
+                switchTab('home');
+            } catch(err) {
+                alert('Gagal menghapus akun: ' + err.message);
+            }
+        }
+
+        function openEditRoleModal() { document.getElementById('new-role-input').value = currentUserData.jabatan || 'Staff Operational'; document.getElementById('edit-role-modal').classList.remove('hidden'); }
         function closeEditRoleModal() { document.getElementById('edit-role-modal').classList.add('hidden'); }
 
         async function saveNewRole() {
             const newRole = document.getElementById('new-role-input').value.trim();
             if (!newRole) return alert('Jabatan tidak boleh kosong!');
-
             try {
-                const { error } = await supabaseClient.auth.updateUser({
-                    data: { jabatan: newRole }
-                });
+                const { error } = await supabaseClient.auth.updateUser({ data: { jabatan: newRole } });
                 if (error) throw error;
                 currentUserData.jabatan = newRole;
                 document.getElementById('prof-role').innerText = newRole;
@@ -475,37 +518,25 @@
             } catch (err) { alert('Gagal ubah jabatan: ' + err.message); }
         }
 
-        // Upload Foto Profil ke Supabase Storage
         async function uploadProfilePhoto(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             try {
                 alert('Mengunggah foto profil...');
                 const fileName = `profile_${currentUserEmail.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.jpg`;
-                
-                const { error: uploadErr } = await supabaseClient.storage
-                    .from('foto-absensi')
-                    .upload(fileName, file, { upsert: true });
-
+                const { error: uploadErr } = await supabaseClient.storage.from('foto-absensi').upload(fileName, file, { upsert: true });
                 if (uploadErr) throw uploadErr;
 
                 const { data: urlData } = supabaseClient.storage.from('foto-absensi').getPublicUrl(fileName);
                 const photoUrl = urlData.publicUrl;
 
-                // Update metadata user
-                const { error: updateErr } = await supabaseClient.auth.updateUser({
-                    data: { foto_url: photoUrl }
-                });
-
+                const { error: updateErr } = await supabaseClient.auth.updateUser({ data: { foto_url: photoUrl } });
                 if (updateErr) throw updateErr;
 
                 currentUserData.foto_url = photoUrl;
                 renderProfileData();
                 alert('Foto profil berhasil diperbarui!');
-            } catch (err) {
-                alert('Gagal upload foto: ' + err.message);
-            }
+            } catch (err) { alert('Gagal upload foto: ' + err.message); }
         }
 
         function initGeolocation() {
@@ -528,8 +559,6 @@
         function evaluateGPSWithUserOffice() {
             if (!currentCoords) return;
             const gpsBadge = document.getElementById('gps-status-badge');
-            
-            // Cari unit kantor user, jika tidak ada pakai kantor pertama / default
             let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
             
             if (!targetOffice) {
@@ -724,11 +753,15 @@
             document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Daftar di sini' : 'Login di sini';
             
             const registerFields = document.getElementById('register-fields');
+            const forgotLink = document.getElementById('forgot-password-link');
+            
             if (isLoginMode) {
                 registerFields.classList.add('hidden');
+                forgotLink.classList.remove('hidden');
                 document.getElementById('fullname').removeAttribute('required');
             } else {
                 registerFields.classList.remove('hidden');
+                forgotLink.classList.add('hidden');
                 document.getElementById('fullname').setAttribute('required', 'true');
             }
         }
