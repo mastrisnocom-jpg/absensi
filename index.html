@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>BINAYASA Mobile - Attendance System Green Edition</title>
   
   <!-- Tailwind CSS CDN -->
@@ -45,6 +45,11 @@
     .icon-gradient-green {
       background: linear-gradient(180deg, #34D399 0%, #059669 100%);
     }
+
+    /* Penyesuaian Safe Area untuk HP dengan Gesture Bar / Dagu Layar */
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 1.75rem);
+    }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans antialiased h-screen w-screen overflow-hidden flex justify-center items-center sm:py-6">
@@ -52,8 +57,8 @@
   <!-- ==================== ANDROID CONTAINER ==================== -->
   <div class="w-full max-w-md bg-[#F2F8F5] h-full sm:h-[844px] sm:rounded-[40px] shadow-2xl flex flex-col relative overflow-hidden sm:border-[8px] sm:border-slate-800">
     
-    <!-- AREA SCROLL UTAMA (HANYA KONTEN INI YANG BISA DI-SCROLL) -->
-    <div class="flex-1 overflow-y-auto no-scrollbar pb-6">
+    <!-- SCROLLABLE CONTENT (KONTEN UTAMA DENGAN SCROLL INDEPENDEN) -->
+    <div class="flex-1 overflow-y-auto no-scrollbar pb-32">
       
       <!-- ==================== TAB 1: HOME UI ==================== -->
       <section id="tab-content-home" class="block">
@@ -184,8 +189,8 @@
 
     </div>
 
-    <!-- ==================== FLOATING BOTTOM NAV BAR (TERKUNCI STATIS DI LUAR SCROLL) ==================== -->
-    <div class="p-3 bg-transparent shrink-0 z-40">
+    <!-- ==================== FLOATING BOTTOM NAV BAR (POSISI TERANGKAT DI ATAS MENU HANDPHONE) ==================== -->
+    <div class="px-3 pt-1 pb-7 sm:pb-3 bg-transparent shrink-0 z-40 safe-area-bottom">
       <nav class="bg-white/95 backdrop-blur-md border border-emerald-100/90 rounded-2xl px-2 py-2 flex justify-around items-center shadow-xl shadow-emerald-950/15">
         
         <!-- Home Button -->
