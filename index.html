@@ -42,12 +42,10 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    /* Gradasi Hijau Lingkaran Menu */
     .icon-gradient-green {
       background: linear-gradient(180deg, #34D399 0%, #059669 100%);
     }
 
-    /* Penyesuaian Full Height Layout Tanpa Bar Biru */
     html, body {
       height: 100%;
       height: 100dvh;
@@ -55,7 +53,6 @@
       overflow: hidden;
     }
 
-    /* Styles Khusus Jam Analog Dinding Anti-Offset */
     .clock-face {
       position: relative;
       width: 90px;
@@ -108,7 +105,7 @@
 </head>
 <body class="font-sans antialiased text-slate-800 flex justify-center items-center">
 
-  <!-- ==================== ANDROID CONTAINER (FULL APP MATCH) ==================== -->
+  <!-- ==================== ANDROID CONTAINER ==================== -->
   <div class="w-full max-w-md bg-[#F2F8F5] h-full flex flex-col relative overflow-hidden">
     
     <!-- SCROLLABLE CONTENT -->
@@ -134,15 +131,13 @@
           </div>
         </div>
 
-        <!-- Floating Shift Card (D1) + JAM ANALOG DINDING & HARI JAWA -->
+        <!-- Floating Shift Card (D1) -->
         <div class="px-5 -mt-10">
           <div class="bg-white rounded-2xl p-4 shadow-lg border border-emerald-50 space-y-4">
             
-            <!-- Bagian Atas: Info Shift + Jam Analog Dinding -->
             <div class="flex items-center justify-between">
               <div>
                 <span class="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-black">SHIFT D1</span>
-                <!-- Tanggal Masehi & Hari Jawa -->
                 <h3 id="current-jawa-date" class="text-xs font-extrabold text-appGreenDark mt-2">Rabu Wage</h3>
                 <p id="current-shift-date" class="text-[11px] font-bold text-slate-600">22 Juli 2026</p>
                 <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Jam Kerja: (07:30 - 16:30)</p>
@@ -177,7 +172,6 @@
         <!-- Grid Menu Items -->
         <div class="px-4 py-6 grid grid-cols-4 gap-y-7 gap-x-2 text-center">
           
-          <!-- Menu 1: Daftar Pengajuan -->
           <button onclick="openGenericModal('modal-pengajuan')" class="flex flex-col items-center group">
             <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
               <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
@@ -185,7 +179,6 @@
             <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Daftar<br>Pengajuan</span>
           </button>
 
-          <!-- Menu 2: Request Absensi -->
           <button onclick="openAbsenModal('Clock In')" class="flex flex-col items-center group">
             <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
               <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><circle cx="12" cy="12" r="3"/></svg>
@@ -193,7 +186,6 @@
             <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Request<br>Absensi</span>
           </button>
 
-          <!-- Menu 3: Request Lembur -->
           <button onclick="openGenericModal('modal-lembur')" class="flex flex-col items-center group">
             <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
               <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><rect x="10.5" y="16.5" width="3" height="1.5" rx="0.5"/></svg>
@@ -201,7 +193,6 @@
             <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Request<br>Lembur</span>
           </button>
 
-          <!-- Menu 4: Request Cuti -->
           <button onclick="openGenericModal('modal-cuti')" class="flex flex-col items-center group">
             <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
               <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
@@ -209,7 +200,6 @@
             <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Request<br>Cuti</span>
           </button>
 
-          <!-- Menu 5: Tim Kami -->
           <button onclick="openGenericModal('modal-tim')" class="flex flex-col items-center group">
             <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
               <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -217,7 +207,6 @@
             <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Tim<br>Kami</span>
           </button>
 
-          <!-- Menu 6: Ganti Kata Sandi -->
           <button onclick="openGenericModal('modal-sandi')" class="flex flex-col items-center group">
             <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
               <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><path d="M12 15v3"/></svg>
@@ -225,7 +214,6 @@
             <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Ganti<br>Kata Sandi</span>
           </button>
 
-          <!-- Menu 7: Slip Gaji -->
           <button onclick="openGenericModal('modal-gaji')" class="flex flex-col items-center group">
             <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
               <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="2" y1="7" x2="22" y2="7"/><circle cx="12" cy="12" r="2.5"/></svg>
@@ -261,10 +249,8 @@
 
     </div>
 
-    <!-- ==================== BOTTOM NAV BAR (TERKUNCI TEPAT DI ATAS TOOLBAR HP) ==================== -->
+    <!-- ==================== BOTTOM NAV BAR ==================== -->
     <nav class="bg-white border-t border-emerald-100/80 px-2 py-2 flex justify-around items-center z-40 shrink-0 shadow-lg">
-      
-      <!-- Home Button -->
       <button id="nav-btn-home" onclick="switchMainTab('home')" class="flex flex-col items-center gap-1 text-appGreenMain font-bold transition-transform active:scale-95">
         <div id="nav-icon-home" class="p-1.5 rounded-full bg-emerald-100/70 text-appGreenMain">
           <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -272,7 +258,6 @@
         <span class="text-[9px]">Home</span>
       </button>
       
-      <!-- Karyawan Button -->
       <button id="nav-btn-karyawan" onclick="openGenericModal('modal-tim')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
         <div id="nav-icon-karyawan" class="p-1.5 rounded-full text-slate-400">
           <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -280,7 +265,6 @@
         <span class="text-[9px]">Karyawan</span>
       </button>
       
-      <!-- Absen Log Button -->
       <button id="nav-btn-log" onclick="switchMainTab('log')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
         <div id="nav-icon-log" class="p-1.5 rounded-full text-slate-400">
           <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -288,7 +272,6 @@
         <span class="text-[9px]">Absen Log</span>
       </button>
       
-      <!-- Inbox Button -->
       <button id="nav-btn-inbox" onclick="showToast('Inbox', 'Belum ada pesan baru', 'success')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
         <div id="nav-icon-inbox" class="p-1.5 rounded-full text-slate-400">
           <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -296,7 +279,6 @@
         <span class="text-[9px]">Inbox</span>
       </button>
       
-      <!-- Profil Button -->
       <button id="nav-btn-profil" onclick="openGenericModal('modal-sandi')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
         <div id="nav-icon-profil" class="p-1.5 rounded-full text-slate-400">
           <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -308,26 +290,26 @@
 
   </div>
 
-  <!-- ==================== MODAL 0: LOGIN / REGISTRASI ==================== -->
+  <!-- ==================== MODAL 0: FORM LOGIN / REGISTRASI ==================== -->
   <div id="modal-login" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b pb-3">
         <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
-          <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i> Login / Identitas Karyawan
+          <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i> Login Identitas Karyawan
         </h3>
         <button onclick="closeGenericModal('modal-login')"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
       </div>
       <form onsubmit="handleLoginSubmit(event)" class="space-y-3">
         <div>
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama Lengkap</label>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama Lengkap *</label>
           <input type="text" id="login-nama" required placeholder="Masukkan Nama Lengkap Anda..." class="w-full p-2.5 text-xs border rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Jabatan / Divisi</label>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Jabatan / Divisi *</label>
           <input type="text" id="login-jabatan" required placeholder="Contoh: Staff IT / Marketing..." class="w-full p-2.5 text-xs border rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
         <button type="submit" class="w-full py-3 bg-appGreenDark hover:bg-emerald-950 text-white font-bold rounded-xl text-xs shadow-lg active:scale-95 transition">
-          Simpan & Gunakan Akun Ini
+          Simpan Akun Saya
         </button>
       </form>
     </div>
@@ -520,6 +502,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
+      checkSavedUser(); // Cek sesi login tersimpan
       updateShiftDateAndJawa();
       startAnalogClock();
       getLocation();
@@ -527,10 +510,51 @@
       document.getElementById('filter-date').value = new Date().toISOString().split('T')[0];
     });
 
+    // LOAD LOCAL STORAGE LOGIN DATA
+    function checkSavedUser() {
+      const savedNama = localStorage.getItem('bm_user_nama');
+      const savedJabatan = localStorage.getItem('bm_user_jabatan');
+
+      if (savedNama && savedJabatan) {
+        applyUserData(savedNama, savedJabatan);
+      }
+    }
+
+    function applyUserData(nama, jabatan) {
+      document.getElementById('user-display-name').innerText = nama;
+      document.getElementById('user-display-role').innerText = jabatan;
+      document.getElementById('login-btn-label').innerText = "Ganti Akun";
+
+      document.getElementById('nama').value = nama;
+      document.getElementById('jabatan').value = jabatan;
+      
+      document.getElementById('tim-nama').innerText = nama;
+      document.getElementById('tim-jabatan').innerText = jabatan + " (You)";
+      document.getElementById('tim-avatar').innerText = nama.charAt(0).toUpperCase();
+    }
+
+    // LOGIN SUBMIT HANDLER
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const namaBaru = document.getElementById('login-nama').value.trim();
+      const jabatanBaru = document.getElementById('login-jabatan').value.trim();
+
+      if (namaBaru && jabatanBaru) {
+        // Simpan ke LocalStorage agar tersimpan permanen di HP
+        localStorage.setItem('bm_user_nama', namaBaru);
+        localStorage.setItem('bm_user_jabatan', jabatanBaru);
+
+        applyUserData(namaBaru, jabatanBaru);
+
+        showToast("Berhasil Login!", `Selamat datang, ${namaBaru}`, "success");
+        closeGenericModal('modal-login');
+      }
+    }
+
     // UNTUK KALKULASI HARI PASARAN JAWA AUTOMATIS
     function getPasaranJawa(date) {
       const pasaran = ['Legi', 'Pahing', 'Pon', 'Wage', 'Kliwon'];
-      const baseDate = new Date(1900, 0, 1); // Epoch acuan Pahing
+      const baseDate = new Date(1900, 0, 1);
       const diffDays = Math.floor((date - baseDate) / (1000 * 60 * 60 * 24));
       const pasaranIndex = (diffDays + 1) % 5;
       return pasaran[pasaranIndex < 0 ? pasaranIndex + 5 : pasaranIndex];
@@ -547,47 +571,37 @@
       const namaBulan = bulanArr[now.getMonth()];
       const tahun = now.getFullYear();
 
-      // Tampilkan Hari Pasaran Jawa
       document.getElementById('current-jawa-date').innerText = `${namaHari} ${pasaran}`;
-      // Tampilkan Tanggal Masehi
       document.getElementById('current-shift-date').innerText = `${tanggal} ${namaBulan} ${tahun}`;
     }
 
-    // UNTUK JAM ANALOG & DIGITAL DINDING (MURNI UTC+7 / WIB ANTI-FAIL)
+    // UNTUK JAM ANALOG DINDING (PRESISE FULL DENGAN ROTASI HALUS)
     function startAnalogClock() {
       function updateClock() {
-        try {
-          const now = new Date();
-          // Hitung milidetik UTC + 7 Jam (WIB)
-          const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-          const wibDate = new Date(utcMs + (3600000 * 7));
+        const now = new Date();
+        const seconds = now.getSeconds();
+        const minutes = now.getMinutes();
+        const hours = now.getHours();
 
-          const hours = wibDate.getHours();
-          const minutes = wibDate.getMinutes();
-          const seconds = wibDate.getSeconds();
+        // Sudut Rotasi Derajat Jarum Jam
+        const secondDegrees = (seconds / 60) * 360;
+        const minuteDegrees = ((minutes + seconds / 60) / 60) * 360;
+        const hourDegrees = (((hours % 12) + minutes / 60) / 12) * 360;
 
-          // Kalkulasi Sudut Derajat Perputaran Jarum
-          const secondDegrees = (seconds / 60) * 360;
-          const minuteDegrees = ((minutes + seconds / 60) / 60) * 360;
-          const hourDegrees = (((hours % 12) + minutes / 60) / 12) * 360;
+        const hourEl = document.getElementById('hour-hand');
+        const minuteEl = document.getElementById('minute-hand');
+        const secondEl = document.getElementById('second-hand');
+        const textEl = document.getElementById('digital-clock-text');
 
-          const hourEl = document.getElementById('hour-hand');
-          const minuteEl = document.getElementById('minute-hand');
-          const secondEl = document.getElementById('second-hand');
-          const textEl = document.getElementById('digital-clock-text');
+        if (hourEl) hourEl.style.transform = `rotate(${hourDegrees}deg)`;
+        if (minuteEl) minuteEl.style.transform = `rotate(${minuteDegrees}deg)`;
+        if (secondEl) secondEl.style.transform = `rotate(${secondDegrees}deg)`;
 
-          if (hourEl) hourEl.style.transform = `rotate(${hourDegrees}deg)`;
-          if (minuteEl) minuteEl.style.transform = `rotate(${minuteDegrees}deg)`;
-          if (secondEl) secondEl.style.transform = `rotate(${secondDegrees}deg)`;
-
-          // Digital Clock Text di Bawah Jam Dinding
-          const hStr = String(hours).padStart(2, '0');
-          const mStr = String(minutes).padStart(2, '0');
-          const sStr = String(seconds).padStart(2, '0');
-          if (textEl) textEl.innerText = `${hStr}:${mStr}:${sStr} WIB`;
-        } catch (err) {
-          console.error("Clock error:", err);
-        }
+        // Update Text Tampilan Jam Digital
+        const hStr = String(hours).padStart(2, '0');
+        const mStr = String(minutes).padStart(2, '0');
+        const sStr = String(seconds).padStart(2, '0');
+        if (textEl) textEl.innerText = `${hStr}:${mStr}:${sStr} WIB`;
       }
 
       updateClock();
@@ -615,29 +629,6 @@
     // Modal Handlers
     function openGenericModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeGenericModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-    // LOGIN SUBMIT HANDLER
-    function handleLoginSubmit(e) {
-      e.preventDefault();
-      const namaBaru = document.getElementById('login-nama').value.trim();
-      const jabatanBaru = document.getElementById('login-jabatan').value.trim();
-
-      if (namaBaru && jabatanBaru) {
-        document.getElementById('user-display-name').innerText = namaBaru;
-        document.getElementById('user-display-role').innerText = jabatanBaru;
-        document.getElementById('login-btn-label').innerText = "Ganti Akun";
-
-        document.getElementById('nama').value = namaBaru;
-        document.getElementById('jabatan').value = jabatanBaru;
-        
-        document.getElementById('tim-nama').innerText = namaBaru;
-        document.getElementById('tim-jabatan').innerText = jabatanBaru + " (You)";
-        document.getElementById('tim-avatar').innerText = namaBaru.charAt(0).toUpperCase();
-
-        showToast("Berhasil Login!", `Selamat datang, ${namaBaru}`, "success");
-        closeGenericModal('modal-login');
-      }
-    }
 
     function openAbsenModal(type) {
       document.getElementById('tipe_absen_val').value = type;
