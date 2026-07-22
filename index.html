@@ -171,7 +171,7 @@
                         </div>
                     </div>
 
-                    <!-- Tombol Pengaturan Super Admin (Hanya muncul jika mastrisnocom@gmail.com) -->
+                    <!-- Tombol Pengaturan Super Admin (Hanya muncul jika mastrisnobpb@gmail.com) -->
                     <div id="superadmin-menu-container" class="hidden pt-2 border-t">
                         <button onclick="openSettingsModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold py-2.5 rounded-xl transition text-xs border border-amber-300 cursor-pointer flex items-center justify-center gap-2">
                             <i class="fa-solid fa-gear"></i> Pengaturan Titik Kantor (Super Admin)
@@ -462,8 +462,9 @@
             document.getElementById('prof-gender').innerText = currentUserData.gender || '-';
             document.getElementById('prof-marital').innerText = currentUserData.marital_status || '-';
 
+            // Cek apakah akun yang login adalah Super Admin (mastrisnobpb@gmail.com)
             const superAdminContainer = document.getElementById('superadmin-menu-container');
-            if (currentUserEmail === 'mastrisnocom@gmail.com') {
+            if (currentUserEmail === 'mastrisnobpb@gmail.com') {
                 superAdminContainer.classList.remove('hidden');
             } else {
                 superAdminContainer.classList.add('hidden');
@@ -598,7 +599,6 @@
             }
         }
 
-        // --- PENANGANAN ERROR AUTHENTICATION DIPERBAIKI ---
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -647,13 +647,10 @@
                 }
             } catch (error) {
                 console.error("Auth Error Detail:", error);
-                
-                // Cek isi pesan error agar tidak blank {}
                 let errorMessage = error.message || error.msg || JSON.stringify(error);
                 if (errorMessage === '{}' || error.status === 422) {
                     errorMessage = "Email ini mungkin sudah pernah didaftarkan, atau format email/password tidak sesuai (password minimal 6 karakter).";
                 }
-                
                 alert("Gagal: " + errorMessage);
             } finally {
                 btn.innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
