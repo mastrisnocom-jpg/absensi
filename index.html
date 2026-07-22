@@ -16,38 +16,18 @@
         .bg-primary-dark { background-color: #0A4D3C; }
         .text-gold { color: #D4AF37; }
         .icon-circle { background-color: #10B981; color: white; }
-        
-        /* Mengatur agar tinggi aplikasi pas di layar HP tanpa celah putih berlebih */
-        html, body {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        .app-container {
-            width: 100%;
-            max-width: 28rem;
-            height: 100%;
-            max-height: 100dvh;
-            background-color: #F9FAFB;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
     </style>
 </head>
-<body>
+<body class="flex justify-center min-h-screen bg-gray-200">
 
-    <div class="app-container">
+    <!-- Container Utama Pembatas Lebar Layar -->
+    <div class="w-full max-w-md bg-gray-50 shadow-xl relative flex flex-col min-h-screen">
 
         <!-- ================= KONTEN UTAMA (SCROLLABLE) ================= -->
-        <div class="flex-1 overflow-y-auto pb-28">
+        <div class="flex-1 pb-24 overflow-y-auto">
             
-            <!-- 1. HOME TAB -->
-            <div id="dashboard-section" class="block">
+            <!-- 1. HOME TAB (Sudah diperbaiki ID-nya menjadi home-section) -->
+            <div id="home-section" class="block">
                 <!-- Header Section -->
                 <div class="bg-primary-dark rounded-b-[40px] pt-10 pb-20 px-6 relative">
                     <div class="flex justify-between items-start">
@@ -57,7 +37,7 @@
                             <p id="user-display-role" class="text-gray-300 text-sm">Staff Operational</p>
                         </div>
                         <div id="auth-action-btn-container">
-                            <button onclick="openAuthModal()" class="bg-white/25 hover:bg-white/35 active:scale-95 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1 cursor-pointer">
+                            <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1 cursor-pointer">
                                 <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
                             </button>
                         </div>
@@ -157,38 +137,38 @@
                         <div class="w-20 h-20 rounded-full bg-primary-dark text-gold flex items-center justify-center text-3xl font-bold shadow-inner mb-3 overflow-hidden border-2 border-gold" id="profile-avatar-container">
                             <i class="fa-solid fa-user"></i>
                         </div>
-                        <h3 id="prof-nama" class="font-bold text-lg text-gray-800">Tamu</h3>
+                        <h3 id="prof-nama" class="font-bold text-lg text-gray-800 text-center px-2">Tamu</h3>
                         <p id="prof-role" class="text-xs text-green-700 font-semibold">Staff Operational</p>
                     </div>
 
-                    <div class="space-y-3 text-xs">
-                        <div class="flex justify-between border-b pb-2">
-                            <span class="text-gray-400 font-medium"><i class="fa-solid fa-id-card w-5 text-green-700"></i> NIP</span>
-                            <span id="prof-nip" class="font-bold text-gray-700">-</span>
+                    <div class="space-y-4 text-xs">
+                        <div class="flex items-center justify-between border-b pb-2 gap-4">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-id-card w-5 text-green-700"></i> NIP</span>
+                            <span id="prof-nip" class="font-bold text-gray-700 text-right truncate">-</span>
                         </div>
-                        <div class="flex justify-between border-b pb-2">
-                            <span class="text-gray-400 font-medium"><i class="fa-solid fa-envelope w-5 text-green-700"></i> Email</span>
-                            <span id="prof-email" class="font-bold text-gray-700">Belum Login</span>
+                        <div class="flex items-center justify-between border-b pb-2 gap-4">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-envelope w-5 text-green-700"></i> Email</span>
+                            <span id="prof-email" class="font-bold text-gray-700 text-right break-all">Belum Login</span>
                         </div>
-                        <div class="flex justify-between border-b pb-2">
-                            <span class="text-gray-400 font-medium"><i class="fa-solid fa-phone w-5 text-green-700"></i> No Handphone</span>
-                            <span id="prof-phone" class="font-bold text-gray-700">-</span>
+                        <div class="flex items-center justify-between border-b pb-2 gap-4">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-phone w-5 text-green-700"></i> Handphone</span>
+                            <span id="prof-phone" class="font-bold text-gray-700 text-right truncate">-</span>
                         </div>
-                        <div class="flex justify-between border-b pb-2">
-                            <span class="text-gray-400 font-medium"><i class="fa-solid fa-hands-praying w-5 text-green-700"></i> Agama</span>
-                            <span id="prof-religion" class="font-bold text-gray-700">-</span>
+                        <div class="flex items-center justify-between border-b pb-2 gap-4">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-hands-praying w-5 text-green-700"></i> Agama</span>
+                            <span id="prof-religion" class="font-bold text-gray-700 text-right truncate">-</span>
                         </div>
-                        <div class="flex justify-between border-b pb-2">
-                            <span class="text-gray-400 font-medium"><i class="fa-solid fa-venus-mars w-5 text-green-700"></i> Jenis Kelamin</span>
-                            <span id="prof-gender" class="font-bold text-gray-700">-</span>
+                        <div class="flex items-center justify-between border-b pb-2 gap-4">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-venus-mars w-5 text-green-700"></i> Kelamin</span>
+                            <span id="prof-gender" class="font-bold text-gray-700 text-right truncate">-</span>
                         </div>
-                        <div class="flex justify-between pb-1">
-                            <span class="text-gray-400 font-medium"><i class="fa-solid fa-ring w-5 text-green-700"></i> Pernikahan</span>
-                            <span id="prof-marital" class="font-bold text-gray-700">-</span>
+                        <div class="flex items-center justify-between pb-1 gap-4">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-ring w-5 text-green-700"></i> Pernikahan</span>
+                            <span id="prof-marital" class="font-bold text-gray-700 text-right truncate">-</span>
                         </div>
                     </div>
 
-                    <div class="pt-2">
+                    <div class="pt-3">
                         <button onclick="logout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl transition text-xs border border-red-200 cursor-pointer">
                             <i class="fa-solid fa-power-off mr-1"></i> Keluar Akun
                         </button>
@@ -198,8 +178,8 @@
 
         </div>
 
-        <!-- ================= BOTTOM NAVIGATION (STICKY AMAN DI ATAS NAVIGASI HP/BROWSER) ================= -->
-        <nav class="absolute bottom-0 left-0 right-0 w-full bg-white border-t border-gray-200 flex justify-between px-6 py-3 z-45 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        <!-- ================= BOTTOM NAVIGATION (FIXED & SCALED TO CONTAINER) ================= -->
+        <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-gray-200 flex justify-between px-6 py-3 z-50 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             <div onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-green-700 cursor-pointer transition select-none">
                 <i class="fa-solid fa-house mb-1 text-base"></i><span class="text-[10px] font-bold">Home</span>
             </div>
@@ -318,9 +298,9 @@
             }
         });
 
-        // Navigasi Antar Tab dengan efek perubahan warna tombol navigasi bawah
+        // Diperbaiki: Array tab section merujuk ke 'home-section'
         function switchTab(tab) {
-            const sections = ['dashboard-section', 'log-section', 'karyawan-section', 'inbox-section', 'profile-section'];
+            const sections = ['home-section', 'log-section', 'karyawan-section', 'inbox-section', 'profile-section'];
             sections.forEach(sec => document.getElementById(sec).classList.add('hidden'));
 
             const navItems = ['nav-home', 'nav-karyawan', 'nav-log', 'nav-inbox', 'nav-profile'];
@@ -330,7 +310,7 @@
                 el.querySelector('span').className = "text-[10px] font-medium";
             });
 
-            // Aktifkan tab tujuan & ubah warna jadi hijau menyala
+            // Aktifkan tab tujuan
             document.getElementById(tab + '-section').classList.remove('hidden');
             const activeNav = document.getElementById('nav-' + tab);
             activeNav.className = "flex flex-col items-center text-green-700 cursor-pointer transition select-none";
