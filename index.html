@@ -55,49 +55,50 @@
       overflow: hidden;
     }
 
-    /* Styles khusus Jam Analog Dinding */
+    /* Styles Khusus Jam Analog Dinding Anti-Offset */
     .clock-face {
       position: relative;
-      width: 100px;
-      height: 100px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
       background: #ffffff;
-      border: 4px solid #044C38;
-      box-shadow: inset 0 0 8px rgba(0,0,0,0.1), 0 4px 10px rgba(4,76,56,0.15);
+      border: 3.5px solid #044C38;
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.1), 0 4px 10px rgba(4,76,56,0.15);
     }
     .hand {
       position: absolute;
       bottom: 50%;
       left: 50%;
-      transform-origin: bottom center;
+      transform-origin: 50% 100%;
       border-radius: 4px;
-      z-index: 10;
     }
     .hour-hand {
-      width: 3.5px;
-      height: 26px;
+      width: 4px;
+      height: 24px;
+      margin-left: -2px;
       background-color: #044C38;
-      margin-left: -1.75px;
+      z-index: 10;
     }
     .minute-hand {
       width: 2.5px;
-      height: 36px;
-      background-color: #059669;
+      height: 33px;
       margin-left: -1.25px;
+      background-color: #059669;
+      z-index: 11;
     }
     .second-hand {
       width: 1.5px;
-      height: 40px;
-      background-color: #EAA623;
+      height: 38px;
       margin-left: -0.75px;
+      background-color: #EAA623;
       z-index: 12;
     }
     .center-dot {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #044C38;
       transform: translate(-50%, -50%);
@@ -552,31 +553,41 @@
       document.getElementById('current-shift-date').innerText = `${tanggal} ${namaBulan} ${tahun}`;
     }
 
-    // UNTUK JAM ANALOG DINDING (UTC+7 / WIB PRESISE FIX)
+    // UNTUK JAM ANALOG & DIGITAL DINDING (MURNI UTC+7 / WIB ANTI-FAIL)
     function startAnalogClock() {
       function updateClock() {
-        const now = new Date();
+        try {
+          const now = new Date();
+          // Hitung milidetik UTC + 7 Jam (WIB)
+          const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+          const wibDate = new Date(utcMs + (3600000 * 7));
 
-        // Mengambil waktu presisi zona waktu Indonesia Barat (UTC+7 / Asia/Jakarta)
-        const options = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-        const timeString = new Intl.DateTimeFormat('id-ID', options).format(now);
-        const [hoursStr, minutesStr, secondsStr] = timeString.replace(/\./g, ':').split(':');
+          const hours = wibDate.getHours();
+          const minutes = wibDate.getMinutes();
+          const seconds = wibDate.getSeconds();
 
-        const hours = parseInt(hoursStr, 10);
-        const minutes = parseInt(minutesStr, 10);
-        const seconds = parseInt(secondsStr, 10);
+          // Kalkulasi Sudut Derajat Perputaran Jarum
+          const secondDegrees = (seconds / 60) * 360;
+          const minuteDegrees = ((minutes + seconds / 60) / 60) * 360;
+          const hourDegrees = (((hours % 12) + minutes / 60) / 12) * 360;
 
-        // Kalkulasi Sudut Jarum Jam Analog
-        const secondDegrees = (seconds / 60) * 360;
-        const minuteDegrees = ((minutes + seconds / 60) / 60) * 360;
-        const hourDegrees = (((hours % 12) + minutes / 60) / 12) * 360;
+          const hourEl = document.getElementById('hour-hand');
+          const minuteEl = document.getElementById('minute-hand');
+          const secondEl = document.getElementById('second-hand');
+          const textEl = document.getElementById('digital-clock-text');
 
-        document.getElementById('second-hand').style.transform = `rotate(${secondDegrees}deg)`;
-        document.getElementById('minute-hand').style.transform = `rotate(${minuteDegrees}deg)`;
-        document.getElementById('hour-hand').style.transform = `rotate(${hourDegrees}deg)`;
+          if (hourEl) hourEl.style.transform = `rotate(${hourDegrees}deg)`;
+          if (minuteEl) minuteEl.style.transform = `rotate(${minuteDegrees}deg)`;
+          if (secondEl) secondEl.style.transform = `rotate(${secondDegrees}deg)`;
 
-        // Digital Clock Text di Bawah Jam Dinding
-        document.getElementById('digital-clock-text').innerText = `${hoursStr.padStart(2, '0')}:${minutesStr.padStart(2, '0')}:${secondsStr.padStart(2, '0')} WIB`;
+          // Digital Clock Text di Bawah Jam Dinding
+          const hStr = String(hours).padStart(2, '0');
+          const mStr = String(minutes).padStart(2, '0');
+          const sStr = String(seconds).padStart(2, '0');
+          if (textEl) textEl.innerText = `${hStr}:${mStr}:${sStr} WIB`;
+        } catch (err) {
+          console.error("Clock error:", err);
+        }
       }
 
       updateClock();
