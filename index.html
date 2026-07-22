@@ -90,8 +90,8 @@
               <div>
                 <span class="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-black">SHIFT D1</span>
                 <!-- Tanggal Masehi & Hari Jawa -->
-                <h3 id="current-jawa-date" class="text-xs font-extrabold text-appGreenDark mt-2">Rabu Wage</h3>
-                <p id="current-shift-date" class="text-[11px] font-bold text-slate-600">22 Juli 2026</p>
+                <h3 id="current-jawa-date" class="text-xs font-extrabold text-appGreenDark mt-2">--</h3>
+                <p id="current-shift-date" class="text-[11px] font-bold text-slate-600">--</p>
                 <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Jam Kerja: (07:30 - 16:30)</p>
               </div>
 
@@ -469,6 +469,24 @@
 
   <!-- JAVASCRIPT CORE FAIL-SAFE -->
   <script>
+    // ==================== JAM DIGITAL MANDIRI ====================
+    // Dijalankan langsung agar jam berdetak seketika tanpa terhambat async
+    (function runClock() {
+      function tick() {
+        const textEl = document.getElementById('digital-clock-text');
+        if (textEl) {
+          const now = new Date();
+          const hh = String(now.getHours()).padStart(2, '0');
+          const mm = String(now.getMinutes()).padStart(2, '0');
+          const ss = String(now.getSeconds()).padStart(2, '0');
+          textEl.innerText = `${hh}:${mm}:${ss}`;
+        }
+      }
+      tick();
+      setInterval(tick, 1000);
+    })();
+
+    // ==================== UTILITY FUNCTIONS ====================
     window.openGenericModal = function(id) { 
       const el = document.getElementById(id);
       if (el) el.classList.remove('hidden'); 
@@ -512,26 +530,8 @@
     let allRecords = [];
     window.currentUserSession = null;
 
-    // JAM DIGITAL MANDIRI (BERJALAN SEGERA SETELAH ELEMEN TERSEDIA)
-    function startDigitalClock() {
-      function updateClock() {
-        const textEl = document.getElementById('digital-clock-text');
-        if (textEl) {
-          const now = new Date();
-          const hours = String(now.getHours()).padStart(2, '0');
-          const minutes = String(now.getMinutes()).padStart(2, '0');
-          const seconds = String(now.getSeconds()).padStart(2, '0');
-          textEl.innerText = `${hours}:${minutes}:${seconds}`;
-        }
-      }
-      updateClock();
-      setInterval(updateClock, 1000);
-    }
-
-    // JALANKAN JAM DIGITAL SEGERA DI GLOBAL SCOPE
-    startDigitalClock();
-
-    document.addEventListener("DOMContentLoaded", () => {
+    // EVENT DOM CONTENT LOADED
+    window.addEventListener("DOMContentLoaded", () => {
       try { updateShiftDateAndJawa(); } catch(e){ console.error(e); }
       try { checkSupabaseSession(); } catch(e){ console.error(e); }
       try { getLocation(); } catch(e){ console.error(e); }
@@ -637,7 +637,7 @@
       if(btn) btn.disabled = true;
 
       try {
-        if (!supabase) throw new Error("Gagal menyambung database.");
+        if (!supabase) throw new Error("Database belum terhubung.");
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
@@ -665,7 +665,7 @@
       if(btn) btn.disabled = true;
 
       try {
-        if (!supabase) throw new Error("Gagal menyambung database.");
+        if (!supabase) throw new Error("Database belum terhubung.");
         const { data, error } = await supabase.auth.signUp({
           email, password,
           options: { data: { nama, jabatan } }
@@ -795,10 +795,12 @@
       try {
         if(!supabase) throw new Error("Database tidak terhubung.");
         const fileName = `selfie_${Date.now()}.jpg`;
-        await supabase.storage.from('foto-absensi').upload(fileName, capturedBlob, { contentType: 'image/jpeg' });
+        const { error: uploadError } = await supabase.storage.from('foto-absensi').upload(fileName, capturedBlob, { contentType: 'image/jpeg' });
+        if (uploadError) throw uploadError;
+
         const { data: urlData } = supabase.storage.from('foto-absensi').getPublicUrl(fileName);
 
-        await supabase.from('absensi').insert([{
+        const { error: insertError } = await supabase.from('absensi').insert([{
           nama: document.getElementById('nama').value.trim(),
           jabatan: document.getElementById('jabatan').value.trim(),
           tipe_absen: document.getElementById('tipe_absen_val').value,
@@ -807,6 +809,7 @@
           lokasi: currentLocation,
           keterangan: document.getElementById('keterangan').value.trim()
         }]);
+        if (insertError) throw insertError;
 
         window.showToast("Berhasil!", "Presensi terisi.", "success");
         window.closeGenericModal('absen-modal');
@@ -825,12 +828,13 @@
       const currentNama = document.getElementById('user-display-name').innerText;
       try {
         if(!supabase) throw new Error("Database terputus");
-        await supabase.from('request_lembur').insert([{
+        const { error } = await supabase.from('request_lembur').insert([{
           nama: currentNama,
           tanggal: document.getElementById('lembur-tgl').value,
           durasi_jam: parseInt(document.getElementById('lembur-jam').value),
           alasan: document.getElementById('lembur-alasan').value
         }]);
+        if (error) throw error;
         window.showToast("Berhasil!", "Request lembur dikirim", "success");
         window.closeGenericModal('modal-lembur');
       } catch (err) { window.showToast("Gagal!", err.message, "error"); }
@@ -841,13 +845,14 @@
       const currentNama = document.getElementById('user-display-name').innerText;
       try {
         if(!supabase) throw new Error("Database terputus");
-        await supabase.from('request_cuti').insert([{
+        const { error } = await supabase.from('request_cuti').insert([{
           nama: currentNama,
           jenis_cuti: document.getElementById('cuti-jenis').value,
           tanggal_mulai: document.getElementById('cuti-mulai').value,
           tanggal_selesai: document.getElementById('cuti-selesai').value,
           alasan: document.getElementById('cuti-alasan').value
         }]);
+        if (error) throw error;
         window.showToast("Berhasil!", "Request cuti dikirim", "success");
         window.closeGenericModal('modal-cuti');
       } catch (err) { window.showToast("Gagal!", err.message, "error"); }
