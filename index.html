@@ -145,11 +145,11 @@
             <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Tim<br>Kami</span>
           </button>
 
-          <button onclick="openGenericModal('modal-sandi')" class="flex flex-col items-center group">
+          <button onclick="openGenericModal('modal-profil')" class="flex flex-col items-center group">
             <div class="w-16 h-16 rounded-full icon-gradient-green text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 group-active:scale-95 transition">
-              <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><path d="M12 15v3"/></svg>
+              <svg class="w-8 h-8 stroke-current text-white" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
-            <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Ganti<br>Kata Sandi</span>
+            <span class="text-[11px] font-bold text-appGreenDark mt-2 leading-tight">Profil<br>Saya</span>
           </button>
 
           <button onclick="openGenericModal('modal-gaji')" class="flex flex-col items-center group">
@@ -217,7 +217,7 @@
         <span class="text-[9px]">Inbox</span>
       </button>
       
-      <button id="nav-btn-profil" onclick="openGenericModal('modal-sandi')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
+      <button id="nav-btn-profil" onclick="openGenericModal('modal-profil')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-transform active:scale-95">
         <div id="nav-icon-profil" class="p-1.5 rounded-full text-slate-400">
           <svg class="w-4 h-4 stroke-current" fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
@@ -414,17 +414,67 @@
     </div>
   </div>
 
-  <div id="modal-sandi" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4">
+  <!-- ==================== MODAL PROFIL USER LENGKAP ==================== -->
+  <div id="modal-profil" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4 overflow-y-auto max-h-[90vh] no-scrollbar">
       <div class="flex justify-between items-center border-b pb-3">
-        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4 text-emerald-600"></i> Ganti Kata Sandi</h3>
-        <button onclick="closeGenericModal('modal-sandi')"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2"><i data-lucide="user" class="w-4 h-4 text-emerald-600"></i> Profil Pengguna</h3>
+        <button onclick="closeGenericModal('modal-profil')"><i data-lucide="x" class="w-5 h-5 text-slate-400 hover:text-slate-700"></i></button>
       </div>
-      <form onsubmit="window.handleSandiSubmit(event)" class="space-y-3">
-        <div><label class="block text-[10px] font-bold text-slate-400">Sandi Lama</label><input type="password" required class="w-full p-2 text-xs border rounded-xl" /></div>
-        <div><label class="block text-[10px] font-bold text-slate-400">Sandi Baru</label><input type="password" required class="w-full p-2 text-xs border rounded-xl" /></div>
-        <button type="submit" class="w-full py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs shadow">Perbarui Sandi</button>
-      </form>
+
+      <!-- Kartu Ringkasan Akun -->
+      <div class="p-4 bg-gradient-to-r from-emerald-900 to-appGreenDark text-white rounded-2xl flex items-center gap-3.5 shadow-md">
+        <div id="profile-card-avatar" class="w-12 h-12 rounded-full bg-appGold text-slate-900 flex items-center justify-center font-black text-lg shadow-md shrink-0">
+          S
+        </div>
+        <div class="overflow-hidden">
+          <h4 id="profile-card-nama" class="font-bold text-sm truncate">Sutrisno</h4>
+          <p id="profile-card-jabatan" class="text-[11px] text-emerald-200/90 font-medium truncate">Staff Operational</p>
+          <span id="profile-card-status" class="inline-block mt-1 px-2 py-0.5 bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 rounded-full text-[9px] font-bold">Default Mode</span>
+        </div>
+      </div>
+
+      <!-- Detail Informasi User yang Terdaftar -->
+      <div class="space-y-2.5 pt-1">
+        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Detail Informasi Saya</h4>
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-2 text-xs">
+          <div class="flex justify-between items-center border-b border-slate-200/60 pb-1.5">
+            <span class="text-slate-500 font-medium">Nama Lengkap</span>
+            <span id="profile-info-nama" class="font-bold text-slate-800">Sutrisno</span>
+          </div>
+          <div class="flex justify-between items-center border-b border-slate-200/60 pb-1.5">
+            <span class="text-slate-500 font-medium">Jabatan / Divisi</span>
+            <span id="profile-info-jabatan" class="font-bold text-slate-800">Staff Operational</span>
+          </div>
+          <div class="flex justify-between items-center border-b border-slate-200/60 pb-1.5">
+            <span class="text-slate-500 font-medium">Alamat Email</span>
+            <span id="profile-info-email" class="font-bold text-slate-800 truncate max-w-[180px]">Belum Login</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 font-medium">ID Pengguna</span>
+            <span id="profile-info-id" class="font-mono text-[10px] font-semibold text-slate-400">Offline</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Ganti Kata Sandi -->
+      <div class="pt-2 border-t border-slate-100 space-y-2">
+        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Keamanan & Password</h4>
+        <form onsubmit="window.handleSandiSubmit(event)" class="space-y-2.5">
+          <div><label class="block text-[10px] font-bold text-slate-500 mb-0.5">Sandi Lama</label><input type="password" required class="w-full p-2 text-xs border rounded-xl font-medium outline-none focus:ring-2 focus:ring-emerald-500" placeholder="••••••••" /></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 mb-0.5">Sandi Baru</label><input type="password" required class="w-full p-2 text-xs border rounded-xl font-medium outline-none focus:ring-2 focus:ring-emerald-500" placeholder="••••••••" /></div>
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow active:scale-95 transition">Perbarui Kata Sandi</button>
+        </form>
+      </div>
+
+      <!-- Action Button Logout / Login -->
+      <div class="pt-2">
+        <button id="profile-btn-action" onclick="window.handleProfileActionButton()" class="w-full py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span id="profile-btn-text">Keluar Akun (Logout)</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -529,6 +579,16 @@
       }
     };
 
+    window.handleProfileActionButton = function() {
+      if (window.currentUserSession) {
+        window.closeGenericModal('modal-profil');
+        window.handleLogout();
+      } else {
+        window.closeGenericModal('modal-profil');
+        window.openGenericModal('modal-login');
+      }
+    };
+
     async function checkSupabaseSession() {
       if (!supabase) return;
       try {
@@ -536,24 +596,27 @@
         if (session) {
           window.currentUserSession = session.user;
           const meta = session.user.user_metadata || {};
-          applyUserData(meta.nama || session.user.email, meta.jabatan || 'Karyawan');
+          applyUserData(meta.nama || session.user.email, meta.jabatan || 'Karyawan', session.user.email, session.user.id);
         } else {
-          applyUserData('Sutrisno', 'Staff Operational');
+          applyUserData('Sutrisno', 'Staff Operational', null, null);
         }
       } catch(e) { console.error("Session check error:", e); }
     }
 
-    function applyUserData(nama, jabatan) {
+    function applyUserData(nama, jabatan, email = null, userId = null) {
+      // Update Display Header Utama
       const nameEl = document.getElementById('user-display-name');
       const roleEl = document.getElementById('user-display-role');
       if (nameEl) nameEl.innerText = nama;
       if (roleEl) roleEl.innerText = jabatan;
 
+      // Update Form Absensi
       const inputNama = document.getElementById('nama');
       const inputJabatan = document.getElementById('jabatan');
       if (inputNama) inputNama.value = nama;
       if (inputJabatan) inputJabatan.value = jabatan;
       
+      // Update Tab Tim
       const timNama = document.getElementById('tim-nama');
       const timJabatan = document.getElementById('tim-jabatan');
       const timAvatar = document.getElementById('tim-avatar');
@@ -562,10 +625,53 @@
       if (timJabatan) timJabatan.innerText = jabatan + " (You)";
       if (timAvatar) timAvatar.innerText = nama.charAt(0).toUpperCase();
 
+      // Update Header Login Button
       const btnLabel = document.getElementById('login-btn-label');
       if (btnLabel) {
         btnLabel.innerText = window.currentUserSession ? "Logout" : "Login / Daftar";
       }
+
+      // UPDATE MODAL PROFIL DATA USER SENSITIF
+      const profCardAvatar = document.getElementById('profile-card-avatar');
+      const profCardNama = document.getElementById('profile-card-nama');
+      const profCardJabatan = document.getElementById('profile-card-jabatan');
+      const profCardStatus = document.getElementById('profile-card-status');
+      
+      const profInfoNama = document.getElementById('profile-info-nama');
+      const profInfoJabatan = document.getElementById('profile-info-jabatan');
+      const profInfoEmail = document.getElementById('profile-info-email');
+      const profInfoId = document.getElementById('profile-info-id');
+      const profBtnText = document.getElementById('profile-btn-text');
+      const profBtnAction = document.getElementById('profile-btn-action');
+
+      if (profCardAvatar) profCardAvatar.innerText = nama.charAt(0).toUpperCase();
+      if (profCardNama) profCardNama.innerText = nama;
+      if (profCardJabatan) profCardJabatan.innerText = jabatan;
+      
+      if (profInfoNama) profInfoNama.innerText = nama;
+      if (profInfoJabatan) profInfoJabatan.innerText = jabatan;
+
+      if (window.currentUserSession) {
+        if (profCardStatus) {
+          profCardStatus.innerText = "Terautentikasi (Online)";
+          profCardStatus.className = "inline-block mt-1 px-2 py-0.5 bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 rounded-full text-[9px] font-bold";
+        }
+        if (profInfoEmail) profInfoEmail.innerText = email || "-";
+        if (profInfoId) profInfoId.innerText = userId ? userId.substring(0, 13) + '...' : "-";
+        if (profBtnText) profBtnText.innerText = "Keluar Akun (Logout)";
+        if (profBtnAction) profBtnAction.className = "w-full py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2";
+      } else {
+        if (profCardStatus) {
+          profCardStatus.innerText = "Sesi Mode Tamu";
+          profCardStatus.className = "inline-block mt-1 px-2 py-0.5 bg-amber-500/30 text-amber-200 border border-amber-400/30 rounded-full text-[9px] font-bold";
+        }
+        if (profInfoEmail) profInfoEmail.innerText = "Belum Login";
+        if (profInfoId) profInfoId.innerText = "Offline";
+        if (profBtnText) profBtnText.innerText = "Login / Masuk Akun";
+        if (profBtnAction) profBtnAction.className = "w-full py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2";
+      }
+
+      try { lucide.createIcons(); } catch(e){}
     }
 
     window.toggleAuthMode = function(mode) {
@@ -601,7 +707,7 @@
 
         window.currentUserSession = data.user;
         const meta = data.user.user_metadata || {};
-        applyUserData(meta.nama || email, meta.jabatan || 'Staff');
+        applyUserData(meta.nama || email, meta.jabatan || 'Staff', data.user.email, data.user.id);
         
         window.showToast("Berhasil Login!", "Selamat bekerja.", "success");
         window.closeGenericModal('modal-login');
@@ -644,7 +750,7 @@
     window.handleLogout = async function() {
       if(supabase) await supabase.auth.signOut();
       window.currentUserSession = null;
-      applyUserData('Sutrisno', 'Staff Operational');
+      applyUserData('Sutrisno', 'Staff Operational', null, null);
       window.showToast("Berhasil Keluar", "Sesi Anda telah diakhiri.", "success");
     };
 
@@ -828,7 +934,7 @@
     window.handleSandiSubmit = function(e) {
       e.preventDefault();
       window.showToast("Berhasil!", "Kata sandi diperbarui", "success");
-      window.closeGenericModal('modal-sandi');
+      window.closeGenericModal('modal-profil');
     };
 
     async function fetchAbsensiData() {
