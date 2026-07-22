@@ -131,7 +131,7 @@
                 </div>
             </div>
 
-            <!-- 5. PROFIL TAB -->
+            <!-- 5. PROFIL TAB (LENGKAP DENGAN FITUR EDIT) -->
             <div id="profile-section" class="hidden px-6 py-6 space-y-4">
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Profil Saya</h2>
                 
@@ -148,38 +148,63 @@
                         <h3 id="prof-nama" class="font-bold text-lg text-gray-800 text-center px-2">Tamu</h3>
                         <div class="flex items-center gap-2 mt-1">
                             <p id="prof-role" class="text-xs text-green-700 font-semibold">Staff Operational</p>
-                            <button onclick="openEditRoleModal()" class="text-gray-400 hover:text-green-700 text-xs cursor-pointer" title="Edit Jabatan"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="openEditFieldModal('jabatan', 'Ubah Jabatan')" class="text-gray-400 hover:text-green-700 text-xs cursor-pointer"><i class="fa-solid fa-pen-to-square"></i></button>
                         </div>
                     </div>
 
                     <div class="space-y-4 text-xs">
                         <div class="flex items-center justify-between border-b pb-2 gap-4">
                             <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-building w-5 text-green-700"></i> Unit / Kantor</span>
-                            <span id="prof-unit" class="font-bold text-gray-700 text-right truncate">-</span>
+                            <div class="flex items-center gap-2">
+                                <span id="prof-unit" class="font-bold text-gray-700 text-right truncate">-</span>
+                                <button onclick="openEditFieldModal('unit', 'Pilih Unit Kantor')" class="text-gray-400 hover:text-green-700"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b pb-2 gap-4">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-address-card w-5 text-green-700"></i> NIK</span>
+                            <div class="flex items-center gap-2">
+                                <span id="prof-nik" class="font-bold text-gray-700 text-right truncate">-</span>
+                                <button onclick="openEditFieldModal('nik', 'Ubah NIK')" class="text-gray-400 hover:text-green-700"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between border-b pb-2 gap-4">
                             <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-id-card w-5 text-green-700"></i> NIP</span>
-                            <span id="prof-nip" class="font-bold text-gray-700 text-right truncate">-</span>
+                            <div class="flex items-center gap-2">
+                                <span id="prof-nip" class="font-bold text-gray-700 text-right truncate">-</span>
+                                <button onclick="openEditFieldModal('nip', 'Ubah NIP')" class="text-gray-400 hover:text-green-700"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between border-b pb-2 gap-4">
-                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-envelope w-5 text-green-700"></i> Email</span>
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid envelope w-5 text-green-700"></i><i class="fa-solid fa-envelope w-5 text-green-700"></i> Email</span>
                             <span id="prof-email" class="font-bold text-gray-700 text-right break-all">Belum Login</span>
                         </div>
                         <div class="flex items-center justify-between border-b pb-2 gap-4">
                             <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-phone w-5 text-green-700"></i> Handphone</span>
-                            <span id="prof-phone" class="font-bold text-gray-700 text-right truncate">-</span>
+                            <div class="flex items-center gap-2">
+                                <span id="prof-phone" class="font-bold text-gray-700 text-right truncate">-</span>
+                                <button onclick="openEditFieldModal('phone', 'Ubah No Handphone')" class="text-gray-400 hover:text-green-700"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between border-b pb-2 gap-4">
                             <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-hands-praying w-5 text-green-700"></i> Agama</span>
-                            <span id="prof-religion" class="font-bold text-gray-700 text-right truncate">-</span>
+                            <div class="flex items-center gap-2">
+                                <span id="prof-religion" class="font-bold text-gray-700 text-right truncate">-</span>
+                                <button onclick="openEditFieldModal('religion', 'Ubah Agama')" class="text-gray-400 hover:text-green-700"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between border-b pb-2 gap-4">
                             <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-venus-mars w-5 text-green-700"></i> Kelamin</span>
-                            <span id="prof-gender" class="font-bold text-gray-700 text-right truncate">-</span>
+                            <div class="flex items-center gap-2">
+                                <span id="prof-gender" class="font-bold text-gray-700 text-right truncate">-</span>
+                                <button onclick="openEditFieldModal('gender', 'Ubah Jenis Kelamin')" class="text-gray-400 hover:text-green-700"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between pb-1 gap-4">
                             <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-ring w-5 text-green-700"></i> Pernikahan</span>
-                            <span id="prof-marital" class="font-bold text-gray-700 text-right truncate">-</span>
+                            <div class="flex items-center gap-2">
+                                <span id="prof-marital" class="font-bold text-gray-700 text-right truncate">-</span>
+                                <button onclick="openEditFieldModal('marital_status', 'Ubah Status Pernikahan')" class="text-gray-400 hover:text-green-700"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
                         </div>
                     </div>
 
@@ -222,17 +247,16 @@
             </div>
         </nav>
 
-        <!-- ================= MODAL EDIT JABATAN ================= -->
-        <div id="edit-role-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+        <!-- ================= MODAL EDIT FIELD UNIVERSAL ================= -->
+        <div id="edit-field-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative space-y-4">
-                <button onclick="closeEditRoleModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                <h3 class="text-lg font-bold text-gray-800">Ubah Jabatan</h3>
+                <button onclick="closeEditFieldModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <h3 id="edit-modal-title" class="text-lg font-bold text-gray-800">Edit Data</h3>
                 <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="font-semibold text-gray-600">Jabatan / Divisi Baru</label>
-                        <input type="text" id="new-role-input" placeholder="Contoh: Staff Operational" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-green-600" />
+                    <div id="edit-input-container">
+                        <!-- Input dinamis dimasukkan via JS -->
                     </div>
-                    <button onclick="saveNewRole()" class="w-full bg-primary-dark text-white font-bold py-2.5 rounded-xl shadow transition cursor-pointer">Simpan Jabatan</button>
+                    <button onclick="saveProfileField()" class="w-full bg-primary-dark text-white font-bold py-2.5 rounded-xl shadow transition cursor-pointer">Simpan Perubahan</button>
                 </div>
             </div>
         </div>
@@ -264,7 +288,7 @@
                     </div>
                     <div>
                         <label class="font-semibold text-gray-600">Radius (Meter)</label>
-                        <input type="number" id="admin-unit-radius" value="100" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 outline-none" />
+                        <input type="number" id="admin-unit-radius" value="100" class="w-full mt-1 border border-gray-300 rounded-lg px-2 py-2 outline-none" />
                     </div>
                     <button onclick="addNewOfficeUnit()" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2 rounded-xl transition cursor-pointer">Tambah Unit</button>
                 </div>
@@ -278,7 +302,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL LUPA PASSWORD (RESET) ================= -->
+        <!-- ================= MODAL LUPA PASSWORD ================= -->
         <div id="reset-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative space-y-4">
                 <button onclick="closeResetModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -296,7 +320,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL / POP-UP LOGIN & DAFTAR ================= -->
+        <!-- ================= MODAL LOGIN & DAFTAR (DISEDERHANAKAN) ================= -->
         <div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative animate-fadeIn my-auto">
                 <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -309,59 +333,24 @@
                 <form id="auth-form" class="space-y-3">
                     <div id="register-fields" class="space-y-3 hidden">
                         <div>
-                            <label class="text-xs text-gray-600 font-semibold">Nama Lengkap</label>
+                            <label class="text-xs text-gray-600 font-semibold">Nama Lengkap *</label>
                             <input type="text" id="fullname" placeholder="Nama lengkap" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
                         </div>
                         <div>
-                            <label class="text-xs text-gray-600 font-semibold">Pilih Unit / Kantor</label>
-                            <select id="reg-unit" class="w-full mt-1 border border-gray-300 rounded-lg px-2 py-2 text-xs focus:outline-none focus:border-green-600 bg-white">
-                                <option value="">-- Pilih Unit Kantor --</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-600 font-semibold">Jabatan / Divisi</label>
-                            <input type="text" id="reg-jabatan" placeholder="Staff Operational" value="Staff Operational" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-600 font-semibold">NIP</label>
-                            <input type="text" id="nip" placeholder="Nomor Induk Pegawai" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-600 font-semibold">No Handphone</label>
-                            <input type="tel" id="phone" placeholder="08xxxxxxxxxx" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="text-xs text-gray-600 font-semibold">Agama</label>
-                                <select id="religion" class="w-full mt-1 border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white">
-                                    <option value="Islam">Islam</option><option value="Kristen">Kristen</option><option value="Katolik">Katolik</option><option value="Hindu">Hindu</option><option value="Buddha">Buddha</option><option value="Konghucu">Konghucu</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-600 font-semibold">Jenis Kelamin</label>
-                                <select id="gender" class="w-full mt-1 border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white">
-                                    <option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-600 font-semibold">Status Pernikahan</label>
-                            <select id="marital" class="w-full mt-1 border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white">
-                                <option value="Belum Menikah">Belum Menikah</option><option value="Menikah">Menikah</option><option value="Cerai">Cerai</option>
-                            </select>
+                            <label class="text-xs text-gray-600 font-semibold">NIK *</label>
+                            <input type="text" id="nik" placeholder="Nomor Induk Kependudukan" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
                         </div>
                     </div>
 
                     <div>
-                        <label class="text-xs text-gray-600 font-semibold">Email</label>
+                        <label class="text-xs text-gray-600 font-semibold">Email *</label>
                         <input type="email" id="email" required placeholder="contoh@email.com" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
                     </div>
                     <div>
-                        <label class="text-xs text-gray-600 font-semibold">Password</label>
+                        <label class="text-xs text-gray-600 font-semibold">Password *</label>
                         <input type="password" id="password" required placeholder="Minimal 6 karakter" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-green-600">
                     </div>
 
-                    <!-- Tombol Lupa Password -->
                     <div id="forgot-password-link" class="text-right">
                         <button type="button" onclick="openResetModal()" class="text-[11px] text-green-700 hover:underline font-semibold cursor-pointer">Lupa Password?</button>
                     </div>
@@ -388,9 +377,7 @@
         let supabaseClient = null;
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } catch (err) {
-            console.error("Gagal menginisialisasi Supabase:", err);
-        }
+        } catch (err) { console.error(err); }
 
         let isLoginMode = true;
         let currentUser = null;
@@ -398,6 +385,7 @@
         let currentUserData = {};
         let currentCoords = null;
         let officeLocations = [];
+        let activeEditField = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
@@ -409,17 +397,10 @@
 
         async function fetchOfficeLocations() {
             try {
-                const { data, error } = await supabaseClient.from('offices').select('*');
-                if (error) throw error;
+                const { data } = await supabaseClient.from('offices').select('*');
                 officeLocations = data || [];
-                
-                const selectUnit = document.getElementById('reg-unit');
-                if (selectUnit) {
-                    selectUnit.innerHTML = '<option value="">-- Pilih Unit Kantor --</option>' + 
-                        officeLocations.map(o => `<option value="${o.unit_name}">${o.unit_name}</option>`).join('');
-                }
                 evaluateGPSWithUserOffice();
-            } catch(e) { console.error("Gagal ambil data kantor:", e); }
+            } catch(e) {}
         }
 
         async function addNewOfficeUnit() {
@@ -428,25 +409,18 @@
             const lng = parseFloat(document.getElementById('admin-unit-lng').value);
             const radius = parseInt(document.getElementById('admin-unit-radius').value) || 100;
 
-            if (!name || isNaN(lat) || isNaN(lng)) {
-                alert('Nama unit, latitude, dan longitude harus diisi!');
-                return;
-            }
-
-            try {
-                const { error } = await supabaseClient.from('offices').insert([{ unit_name: name, lat, lng, radius }]);
-                if (error) throw error;
-                alert('Unit kantor berhasil ditambahkan!');
-                document.getElementById('admin-unit-name').value = '';
-                document.getElementById('admin-unit-lat').value = '';
-                document.getElementById('admin-unit-lng').value = '';
-                fetchOfficeLocations();
-                renderAdminOfficeList();
-            } catch (err) { alert('Gagal tambah unit: ' + err.message); }
+            if (!name || isNaN(lat) || isNaN(lng)) return alert('Isi data unit dengan benar!');
+            await supabaseClient.from('offices').insert([{ unit_name: name, lat, lng, radius }]);
+            alert('Unit berhasil ditambahkan!');
+            document.getElementById('admin-unit-name').value = '';
+            document.getElementById('admin-unit-lat').value = '';
+            document.getElementById('admin-unit-lng').value = '';
+            fetchOfficeLocations();
+            renderAdminOfficeList();
         }
 
         async function deleteOfficeUnit(id) {
-            if (!confirm('Hapus unit kantor ini?')) return;
+            if (!confirm('Hapus unit ini?')) return;
             await supabaseClient.from('offices').delete().eq('id', id);
             fetchOfficeLocations();
             renderAdminOfficeList();
@@ -454,17 +428,14 @@
 
         function renderAdminOfficeList() {
             const listEl = document.getElementById('admin-office-list');
-            if (officeLocations.length === 0) {
-                listEl.innerHTML = '<p class="text-gray-400 text-center py-2">Belum ada unit.</p>';
-                return;
-            }
+            if (officeLocations.length === 0) { listEl.innerHTML = '<p class="text-gray-400 text-center py-2">Belum ada unit.</p>'; return; }
             listEl.innerHTML = officeLocations.map(o => `
                 <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg border">
                     <div>
                         <p class="font-bold text-gray-800">${o.unit_name}</p>
                         <p class="text-[10px] text-gray-500">Lat: ${o.lat}, Lng: ${o.lng} (${o.radius}m)</p>
                     </div>
-                    <button onclick="deleteOfficeUnit(${o.id})" class="text-red-500 hover:text-red-700 text-xs px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="deleteOfficeUnit(${o.id})" class="text-red-500 text-xs px-2 py-1"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('');
         }
@@ -478,79 +449,84 @@
         async function sendPasswordReset() {
             const email = document.getElementById('reset-email').value.trim();
             if (!email) return alert('Masukkan email Anda!');
-            try {
-                const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
-                if (error) throw error;
-                alert('Instruksi pemulihan password telah dikirim ke email Anda.');
-                closeResetModal();
-            } catch(err) { alert('Gagal mengirim reset password: ' + err.message); }
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+            if (error) alert('Gagal: ' + error.message);
+            else { alert('Link reset password dikirim ke email Anda.'); closeResetModal(); }
         }
 
         async function deleteAccount() {
-            if (!confirm('PERINGATAN: Apakah Anda yakin ingin menghapus akun ini secara permanen dari sistem?')) return;
-            
-            try {
-                // Catatan: Penghapusan akun secara penuh di sisi klien memerlukan fungsi RPC atau kebijakan auth Supabase. 
-                // Untuk sesi lokal, kita lakukan signOut dan hapus sesi data.
-                await supabaseClient.auth.signOut();
-                alert('Sesi akun Anda telah dihapus dari perangkat ini.');
-                checkSession();
-                switchTab('home');
-            } catch(err) {
-                alert('Gagal menghapus akun: ' + err.message);
-            }
+            if (!confirm('Yakin ingin keluar dan membersihkan sesi akun ini?')) return;
+            await supabaseClient.auth.signOut();
+            checkSession();
+            switchTab('home');
+            alert('Sesi dibersihkan.');
         }
 
-        function openEditRoleModal() { document.getElementById('new-role-input').value = currentUserData.jabatan || 'Staff Operational'; document.getElementById('edit-role-modal').classList.remove('hidden'); }
-        function closeEditRoleModal() { document.getElementById('edit-role-modal').classList.add('hidden'); }
+        // Edit Profile Universal Handler
+        function openEditFieldModal(fieldKey, title) {
+            activeEditField = fieldKey;
+            document.getElementById('edit-modal-title').innerText = title;
+            const container = document.getElementById('edit-input-container');
+            
+            if (fieldKey === 'unit') {
+                let options = officeLocations.map(o => `<option value="${o.unit_name}" ${currentUserData.unit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="">-- Pilih Unit --</option>${options}</select>`;
+            } else if (fieldKey === 'religion') {
+                let religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];
+                let options = religions.map(r => `<option value="${r}" ${currentUserData.religion === r ? 'selected' : ''}>${r}</option>`).join('');
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white">${options}</select>`;
+            } else if (fieldKey === 'gender') {
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="Laki-laki" ${currentUserData.gender==='Laki-laki'?'selected':''}>Laki-laki</option><option value="Perempuan" ${currentUserData.gender==='Perempuan'?'selected':''}>Perempuan</option></select>`;
+            } else if (fieldKey === 'marital_status') {
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="Belum Menikah" ${currentUserData.marital_status==='Belum Menikah'?'selected':''}>Belum Menikah</option><option value="Menikah" ${currentUserData.marital_status==='Menikah'?'selected':''}>Menikah</option><option value="Cerai" ${currentUserData.marital_status==='Cerai'?'selected':''}>Cerai</option></select>`;
+            } else {
+                let val = currentUserData[fieldKey] || '';
+                container.innerHTML = `<input type="text" id="modal-dynamic-input" value="${val}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-green-600" />`;
+            }
 
-        async function saveNewRole() {
-            const newRole = document.getElementById('new-role-input').value.trim();
-            if (!newRole) return alert('Jabatan tidak boleh kosong!');
+            document.getElementById('edit-field-modal').classList.remove('hidden');
+        }
+        function closeEditFieldModal() { document.getElementById('edit-field-modal').classList.add('hidden'); }
+
+        async function saveProfileField() {
+            const val = document.getElementById('modal-dynamic-input').value.trim();
+            let updatePayload = {};
+            updatePayload[activeEditField] = val;
+
+            // Jika ubah nama lengkap, sinkronkan juga full_name metadata
+            if (activeEditField === 'full_name') updatePayload['full_name'] = val;
+
             try {
-                const { error } = await supabaseClient.auth.updateUser({ data: { jabatan: newRole } });
+                const { error } = await supabaseClient.auth.updateUser({ data: updatePayload });
                 if (error) throw error;
-                currentUserData.jabatan = newRole;
-                document.getElementById('prof-role').innerText = newRole;
-                document.getElementById('user-display-role').innerText = newRole;
-                alert('Jabatan berhasil diperbarui!');
-                closeEditRoleModal();
-            } catch (err) { alert('Gagal ubah jabatan: ' + err.message); }
+                currentUserData[activeEditField] = val;
+                renderProfileData();
+                alert('Berhasil diperbarui!');
+                closeEditFieldModal();
+            } catch(err) { alert('Gagal: ' + err.message); }
         }
 
         async function uploadProfilePhoto(event) {
             const file = event.target.files[0];
             if (!file) return;
             try {
-                alert('Mengunggah foto profil...');
+                alert('Mengunggah foto...');
                 const fileName = `profile_${currentUserEmail.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.jpg`;
-                const { error: uploadErr } = await supabaseClient.storage.from('foto-absensi').upload(fileName, file, { upsert: true });
-                if (uploadErr) throw uploadErr;
-
+                await supabaseClient.storage.from('foto-absensi').upload(fileName, file, { upsert: true });
                 const { data: urlData } = supabaseClient.storage.from('foto-absensi').getPublicUrl(fileName);
-                const photoUrl = urlData.publicUrl;
-
-                const { error: updateErr } = await supabaseClient.auth.updateUser({ data: { foto_url: photoUrl } });
-                if (updateErr) throw updateErr;
-
-                currentUserData.foto_url = photoUrl;
+                
+                await supabaseClient.auth.updateUser({ data: { foto_url: urlData.publicUrl } });
+                currentUserData.foto_url = urlData.publicUrl;
                 renderProfileData();
-                alert('Foto profil berhasil diperbarui!');
-            } catch (err) { alert('Gagal upload foto: ' + err.message); }
+                alert('Foto profil diperbarui!');
+            } catch (err) { alert('Gagal: ' + err.message); }
         }
 
         function initGeolocation() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        currentCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
-                        evaluateGPSWithUserOffice();
-                    },
-                    (error) => {
-                        const gpsBadge = document.getElementById('gps-status-badge');
-                        gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
-                        gpsBadge.innerHTML = `<i class="fa-solid fa-ban mr-1"></i> GPS Tidak Aktif`;
-                    },
+                    (pos) => { currentCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude }; evaluateGPSWithUserOffice(); },
+                    () => { document.getElementById('gps-status-badge').innerHTML = `<i class="fa-solid fa-ban"></i> GPS Off`; },
                     { enableHighAccuracy: true }
                 );
             }
@@ -560,11 +536,7 @@
             if (!currentCoords) return;
             const gpsBadge = document.getElementById('gps-status-badge');
             let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
-            
-            if (!targetOffice) {
-                gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> GPS Aktif (Belum ada data kantor)`;
-                return;
-            }
+            if (!targetOffice) return;
 
             const dist = calculateDistance(currentCoords.lat, currentCoords.lng, targetOffice.lat, targetOffice.lng);
             if (dist <= targetOffice.radius) {
@@ -572,45 +544,34 @@
                 gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> Dalam Area ${targetOffice.unit_name} (${Math.round(dist)}m)`;
             } else {
                 gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
-                gpsBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Luar Area ${targetOffice.unit_name} (${Math.round(dist)}m)`;
+                gpsBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Luar Area (${Math.round(dist)}m)`;
             }
         }
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3;
-            const φ1 = lat1 * Math.PI/180;
-            const φ2 = lat2 * Math.PI/180;
-            const Δφ = (lat2-lat1) * Math.PI/180;
-            const Δλ = (lon2-lon1) * Math.PI/180;
-            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const φ1 = lat1 * Math.PI/180, φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180, Δλ = (lon2-lon1) * Math.PI/180;
+            const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
         function switchTab(tab) {
-            const sections = ['home-section', 'log-section', 'karyawan-section', 'inbox-section', 'profile-section'];
-            sections.forEach(sec => document.getElementById(sec).classList.add('hidden'));
-
-            const navItems = ['nav-home', 'nav-karyawan', 'nav-log', 'nav-inbox', 'nav-profile'];
-            navItems.forEach(item => {
-                const el = document.getElementById(item);
+            ['home-section', 'log-section', 'karyawan-section', 'inbox-section', 'profile-section'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            ['nav-home', 'nav-karyawan', 'nav-log', 'nav-inbox', 'nav-profile'].forEach(n => {
+                const el = document.getElementById(n);
                 el.className = "flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none";
                 el.querySelector('span').className = "text-[10px] font-medium";
             });
 
             document.getElementById(tab + '-section').classList.remove('hidden');
-            const activeNav = document.getElementById('nav-' + tab);
-            activeNav.className = "flex flex-col items-center text-green-700 cursor-pointer transition select-none";
-            activeNav.querySelector('span').className = "text-[10px] font-bold";
+            const active = document.getElementById('nav-' + tab);
+            active.className = "flex flex-col items-center text-green-700 cursor-pointer transition select-none";
+            active.querySelector('span').className = "text-[10px] font-bold";
 
-            if (tab === 'log') {
-                fetchAttendanceLogs();
-            } else if (tab === 'profile' || tab === 'karyawan') {
-                if (!currentUser) {
-                    alert('Silakan login terlebih dahulu untuk mengakses menu ini!');
-                    openAuthModal();
-                    switchTab('home');
-                    return;
-                }
+            if (tab === 'log') fetchAttendanceLogs();
+            else if (tab === 'profile' || tab === 'karyawan') {
+                if (!currentUser) { alert('Silakan login terlebih dahulu!'); openAuthModal(); switchTab('home'); return; }
                 if (tab === 'profile') renderProfileData();
                 if (tab === 'karyawan') renderKaryawanData();
             }
@@ -623,6 +584,7 @@
             document.getElementById('prof-role').innerText = role;
             document.getElementById('user-display-role').innerText = role;
             document.getElementById('prof-email').innerText = currentUserData.email || '-';
+            document.getElementById('prof-nik').innerText = currentUserData.nik || '-';
             document.getElementById('prof-nip').innerText = currentUserData.nip || '-';
             document.getElementById('prof-phone').innerText = currentUserData.phone || '-';
             document.getElementById('prof-religion').innerText = currentUserData.religion || '-';
@@ -630,116 +592,64 @@
             document.getElementById('prof-marital').innerText = currentUserData.marital_status || '-';
             document.getElementById('prof-unit').innerText = currentUserData.unit || 'Belum dipilih';
 
-            const superAdminContainer = document.getElementById('superadmin-menu-container');
-            if (currentUserEmail === 'mastrisnobpb@gmail.com') {
-                superAdminContainer.classList.remove('hidden');
-            } else {
-                superAdminContainer.classList.add('hidden');
-            }
+            if (currentUserEmail === 'mastrisnobpb@gmail.com') document.getElementById('superadmin-menu-container').classList.remove('hidden');
+            else document.getElementById('superadmin-menu-container').classList.add('hidden');
 
-            const avatarContainer = document.getElementById('profile-avatar-container');
-            if (currentUserData.foto_url) {
-                avatarContainer.innerHTML = `<img src="${currentUserData.foto_url}" class="w-full h-full object-cover" />`;
-            } else {
-                const initial = name.charAt(0).toUpperCase();
-                avatarContainer.innerHTML = `<span class="text-gold font-bold text-3xl">${initial}</span>`;
-            }
+            const av = document.getElementById('profile-avatar-container');
+            if (currentUserData.foto_url) av.innerHTML = `<img src="${currentUserData.foto_url}" class="w-full h-full object-cover" />`;
+            else av.innerHTML = `<span class="text-gold font-bold text-3xl">${name.charAt(0).toUpperCase()}</span>`;
         }
 
         function renderKaryawanData() {
             const name = currentUserData.full_name || currentUser || 'Tamu';
-            const role = currentUserData.jabatan || 'Staff Operational';
             document.getElementById('karyawan-name-card').innerText = name;
-            document.getElementById('karyawan-role-card').innerText = role;
+            document.getElementById('karyawan-role-card').innerText = currentUserData.jabatan || 'Staff Operational';
             document.getElementById('karyawan-initial').innerText = name.charAt(0).toUpperCase();
         }
 
         async function fetchAttendanceLogs() {
             const logList = document.getElementById('log-list');
-            logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data riwayat...</p>';
-
+            logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Memuat...</p>';
             try {
-                const { data, error } = await supabaseClient.from('attendance_logs').select('*').order('timestamp', { ascending: false });
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi.</p>';
-                    return;
-                }
-
-                logList.innerHTML = data.map(item => {
-                    const timeStr = new Date(item.timestamp || Date.now()).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-                    const isIn = item.action_type === 'Clock In';
-                    const badgeColor = isIn ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-                    const iconClass = isIn ? 'fa-arrow-right-to-bracket text-green-700' : 'fa-arrow-right-from-bracket text-red-700';
-
-                    return `
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"><i class="fa-solid ${iconClass}"></i></div>
-                                <div>
-                                    <h4 class="font-bold text-xs text-gray-800">${item.user_name || 'Karyawan'}</h4>
-                                    <p class="text-[11px] text-gray-400">${timeStr}</p>
-                                </div>
-                            </div>
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${badgeColor}">${item.action_type}</span>
+                const { data } = await supabaseClient.from('attendance_logs').select('*').order('timestamp', { ascending: false });
+                if (!data || data.length === 0) { logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Kosong</p>'; return; }
+                logList.innerHTML = data.map(item => `
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border flex items-center justify-between">
+                        <div>
+                            <h4 class="font-bold text-xs text-gray-800">${item.user_name}</h4>
+                            <p class="text-[11px] text-gray-400">${new Date(item.timestamp || Date.now()).toLocaleString()}</p>
                         </div>
-                    `;
-                }).join('');
-            } catch (err) {
-                logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data: ${err.message}</p>`;
-            }
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${item.action_type==='Clock In'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${item.action_type}</span>
+                    </div>
+                `).join('');
+            } catch(e) {}
         }
 
         async function checkSession() {
             try {
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
-                if (error) throw error;
-                
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 const btnContainer = document.getElementById('auth-action-btn-container');
 
                 if (session) {
                     const meta = session.user.user_metadata || {};
                     const userName = meta.full_name || session.user.email.split('@')[0];
-                    const role = meta.jabatan || 'Staff Operational';
-                    
                     currentUser = userName;
                     currentUserEmail = session.user.email;
                     currentUserData = {
-                        full_name: userName,
-                        email: session.user.email,
-                        jabatan: role,
-                        unit: meta.unit,
-                        nip: meta.nip,
-                        phone: meta.phone,
-                        religion: meta.religion,
-                        gender: meta.gender,
-                        marital_status: meta.marital_status,
-                        foto_url: meta.foto_url
+                        full_name: userName, email: session.user.email,
+                        jabatan: meta.jabatan || 'Staff Operational', unit: meta.unit,
+                        nik: meta.nik, nip: meta.nip, phone: meta.phone,
+                        religion: meta.religion, gender: meta.gender, marital_status: meta.marital_status, foto_url: meta.foto_url
                     };
-
                     document.getElementById('user-display-name').innerText = userName;
-                    document.getElementById('user-display-role').innerText = role;
-
-                    btnContainer.innerHTML = `
-                        <button onclick="logout()" class="bg-red-500/25 hover:bg-red-500/35 active:scale-95 text-red-100 text-xs font-semibold py-2 px-3 rounded-full border border-red-400/35 transition flex items-center gap-1 cursor-pointer">
-                            <i class="fa-solid fa-power-off"></i> Keluar
-                        </button>
-                    `;
+                    document.getElementById('user-display-role').innerText = currentUserData.jabatan;
+                    btnContainer.innerHTML = `<button onclick="logout()" class="bg-red-500/25 text-red-100 text-xs font-semibold py-2 px-3 rounded-full border border-red-400/35 cursor-pointer"><i class="fa-solid fa-power-off"></i> Keluar</button>`;
                 } else {
+                    currentUser = null; currentUserEmail = null; currentUserData = {};
                     document.getElementById('user-display-name').innerText = 'Tamu';
-                    document.getElementById('user-display-role').innerText = 'Staff Operational';
-                    currentUser = null;
-                    currentUserEmail = null;
-                    currentUserData = {};
-
-                    btnContainer.innerHTML = `
-                        <button onclick="openAuthModal()" class="bg-white/25 hover:bg-white/35 active:scale-95 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1 cursor-pointer">
-                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
-                        </button>
-                    `;
+                    btnContainer.innerHTML = `<button onclick="openAuthModal()" class="bg-white/25 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 cursor-pointer"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar</button>`;
                 }
-            } catch (err) { console.error("Sesi error:", err); }
+            } catch(e) {}
         }
 
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
@@ -752,18 +662,10 @@
             document.getElementById('auth-switch-text').innerText = isLoginMode ? 'Belum punya akun?' : 'Sudah punya akun?';
             document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Daftar di sini' : 'Login di sini';
             
-            const registerFields = document.getElementById('register-fields');
-            const forgotLink = document.getElementById('forgot-password-link');
-            
-            if (isLoginMode) {
-                registerFields.classList.add('hidden');
-                forgotLink.classList.remove('hidden');
-                document.getElementById('fullname').removeAttribute('required');
-            } else {
-                registerFields.classList.remove('hidden');
-                forgotLink.classList.add('hidden');
-                document.getElementById('fullname').setAttribute('required', 'true');
-            }
+            const reg = document.getElementById('register-fields');
+            const forgot = document.getElementById('forgot-password-link');
+            if (isLoginMode) { reg.classList.add('hidden'); forgot.classList.remove('hidden'); document.getElementById('fullname').removeAttribute('required'); }
+            else { reg.classList.remove('hidden'); forgot.classList.add('hidden'); document.getElementById('fullname').setAttribute('required', 'true'); }
         }
 
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
@@ -771,9 +673,7 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const btn = document.getElementById('auth-btn');
-            
-            btn.innerText = "Memproses...";
-            btn.disabled = true;
+            btn.innerText = "Memproses..."; btn.disabled = true;
 
             try {
                 if (isLoginMode) {
@@ -783,31 +683,19 @@
                     closeAuthModal();
                     checkSession();
                 } else {
-                    const fullName = document.getElementById('fullname').value;
-                    const unit = document.getElementById('reg-unit').value;
-                    const jabatan = document.getElementById('reg-jabatan').value;
-                    const nip = document.getElementById('nip').value;
-                    const phone = document.getElementById('phone').value;
-                    const religion = document.getElementById('religion').value;
-                    const gender = document.getElementById('gender').value;
-                    const marital = document.getElementById('marital').value;
+                    const full_name = document.getElementById('fullname').value;
+                    const nik = document.getElementById('nik').value;
 
                     const { error } = await supabaseClient.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: { 
-                            data: { full_name: fullName, unit, jabatan, nip, phone, religion, gender, marital_status: marital } 
-                        }
+                        email, password,
+                        options: { data: { full_name, nik, jabatan: 'Staff Operational' } }
                     });
                     if (error) throw error;
                     alert('Registrasi berhasil! Silakan masuk.');
                     toggleAuthMode();
-                    document.getElementById('password').value = '';
                 }
             } catch (error) {
-                let msg = error.message || "Gagal memproses.";
-                if (msg === '{}') msg = "Email sudah terdaftar atau format salah.";
-                alert("Gagal: " + msg);
+                alert("Gagal: " + (error.message === '{}' ? 'Email sudah terdaftar atau format salah.' : error.message));
             } finally {
                 btn.innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
                 btn.disabled = false;
@@ -818,75 +706,45 @@
             await supabaseClient.auth.signOut();
             checkSession();
             switchTab('home');
-            alert('Berhasil keluar akun.');
+            alert('Berhasil keluar.');
         }
 
         async function recordAttendance(actionType) {
-            if (!currentUser) {
-                alert('Silakan "Login / Daftar" terlebih dahulu untuk melakukan absensi!');
-                openAuthModal();
-                return;
-            }
-
-            if (!currentCoords) {
-                alert('GPS belum terdeteksi. Aktifkan izin lokasi lalu muat ulang.');
-                initGeolocation();
-                return;
-            }
+            if (!currentUser) { alert('Silakan login terlebih dahulu!'); openAuthModal(); return; }
+            if (!currentCoords) { alert('GPS belum siap.'); initGeolocation(); return; }
 
             let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
-            if (!targetOffice) {
-                alert('Belum ada data titik lokasi kantor yang dikonfigurasi Super Admin.');
-                return;
-            }
+            if (!targetOffice) { alert('Belum ada data titik lokasi kantor.'); return; }
 
-            const distance = calculateDistance(currentCoords.lat, currentCoords.lng, targetOffice.lat, targetOffice.lng);
-
-            if (distance > targetOffice.radius) {
-                const confirmReq = confirm(`Anda berada di luar radius kantor ${targetOffice.unit_name} (${Math.round(distance)}m).\nKirim permohonan persetujuan ke Kepala Unit?`);
-                if (confirmReq) {
-                    await supabaseClient.from('request_absensi').insert([{ 
-                        nama: currentUser, jenis_request: actionType, alasan: `Diluar radius ${targetOffice.unit_name} (${Math.round(distance)}m)`, status: 'Pending Kepala Unit' 
-                    }]);
-                    alert('Permohonan absensi luar area dikirim!');
+            const dist = calculateDistance(currentCoords.lat, currentCoords.lng, targetOffice.lat, targetOffice.lng);
+            if (dist > targetOffice.radius) {
+                if (confirm(`Diluar radius kantor (${Math.round(dist)}m). Kirim permohonan ke Kepala Unit?`)) {
+                    await supabaseClient.from('request_absensi').insert([{ nama: currentUser, jenis_request: actionType, alasan: `Diluar radius (${Math.round(dist)}m)`, status: 'Pending' }]);
+                    alert('Permohonan terkirim!');
                 }
                 return;
             }
 
-            const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
-            const btnEl = document.getElementById(btnId);
-            const orig = btnEl.innerHTML;
-            btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
-            btnEl.disabled = true;
-
             const todayStr = new Date().toISOString().split('T')[0];
-
             try {
-                const { data: existingLogs } = await supabaseClient.from('attendance_logs').select('*').eq('user_name', currentUser);
-                const todayLogs = (existingLogs || []).filter(item => new Date(item.timestamp || Date.now()).toISOString().split('T')[0] === todayStr);
-
-                const hasClockIn = todayLogs.some(item => item.action_type === 'Clock In');
-                const clockOutLog = todayLogs.find(item => item.action_type === 'Clock Out');
+                const { data: logs } = await supabaseClient.from('attendance_logs').select('*').eq('user_name', currentUser);
+                const todayLogs = (logs || []).filter(item => new Date(item.timestamp || Date.now()).toISOString().split('T')[0] === todayStr);
 
                 if (actionType === 'Clock In') {
-                    if (hasClockIn) { alert('Anda sudah Clock In hari ini!'); return; }
+                    if (todayLogs.some(i => i.action_type === 'Clock In')) { alert('Sudah Clock In hari ini!'); return; }
                     await supabaseClient.from('attendance_logs').insert([{ user_name: currentUser, action_type: 'Clock In' }]);
                     alert('Berhasil Clock In!');
-                } else if (actionType === 'Clock Out') {
-                    if (clockOutLog) {
-                        await supabaseClient.from('attendance_logs').update({ timestamp: new Date().toISOString() }).eq('id', clockOutLog.id);
-                        alert('Berhasil Clock Out (Diperbarui ke data terakhir)!');
+                } else {
+                    const co = todayLogs.find(i => i.action_type === 'Clock Out');
+                    if (co) {
+                        await supabaseClient.from('attendance_logs').update({ timestamp: new Date().toISOString() }).eq('id', co.id);
+                        alert('Clock Out diperbarui!');
                     } else {
                         await supabaseClient.from('attendance_logs').insert([{ user_name: currentUser, action_type: 'Clock Out' }]);
                         alert('Berhasil Clock Out!');
                     }
                 }
-            } catch (err) {
-                alert('Gagal: ' + err.message);
-            } finally {
-                btnEl.innerHTML = orig;
-                btnEl.disabled = false;
-            }
+            } catch(e) { alert('Gagal: ' + e.message); }
         }
     </script>
 </body>
