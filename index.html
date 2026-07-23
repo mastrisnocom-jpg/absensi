@@ -52,7 +52,7 @@
                             <span id="gps-status-badge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold"><i class="fa-solid fa-location-crosshairs mr-1"></i> Mendeteksi GPS...</span>
                         </div>
                         <div class="flex gap-3">
-                            <button onclick="recordAttendance('Clock In')" id="btn-in" class="flex-1 bg-green-800 hover:bg-green-700 active:scale-95 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition shadow-sm cursor-pointer">
+                            <button onclick="prepareClockIn()" id="btn-in" class="flex-1 bg-green-800 hover:bg-green-700 active:scale-95 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition shadow-sm cursor-pointer">
                                 <i class="fa-solid fa-arrow-right-to-bracket"></i> Clock In
                             </button>
                             <button onclick="recordAttendance('Clock Out')" id="btn-out" class="flex-1 bg-primary-dark hover:bg-green-900 active:scale-95 text-white py-3 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition shadow-sm cursor-pointer">
@@ -136,7 +136,7 @@
                 </div>
             </div>
 
-            <!-- 5. INBOX / CHAT 2 ARAH TAB -->
+            <!-- 5. INBOX TAB -->
             <div id="inbox-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xl font-bold text-gray-800" id="inbox-header-title">Kotak Masuk (Obrolan)</h2>
@@ -256,7 +256,6 @@
                         </button>
                     </div>
 
-                    <!-- TOMBOL AKSI AKUN: KELUAR DAN HAPUS AKUN -->
                     <div class="pt-2 space-y-2 border-t mt-2">
                         <button onclick="logout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl transition text-xs border border-red-200 cursor-pointer flex items-center justify-center gap-1">
                             <i class="fa-solid fa-power-off"></i> Keluar Akun
@@ -269,6 +268,25 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- ================= MODAL KAMERA SELFIE CLOCK IN ================= -->
+        <div id="selfie-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative space-y-3 text-center">
+                <button onclick="closeSelfieModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <h3 class="text-base font-bold text-gray-800">Verifikasi Wajah (Clock In)</h3>
+                <p class="text-[11px] text-gray-500">Posisikan wajah Anda di depan kamera untuk verifikasi foto selfie.</p>
+
+                <!-- Tampilan Kamera Video -->
+                <div class="relative w-full h-64 bg-black rounded-xl overflow-hidden shadow-inner flex items-center justify-center">
+                    <video id="selfie-video" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <canvas id="selfie-canvas" class="hidden"></canvas>
+                </div>
+
+                <button onclick="captureAndVerifyClockIn()" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3 rounded-xl transition text-xs shadow-md cursor-pointer flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-camera"></i> Ambil Foto & Clock In
+                </button>
+            </div>
         </div>
 
         <!-- ================= BOTTOM NAVIGATION ================= -->
@@ -499,86 +517,101 @@
         let currentCoords = null;
         let officeLocations = [];
         let activeEditField = null;
-        let activeChatUser = null; 
+        let activeChatUser = null;
+        let mediaStream = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
                 checkSession();
-                
                 supabaseClient.auth.onAuthStateChange((event, session) => {
                     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') checkSession();
                     else if (event === 'SIGNED_OUT') clearUserState();
                 });
-
                 fetchOfficeLocations();
             }
             initGeolocation();
         });
 
-        // ================= PENGECEKAN PESAN UNREAD (BADGE NOTIFIKASI) =================
+        // ================= KAMERA & SELFIE VERIFIKASI CLOCK IN =================
+        async function prepareClockIn() {
+            if (!currentUser) {
+                alert('Akses Ditolak: Anda belum login!');
+                openAuthModal();
+                return;
+            }
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            try {
+                const { data: logsToday } = await supabaseClient
+                    .from('attendance_logs').select('*')
+                    .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
+
+                if ((logsToday || []).some(l => l.action_type === 'Clock In')) {
+                    alert('Anda sudah melakukan Clock In hari ini!');
+                    return;
+                }
+            } catch(e) {}
+
+            // Buka Modal Kamera Selfie
+            document.getElementById('selfie-modal').classList.remove('hidden');
+            const video = document.getElementById('selfie-video');
+
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user" },
+                    audio: false
+                });
+                video.srcObject = mediaStream;
+            } catch (err) {
+                alert("Gagal mengakses kamera: Pastikan izin kamera diaktifkan di browser Anda.");
+                closeSelfieModal();
+            }
+        }
+
+        function closeSelfieModal() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            document.getElementById('selfie-modal').classList.add('hidden');
+        }
+
+        async function captureAndVerifyClockIn() {
+            const video = document.getElementById('selfie-video');
+            const canvas = document.getElementById('selfie-canvas');
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 240;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const selfieBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+            closeSelfieModal();
+
+            // Lanjutkan Proses Clock In
+            await recordAttendance('Clock In', selfieBase64);
+        }
+
+        // ================= PENGECEKAN NOTIFIKASI & LAINNYA =================
         async function checkUnreadMessages() {
             if (!currentUserEmail) return;
             try {
                 const { count } = await supabaseClient
-                    .from('messages')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('receiver_email', currentUserEmail)
-                    .eq('is_read', false);
+                    .from('messages').select('*', { count: 'exact', head: true })
+                    .eq('receiver_email', currentUserEmail).eq('is_read', false);
 
                 const badge = document.getElementById('inbox-badge');
                 if (badge) {
                     if (count && count > 0) {
                         badge.innerText = count > 99 ? '99+' : count;
                         badge.classList.remove('hidden');
-                    } else {
-                        badge.classList.add('hidden');
-                    }
+                    } else { badge.classList.add('hidden'); }
                 }
             } catch(e) {}
         }
 
-        // ================= FUNGSI HAPUS AKUN PERMANEN =================
-        async function deleteAccountPermanently() {
-            if (!currentUserEmail) {
-                alert('Anda belum login!');
-                return;
-            }
-
-            if (currentUserEmail === 'mastrisnocom@gmail.com') {
-                alert('Akses Ditolak: Akun Super Admin Utama tidak dapat dihapus!');
-                return;
-            }
-
-            const confirm1 = confirm("PERINGATAN SANGAT PENTING!\n\nApakah Anda yakin ingin MENGHAPUS AKUN ANDA PERMANEN?\nSeluruh data profil, riwayat absensi, dan pesan Anda akan dihapus dari sistem.");
-            if (!confirm1) return;
-
-            const confirm2 = prompt(`Ketikkan email Anda (${currentUserEmail}) untuk mengonfirmasi penghapusan permanen:`);
-            if (confirm2 !== currentUserEmail) {
-                alert("Konfirmasi batal. Email yang diketikkan tidak sesuai.");
-                return;
-            }
-
-            try {
-                // Hapus data pengguna dari tabel-tabel utama database
-                await supabaseClient.from('profiles').delete().eq('user_email', currentUserEmail);
-                await supabaseClient.from('attendance_logs').delete().eq('user_email', currentUserEmail);
-                await supabaseClient.from('messages').delete().or(`sender_email.eq.${currentUserEmail},receiver_email.eq.${currentUserEmail}`);
-                await supabaseClient.from('request_absensi').delete().eq('user_email', currentUserEmail);
-
-                // Sign out dari Supabase Auth
-                await supabaseClient.auth.signOut();
-                clearUserState();
-                switchTab('home');
-
-                alert("Akun Anda telah berhasil dihapus secara permanen dari sistem.");
-            } catch (err) {
-                alert("Gagal menghapus akun: " + err.message);
-            }
-        }
-
         function handleMenuClick(menuName) {
             if (!currentUser) {
-                alert('Akses Ditolak: Anda belum login! Silakan Login atau Daftar akun terlebih dahulu.');
+                alert('Akses Ditolak: Anda belum login!');
                 openAuthModal();
                 return;
             }
@@ -639,7 +672,7 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
-        async function recordAttendance(actionType) {
+        async function recordAttendance(actionType, selfieBase64 = null) {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
                 openAuthModal();
@@ -648,21 +681,18 @@
 
             const todayStr = new Date().toISOString().split('T')[0];
 
-            try {
-                const { data: logsToday } = await supabaseClient
-                    .from('attendance_logs').select('*')
-                    .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
+            if (actionType === 'Clock Out') {
+                try {
+                    const { data: logsToday } = await supabaseClient
+                        .from('attendance_logs').select('*')
+                        .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
 
-                const existingClockIn = (logsToday || []).some(l => l.action_type === 'Clock In');
-                const existingClockOut = (logsToday || []).some(l => l.action_type === 'Clock Out');
-
-                if (actionType === 'Clock In' && existingClockIn) {
-                    alert('Anda sudah melakukan Clock In hari ini!'); return;
-                }
-                if (actionType === 'Clock Out' && existingClockOut) {
-                    alert('Anda sudah melakukan Clock Out hari ini!'); return;
-                }
-            } catch(e) {}
+                    if ((logsToday || []).some(l => l.action_type === 'Clock Out')) {
+                        alert('Anda sudah melakukan Clock Out hari ini!');
+                        return;
+                    }
+                } catch(e) {}
+            }
 
             let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
             let isOutOfRange = false, distance = 0;
@@ -702,7 +732,8 @@
             try {
                 const { error } = await supabaseClient.from('attendance_logs').insert([{ 
                     user_email: currentUserEmail, user_name: currentUser, action_type: actionType,
-                    jabatan: userRole, unit: currentUserData.unit || 'Pusat', date_recorded: todayStr
+                    jabatan: userRole, unit: currentUserData.unit || 'Pusat', date_recorded: todayStr,
+                    foto_url: selfieBase64 || ''
                 }]);
                 if (error) throw error;
                 alert(`Berhasil ${actionType}! Data absensi dicatat.`);
@@ -1047,8 +1078,8 @@
                 logList.innerHTML = data.map(item => `
                     <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                <i class="fa-solid ${item.action_type==='Clock In'?'fa-arrow-right-to-bracket text-green-700':'fa-arrow-right-from-bracket text-red-700'}"></i>
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                                ${item.foto_url ? `<img src="${item.foto_url}" class="w-full h-full object-cover" />` : `<i class="fa-solid ${item.action_type==='Clock In'?'fa-arrow-right-to-bracket text-green-700':'fa-arrow-right-from-bracket text-red-700'}"></i>`}
                             </div>
                             <div>
                                 <h4 class="font-bold text-xs text-gray-800">${item.user_name} (${item.jabatan || 'Teknisi/User'})</h4>
@@ -1119,6 +1150,27 @@
             } catch(e) { alert('Gagal: ' + e.message); }
         }
 
+        async function deleteAccountPermanently() {
+            if (!currentUserEmail) { alert('Anda belum login!'); return; }
+            if (currentUserEmail === 'mastrisnocom@gmail.com') { alert('Akses Ditolak: Akun Super Admin Utama tidak dapat dihapus!'); return; }
+
+            if (!confirm("PERINGATAN!\n\nApakah Anda yakin ingin MENGHAPUS AKUN ANDA PERMANEN?")) return;
+            const confirm2 = prompt(`Ketikkan email Anda (${currentUserEmail}) untuk mengonfirmasi:`);
+            if (confirm2 !== currentUserEmail) { alert("Konfirmasi batal."); return; }
+
+            try {
+                await supabaseClient.from('profiles').delete().eq('user_email', currentUserEmail);
+                await supabaseClient.from('attendance_logs').delete().eq('user_email', currentUserEmail);
+                await supabaseClient.from('messages').delete().or(`sender_email.eq.${currentUserEmail},receiver_email.eq.${currentUserEmail}`);
+                await supabaseClient.from('request_absensi').delete().eq('user_email', currentUserEmail);
+
+                await supabaseClient.auth.signOut();
+                clearUserState();
+                switchTab('home');
+                alert("Akun Anda telah berhasil dihapus secara permanen.");
+            } catch (err) { alert("Gagal menghapus akun: " + err.message); }
+        }
+
         function openEditFieldModal(fieldKey, title) {
             if (!currentUser) { openAuthModal(); return; }
 
@@ -1136,24 +1188,24 @@
             if (fieldKey === 'jabatan') {
                 let roles = ['Teknisi/User', 'Kepala Unit', 'Kepala Kanwil', 'Kepala Divisi', 'Super Admin'];
                 let options = roles.map(r => `<option value="${r}" ${currentUserData.jabatan === r ? 'selected' : ''}>${r}</option>`).join('');
-                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white">${options}</select>`;
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border rounded-lg p-2 bg-white">${options}</select>`;
             } else if (fieldKey === 'unit') {
                 let options = officeLocations.map(o => `<option value="${o.unit_name}" ${currentUserData.unit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
-                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="">-- Pilih Unit Kantor --</option>${options}</select>`;
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border rounded-lg p-2 bg-white"><option value="">-- Pilih Unit Kantor --</option>${options}</select>`;
             } else if (fieldKey === 'religion') {
                 let religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];
                 let options = religions.map(r => `<option value="${r}" ${currentUserData.religion === r ? 'selected' : ''}>${r}</option>`).join('');
-                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white">${options}</select>`;
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border rounded-lg p-2 bg-white">${options}</select>`;
             } else if (fieldKey === 'gender') {
-                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="Laki-laki" ${currentUserData.gender==='Laki-laki'?'selected':''}>Laki-laki</option><option value="Perempuan" ${currentUserData.gender==='Perempuan'?'selected':''}>Perempuan</option></select>`;
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border rounded-lg p-2 bg-white"><option value="Laki-laki" ${currentUserData.gender==='Laki-laki'?'selected':''}>Laki-laki</option><option value="Perempuan" ${currentUserData.gender==='Perempuan'?'selected':''}>Perempuan</option></select>`;
             } else if (fieldKey === 'status_karyawan') {
-                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="Tetap">Tetap</option><option value="Kontrak">Kontrak</option><option value="Magang">Magang</option></select>`;
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border rounded-lg p-2 bg-white"><option value="Tetap">Tetap</option><option value="Kontrak">Kontrak</option><option value="Magang">Magang</option></select>`;
             } else if (fieldKey === 'dob') {
                 let val = currentUserData.dob || '';
-                container.innerHTML = `<input type="date" id="modal-dynamic-input" value="${val}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-green-600" />`;
+                container.innerHTML = `<input type="date" id="modal-dynamic-input" value="${val}" class="w-full border rounded-lg p-2 outline-none" />`;
             } else {
                 let val = currentUserData[fieldKey] || '';
-                container.innerHTML = `<input type="text" id="modal-dynamic-input" value="${val}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-green-600" />`;
+                container.innerHTML = `<input type="text" id="modal-dynamic-input" value="${val}" class="w-full border rounded-lg p-2 outline-none" />`;
             }
 
             document.getElementById('edit-field-modal').classList.remove('hidden');
