@@ -68,19 +68,19 @@
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition bg-amber-600"><i class="fa-solid fa-user-check"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Persetujuan<br>Absensi</span>
                     </div>
-                    <div class="flex flex-col items-center cursor-pointer group">
+                    <div onclick="handleMenuClick('Daftar Pengajuan')" class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-clipboard-list"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Daftar<br>Pengajuan</span>
                     </div>
-                    <div class="flex flex-col items-center cursor-pointer group">
+                    <div onclick="handleMenuClick('Request Absensi')" class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-clock-rotate-left"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Absensi</span>
                     </div>
-                    <div class="flex flex-col items-center cursor-pointer group">
+                    <div onclick="handleMenuClick('Request Lembur')" class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-business-time"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Lembur</span>
                     </div>
-                    <div class="flex flex-col items-center cursor-pointer group">
+                    <div onclick="handleMenuClick('Request Cuti')" class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-plane-departure"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Cuti</span>
                     </div>
@@ -91,6 +91,10 @@
                     <div onclick="switchTab('profile')" class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-regular fa-user"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Profil<br>Saya</span>
+                    </div>
+                    <div onclick="handleMenuClick('Slip Gaji')" class="flex flex-col items-center cursor-pointer group">
+                        <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-money-check-dollar"></i></div>
+                        <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Slip<br>Gaji</span>
                     </div>
                 </div>
             </div>
@@ -152,7 +156,6 @@
                         <h3 id="prof-nama" class="font-bold text-lg text-gray-800 text-center px-2">Tamu</h3>
                         <div class="flex items-center gap-2 mt-0.5">
                             <p id="prof-role" class="text-xs text-green-700 font-semibold">Teknisi / User</p>
-                            <!-- Tombol Edit Jabatan Khusus Super Admin -->
                             <button id="btn-edit-role" onclick="openEditFieldModal('jabatan', 'Pilih Role Jabatan')" class="hidden text-gray-400 hover:text-green-700 text-xs cursor-pointer"><i class="fa-solid fa-pen-to-square"></i></button>
                         </div>
                     </div>
@@ -170,7 +173,6 @@
                             <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-building w-5 text-green-700"></i> Unit Kantor</span>
                             <div class="flex items-center gap-1.5 overflow-hidden">
                                 <span id="prof-unit" class="font-bold text-gray-700 truncate">-</span>
-                                <!-- Tombol Edit Unit Kantor Khusus Super Admin -->
                                 <button id="btn-edit-unit" onclick="openEditFieldModal('unit', 'Pilih Unit Kantor')" class="hidden text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
                             </div>
                         </div>
@@ -266,16 +268,34 @@
             </div>
         </div>
 
-        <!-- ================= MODAL PENGATURAN SISTEM ================= -->
+        <!-- ================= MODAL PENGATURAN SISTEM (SUPER ADMIN) ================= -->
         <div id="sys-settings-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-4">
                 <button onclick="closeSystemSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                 <div class="text-center">
                     <h3 class="text-lg font-bold text-gray-800">Pengaturan Sistem</h3>
-                    <p class="text-gray-500 text-[11px] mt-0.5">Atur LongLat Unit Kantor</p>
+                    <p class="text-gray-500 text-[11px] mt-0.5">Kelola Persetujuan Akun & Unit Kantor</p>
                 </div>
 
-                <div class="space-y-3 text-xs">
+                <!-- SUB TAB SUPER ADMIN -->
+                <div class="flex border-b text-xs font-semibold">
+                    <button onclick="switchAdminSubTab('acc-approval')" id="adm-tab-acc-approval" class="flex-1 py-2 text-green-700 border-b-2 border-green-700">Persetujuan Akun</button>
+                    <button onclick="switchAdminSubTab('lokasi')" id="adm-tab-lokasi" class="flex-1 py-2 text-gray-400">Unit Kantor</button>
+                </div>
+
+                <!-- TAB 1: PERSETUJUAN AKUN BARU -->
+                <div id="adm-sec-acc-approval" class="space-y-3 text-xs">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-gray-700">Daftar Pendaftar Pending</h4>
+                        <button onclick="fetchPendingUserRegistrations()" class="text-[10px] bg-green-700 text-white px-2 py-1 rounded font-semibold"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                    </div>
+                    <div id="admin-pending-users-list" class="space-y-2 max-h-48 overflow-y-auto">
+                        <p class="text-gray-400 text-center py-4">Memuat data pendaftar...</p>
+                    </div>
+                </div>
+
+                <!-- TAB 2: LONGLAT KANTOR -->
+                <div id="adm-sec-lokasi" class="hidden space-y-3 text-xs">
                     <h4 class="font-bold text-gray-700">Tambah / Edit Unit Kantor</h4>
                     <div>
                         <label class="font-semibold text-gray-600">Nama Unit Kantor</label>
@@ -299,7 +319,7 @@
                     
                     <div class="pt-2 border-t">
                         <h5 class="font-bold text-gray-600 mb-1">Daftar Unit Terdaftar</h5>
-                        <div id="admin-office-list" class="space-y-1.5 max-h-28 overflow-y-auto"></div>
+                        <div id="admin-office-list" class="space-y-1.5 max-h-24 overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
@@ -372,6 +392,15 @@
             initGeolocation();
         });
 
+        function handleMenuClick(menuName) {
+            if (!currentUser) {
+                alert('Akses Ditolak: Anda belum login! Silakan Login atau Daftar akun terlebih dahulu.');
+                openAuthModal();
+                return;
+            }
+            alert(`Fitur "${menuName}" sedang dalam pengembangan.`);
+        }
+
         function initGeolocation() {
             const gpsBadge = document.getElementById('gps-status-badge');
             if ("geolocation" in navigator) {
@@ -428,17 +457,15 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
-        // FUNGSI ABSENSI DENGAN VALIDASI HARI INI & ATURAN JANGKAUAN
         async function recordAttendance(actionType) {
             if (!currentUser) {
-                alert('Silakan Login terlebih dahulu!');
+                alert('Akses Ditolak: Anda belum login! Silakan Login atau Daftar terlebih dahulu untuk mencatat absensi.');
                 openAuthModal();
                 return;
             }
 
             const todayStr = new Date().toISOString().split('T')[0];
 
-            // 1. CEK ABSENSI HARI INI AGAR TIDAK BISA CLOCK IN / CLOCK OUT GANDA
             try {
                 const { data: logsToday } = await supabaseClient
                     .from('attendance_logs')
@@ -460,7 +487,6 @@
                 }
             } catch(e) {}
 
-            // 2. CEK AREA JANGKAUAN KANTOR & ATURAN PERSETUJUAN (APPROVAL)
             let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
             let isOutOfRange = false;
             let distance = 0;
@@ -474,7 +500,6 @@
 
             const userRole = currentUserData.jabatan || 'Teknisi/User';
 
-            // JIKA ABSENSI DI LUAR JANGKAUAN
             if (isOutOfRange) {
                 let targetApprover = 'Kepala Unit';
                 if (userRole === 'Kepala Unit') targetApprover = 'Kepala Kanwil';
@@ -497,7 +522,6 @@
                 return;
             }
 
-            // JIKA DALAM JANGKAUAN -> LANGSUNG SIMPAN KE LOG ABSENSI
             const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
             const btnElement = document.getElementById(btnId);
             const originalContent = btnElement.innerHTML;
@@ -528,7 +552,6 @@
             }
         }
 
-        // FUNGSI LOAD PENDING REQUESTS UNTUK APPROVER
         async function fetchPendingRequests() {
             const listEl = document.getElementById('approval-list');
             listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat permohonan...</p>';
@@ -595,11 +618,11 @@
             } catch(e) { alert('Gagal: ' + e.message); }
         }
 
-        // EDIT PROFIL FIELD DYNAMIC (HANYA SUPER ADMIN BISA EDIT JABATAN & UNIT)
         function openEditFieldModal(fieldKey, title) {
+            if (!currentUser) { openAuthModal(); return; }
+
             const isSuperAdmin = (currentUserEmail === 'mastrisnocom@gmail.com' || currentUserData.jabatan === 'Super Admin');
 
-            // PROTEKSI TAMBAHAN SISI SCRIPT
             if ((fieldKey === 'jabatan' || fieldKey === 'unit') && !isSuperAdmin) {
                 alert('Akses Ditolak: Hanya Super Admin yang dapat mengubah Jabatan atau Unit Kantor!');
                 return;
@@ -644,6 +667,11 @@
             try {
                 const { error } = await supabaseClient.auth.updateUser({ data: updatePayload });
                 if (error) throw error;
+
+                if (activeEditField === 'jabatan' || activeEditField === 'unit') {
+                    await supabaseClient.from('profiles').update({ [activeEditField]: val }).eq('user_email', currentUserEmail);
+                }
+
                 currentUserData[activeEditField] = val;
                 renderProfileData();
                 alert('Data profil berhasil diperbarui!');
@@ -652,6 +680,7 @@
         }
 
         async function uploadProfilePhoto(event) {
+            if (!currentUser) { openAuthModal(); return; }
             const file = event.target.files[0];
             if (!file) return;
             try {
@@ -667,7 +696,6 @@
             } catch (err) { alert('Gagal upload: ' + err.message); }
         }
 
-        // TAMPILAN DATA PROFIL SAYA
         function renderProfileData() {
             const name = currentUserData.full_name || currentUser || 'Tamu';
             
@@ -682,7 +710,7 @@
             document.getElementById('prof-nama').innerText = name;
             document.getElementById('prof-role').innerText = role;
             document.getElementById('user-display-role').innerText = role;
-            document.getElementById('prof-email').innerText = currentUserData.email || '-';
+            document.getElementById('prof-email').innerText = currentUserData.email || 'Belum Login';
             document.getElementById('prof-nip').innerText = currentUserData.nip || '-';
             document.getElementById('prof-unit').innerText = currentUserData.unit || 'Belum dipilih';
             document.getElementById('prof-gender').innerText = currentUserData.gender || '-';
@@ -691,7 +719,6 @@
             document.getElementById('prof-status').innerText = currentUserData.status_karyawan || '-';
             document.getElementById('prof-dob').innerText = currentUserData.dob || '-';
 
-            // KONTROL VISIBILITAS TOMBOL EDIT KHUSUS SUPER ADMIN
             const btnEditRole = document.getElementById('btn-edit-role');
             const btnEditUnit = document.getElementById('btn-edit-unit');
 
@@ -705,7 +732,6 @@
                 else btnEditUnit.classList.add('hidden');
             }
 
-            // HAK AKSES CONTAINER MENU SUPER ADMIN
             const superAdminContainer = document.getElementById('superadmin-menu-container');
             if (isSuperAdmin) {
                 superAdminContainer.classList.remove('hidden');
@@ -713,7 +739,6 @@
                 superAdminContainer.classList.add('hidden');
             }
 
-            // MENU PERSETUJUAN (APPROVAL) TAMPIL KHUSUS UNTUK ATASAN DAN SUPER ADMIN
             const approvalMenu = document.getElementById('menu-approval-container');
             if (isSuperAdmin || ['Kepala Divisi', 'Kepala Kanwil', 'Kepala Unit'].includes(role)) {
                 approvalMenu.classList.remove('hidden');
@@ -734,11 +759,63 @@
             }
         }
 
+        // CONTROL PENGATURAN SUPER ADMIN
         function openSystemSettingsModal() {
             renderAdminOfficeList();
+            fetchPendingUserRegistrations();
             document.getElementById('sys-settings-modal').classList.remove('hidden');
         }
         function closeSystemSettingsModal() { document.getElementById('sys-settings-modal').classList.add('hidden'); }
+
+        function switchAdminSubTab(sub) {
+            ['acc-approval', 'lokasi'].forEach(s => {
+                document.getElementById('adm-sec-' + s).classList.add('hidden');
+                document.getElementById('adm-tab-' + s).className = "flex-1 py-2 text-gray-400";
+            });
+            document.getElementById('adm-sec-' + sub).classList.remove('hidden');
+            document.getElementById('adm-tab-' + sub).className = "flex-1 py-2 text-green-700 border-b-2 border-green-700";
+        }
+
+        // FUNGSI LOAD & APPROVE PENDAFTAR BARU
+        async function fetchPendingUserRegistrations() {
+            const listEl = document.getElementById('admin-pending-users-list');
+            listEl.innerHTML = '<p class="text-gray-400 text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Memuat pendaftar...</p>';
+
+            try {
+                const { data, error } = await supabaseClient.from('profiles').select('*').eq('is_approved', false).order('created_at', { ascending: false });
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = '<p class="text-gray-400 text-center py-4">Tidak ada pendaftar pending saat ini.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.map(p => `
+                    <div class="bg-gray-50 p-2.5 rounded-lg border flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-gray-800">${p.full_name}</p>
+                            <p class="text-[10px] text-gray-500">${p.user_email}</p>
+                        </div>
+                        <button onclick="approveUserAccount('${p.user_email}')" class="bg-green-700 hover:bg-green-800 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition">
+                            Setujui Akun
+                        </button>
+                    </div>
+                `).join('');
+            } catch(e) {
+                listEl.innerHTML = '<p class="text-red-500 text-center py-4">Gagal memuat data.</p>';
+            }
+        }
+
+        async function approveUserAccount(targetEmail) {
+            try {
+                const { error } = await supabaseClient.from('profiles').update({ is_approved: true }).eq('user_email', targetEmail);
+                if (error) throw error;
+                alert(`Akun (${targetEmail}) berhasil disetujui! Pengguna kini dapat login.`);
+                fetchPendingUserRegistrations();
+            } catch(e) {
+                alert('Gagal menyetujui akun: ' + e.message);
+            }
+        }
 
         async function addNewOfficeUnit() {
             const name = document.getElementById('admin-unit-name').value.trim();
@@ -792,7 +869,7 @@
             } catch (err) { logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data.</p>`; }
         }
 
-        // AUTHENTICATION
+        // AUTHENTICATION DENGAN PENGECEKAN PERSETUJUAN SUPER ADMIN
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
@@ -831,7 +908,7 @@
                 } else {
                     const fullName = document.getElementById('fullname').value.trim();
                     await doSignUp(email, password, fullName);
-                    alert('Registrasi berhasil! Silakan klik Login untuk masuk.');
+                    alert('Registrasi berhasil! Akun Anda membutuhkan persetujuan Super Admin sebelum dapat digunakan untuk login.');
                     toggleAuthMode();
                 }
             } catch (error) {
@@ -843,46 +920,66 @@
         });
 
         async function doLogin(email, password) {
+            let authResult = null;
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (!error && data && data.session) return data;
+                if (!error && data && data.session) authResult = data;
             } catch (err) {}
 
-            const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-                method: 'POST',
-                headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
+            if (!authResult) {
+                const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                    method: 'POST',
+                    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
 
-            const result = await res.json();
-            if (!res.ok) throw new Error(result.error_description || result.msg || 'Email/Password salah!');
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error_description || result.msg || 'Email/Password salah!');
 
-            if (result.access_token && supabaseClient) {
-                await supabaseClient.auth.setSession({ access_token: result.access_token, refresh_token: result.refresh_token });
+                if (result.access_token && supabaseClient) {
+                    await supabaseClient.auth.setSession({ access_token: result.access_token, refresh_token: result.refresh_token });
+                }
             }
-            return result;
+
+            // PERIKSA STATUS PERSETUJUAN DARI SUPER ADMIN (KECUALI mastrisnocom@gmail.com)
+            if (email !== 'mastrisnocom@gmail.com') {
+                const { data: prof } = await supabaseClient.from('profiles').select('is_approved').eq('user_email', email).single();
+                if (prof && !prof.is_approved) {
+                    await supabaseClient.auth.signOut();
+                    throw new Error("Akun Anda belum disetujui oleh Super Admin. Harap hubungi Super Admin untuk aktivasi akun.");
+                }
+            }
+
+            return true;
         }
 
         async function doSignUp(email, password, fullName) {
-            let roleDefault = (email === 'mastrisnocom@gmail.com') ? 'Super Admin' : 'Teknisi/User';
+            let isSuper = (email === 'mastrisnocom@gmail.com');
+            let roleDefault = isSuper ? 'Super Admin' : 'Teknisi/User';
 
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
                     email, password,
                     options: { data: { full_name: fullName, jabatan: roleDefault } }
                 });
-                if (!error && data && data.user) return data;
             } catch (err) {}
 
-            const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+            // PANGGILAN DIRECT REST FALLBACK
+            await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                 method: 'POST',
                 headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, data: { full_name: fullName, jabatan: roleDefault } })
             });
 
-            const result = await res.json();
-            if (!res.ok) throw new Error(result.msg || result.message || 'Gagal mendaftar.');
-            return result;
+            // SIMPAN DATA PROFIL KE TABEL PROFILES (DENGAN STATUS IS_APPROVED)
+            await supabaseClient.from('profiles').upsert([{
+                user_email: email,
+                full_name: fullName,
+                jabatan: roleDefault,
+                is_approved: isSuper
+            }], { onConflict: 'user_email' });
+
+            return true;
         }
 
         async function checkSession() {
@@ -891,6 +988,18 @@
                 const btnContainer = document.getElementById('auth-action-btn-container');
 
                 if (session) {
+                    // double check status approval
+                    if (session.user.email !== 'mastrisnocom@gmail.com') {
+                        const { data: prof } = await supabaseClient.from('profiles').select('is_approved').eq('user_email', session.user.email).single();
+                        if (prof && !prof.is_approved) {
+                            await supabaseClient.auth.signOut();
+                            currentUser = null; currentUserEmail = null; currentUserData = {};
+                            document.getElementById('user-display-name').innerText = 'Tamu';
+                            btnContainer.innerHTML = `<button onclick="openAuthModal()" class="bg-white/25 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 cursor-pointer"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar</button>`;
+                            return;
+                        }
+                    }
+
                     const meta = session.user.user_metadata || {};
                     const userName = meta.full_name || session.user.email.split('@')[0];
                     currentUser = userName;
@@ -940,6 +1049,12 @@
         }
 
         function switchTab(tab) {
+            if (!currentUser && tab !== 'home') {
+                alert('Akses Ditolak: Anda belum login! Silakan Login atau Daftar akun terlebih dahulu.');
+                openAuthModal();
+                return;
+            }
+
             ['home-section', 'log-section', 'approval-section', 'karyawan-section', 'profile-section'].forEach(s => {
                 const el = document.getElementById(s);
                 if (el) el.classList.add('hidden');
