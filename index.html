@@ -152,7 +152,8 @@
                         <h3 id="prof-nama" class="font-bold text-lg text-gray-800 text-center px-2">Tamu</h3>
                         <div class="flex items-center gap-2 mt-0.5">
                             <p id="prof-role" class="text-xs text-green-700 font-semibold">Teknisi / User</p>
-                            <button onclick="openEditFieldModal('jabatan', 'Pilih Role Jabatan')" class="text-gray-400 hover:text-green-700 text-xs cursor-pointer"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <!-- Tombol Edit Jabatan Khusus Super Admin -->
+                            <button id="btn-edit-role" onclick="openEditFieldModal('jabatan', 'Pilih Role Jabatan')" class="hidden text-gray-400 hover:text-green-700 text-xs cursor-pointer"><i class="fa-solid fa-pen-to-square"></i></button>
                         </div>
                     </div>
 
@@ -169,7 +170,8 @@
                             <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-building w-5 text-green-700"></i> Unit Kantor</span>
                             <div class="flex items-center gap-1.5 overflow-hidden">
                                 <span id="prof-unit" class="font-bold text-gray-700 truncate">-</span>
-                                <button onclick="openEditFieldModal('unit', 'Pilih Unit Kantor')" class="text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <!-- Tombol Edit Unit Kantor Khusus Super Admin -->
+                                <button id="btn-edit-unit" onclick="openEditFieldModal('unit', 'Pilih Unit Kantor')" class="hidden text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
                             </div>
                         </div>
 
@@ -480,7 +482,6 @@
 
                 alert(`PEMBERITAHUAN:\nAnda berada di luar jangkauan titik lokasi kantor (${Math.round(distance)} meter).\n\nAbsensi tetap dikirimkan dan menunggu persetujuan (Approve) dari ${targetApprover}.`);
 
-                // SIMPAN KE TABEL REQUEST APPROVAL
                 try {
                     await supabaseClient.from('request_absensi').insert([{
                         user_email: currentUserEmail,
@@ -537,7 +538,6 @@
             try {
                 let query = supabaseClient.from('request_absensi').select('*').eq('status', 'Pending');
                 
-                // Filter berdasarkan hirarki approver (Kecuali Super Admin dan Kepala Divisi)
                 if (currentUserEmail !== 'mastrisnocom@gmail.com' && userRole !== 'Kepala Divisi' && userRole !== 'Super Admin') {
                     query = query.eq('target_approver', userRole);
                 }
@@ -595,8 +595,16 @@
             } catch(e) { alert('Gagal: ' + e.message); }
         }
 
-        // EDIT PROFIL FIELD DYNAMIC
+        // EDIT PROFIL FIELD DYNAMIC (HANYA SUPER ADMIN BISA EDIT JABATAN & UNIT)
         function openEditFieldModal(fieldKey, title) {
+            const isSuperAdmin = (currentUserEmail === 'mastrisnocom@gmail.com' || currentUserData.jabatan === 'Super Admin');
+
+            // PROTEKSI TAMBAHAN SISI SCRIPT
+            if ((fieldKey === 'jabatan' || fieldKey === 'unit') && !isSuperAdmin) {
+                alert('Akses Ditolak: Hanya Super Admin yang dapat mengubah Jabatan atau Unit Kantor!');
+                return;
+            }
+
             activeEditField = fieldKey;
             document.getElementById('edit-modal-title').innerText = title;
             const container = document.getElementById('edit-input-container');
@@ -663,12 +671,13 @@
         function renderProfileData() {
             const name = currentUserData.full_name || currentUser || 'Tamu';
             
-            // SET OTOMATIS SUPER ADMIN JIKA EMAIL MASTTRISNOCOM@GMAIL.COM
             let role = currentUserData.jabatan || 'Teknisi/User';
             if (currentUserEmail === 'mastrisnocom@gmail.com') {
                 role = 'Super Admin';
                 currentUserData.jabatan = 'Super Admin';
             }
+
+            const isSuperAdmin = (currentUserEmail === 'mastrisnocom@gmail.com' || role === 'Super Admin');
 
             document.getElementById('prof-nama').innerText = name;
             document.getElementById('prof-role').innerText = role;
@@ -682,9 +691,23 @@
             document.getElementById('prof-status').innerText = currentUserData.status_karyawan || '-';
             document.getElementById('prof-dob').innerText = currentUserData.dob || '-';
 
-            // HAK AKSES CONTAINER MENU
+            // KONTROL VISIBILITAS TOMBOL EDIT KHUSUS SUPER ADMIN
+            const btnEditRole = document.getElementById('btn-edit-role');
+            const btnEditUnit = document.getElementById('btn-edit-unit');
+
+            if (btnEditRole) {
+                if (isSuperAdmin) btnEditRole.classList.remove('hidden');
+                else btnEditRole.classList.add('hidden');
+            }
+
+            if (btnEditUnit) {
+                if (isSuperAdmin) btnEditUnit.classList.remove('hidden');
+                else btnEditUnit.classList.add('hidden');
+            }
+
+            // HAK AKSES CONTAINER MENU SUPER ADMIN
             const superAdminContainer = document.getElementById('superadmin-menu-container');
-            if (currentUserEmail === 'mastrisnocom@gmail.com' || role === 'Super Admin') {
+            if (isSuperAdmin) {
                 superAdminContainer.classList.remove('hidden');
             } else {
                 superAdminContainer.classList.add('hidden');
@@ -692,7 +715,7 @@
 
             // MENU PERSETUJUAN (APPROVAL) TAMPIL KHUSUS UNTUK ATASAN DAN SUPER ADMIN
             const approvalMenu = document.getElementById('menu-approval-container');
-            if (currentUserEmail === 'mastrisnocom@gmail.com' || ['Kepala Divisi', 'Kepala Kanwil', 'Kepala Unit', 'Super Admin'].includes(role)) {
+            if (isSuperAdmin || ['Kepala Divisi', 'Kepala Kanwil', 'Kepala Unit'].includes(role)) {
                 approvalMenu.classList.remove('hidden');
             } else {
                 approvalMenu.classList.add('hidden');
