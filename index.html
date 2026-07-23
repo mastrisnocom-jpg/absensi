@@ -33,7 +33,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <!-- LOGO PERUSAHAAN BINAYASA DI ATAS SELAMAT BEKERJA -->
-                            <div class="bg-emerald green rounded-xl p-2.5 mb-3 inline-block shadow-lg border border-white/40 max-w-[180px]">
+                            <div class="bg-white/95 rounded-xl p-2.5 mb-3 inline-block shadow-lg border border-white/40 max-w-[180px]">
                                 <img src="8723.jpg" alt="Logo Binayasa" class="h-9 w-auto object-contain">
                             </div>
                             <p class="text-gold text-sm font-semibold mb-1 flex items-center gap-1.5">
@@ -308,6 +308,27 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- ================= POP-UP DIALOG & ALERT SYSTEM MODERN ================= -->
+        <div id="custom-modal-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 hidden transition-opacity duration-200">
+            <div id="custom-modal-card" class="bg-white w-full max-w-xs rounded-3xl shadow-2xl overflow-hidden border border-emerald-100 transform scale-95 transition-transform duration-200">
+                <div class="p-6 text-center space-y-3">
+                    <div id="custom-modal-icon-bg" class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mx-auto shadow-inner">
+                        <i id="custom-modal-icon" class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <h3 id="custom-modal-title" class="text-base font-bold text-gray-800">Notifikasi</h3>
+                    <p id="custom-modal-message" class="text-xs text-gray-600 leading-relaxed font-medium">Pesan notifikasi...</p>
+                    
+                    <div id="custom-modal-input-container" class="hidden pt-1">
+                        <input type="text" id="custom-modal-input" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-xs text-center font-semibold outline-none focus:border-emerald-600" placeholder="" />
+                    </div>
+                </div>
+                <div id="custom-modal-actions" class="flex border-t border-gray-100 bg-gray-50">
+                    <button id="custom-modal-btn-cancel" class="flex-1 py-3 text-xs font-bold text-gray-500 hover:bg-gray-100 transition border-r border-gray-100">Batal</button>
+                    <button id="custom-modal-btn-confirm" class="flex-1 py-3 text-xs font-bold text-emerald-700 hover:bg-emerald-100/50 transition">Ya, Lanjutkan</button>
+                </div>
+            </div>
         </div>
 
         <!-- ================= MODAL REQUEST FORM BARU (DENGAN TANGGAL DINAMIS) ================= -->
@@ -743,7 +764,7 @@
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                     
-                    <div class="bg-emerald green rounded-xl p-2.5 mb-3 inline-block shadow-md max-w-[8p0px] mx-auto">
+                    <div class="bg-white rounded-xl p-2.5 mb-3 inline-block shadow-md max-w-[160px] mx-auto">
                         <img src="8723.jpg" alt="Logo Binayasa" class="h-8 w-auto object-contain mx-auto">
                     </div>
                     
@@ -809,6 +830,122 @@
         let userAssignedShift = null;
         let selectedRosterTargetEmail = null;
 
+        // ================= HELPER UI DIALOG & NOTIFIKASI MODERN =================
+        function customAlert(message, title = 'Notifikasi', iconClass = 'fa-circle-info', iconColorClass = 'bg-emerald-100 text-emerald-700') {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('custom-modal-overlay');
+                const card = document.getElementById('custom-modal-card');
+                const iconBg = document.getElementById('custom-modal-icon-bg');
+                const icon = document.getElementById('custom-modal-icon');
+                const titleEl = document.getElementById('custom-modal-title');
+                const msgEl = document.getElementById('custom-modal-message');
+                const inputContainer = document.getElementById('custom-modal-input-container');
+                const btnCancel = document.getElementById('custom-modal-btn-cancel');
+                const btnConfirm = document.getElementById('custom-modal-btn-confirm');
+
+                iconBg.className = `w-16 h-16 rounded-full flex items-center justify-center text-2xl mx-auto shadow-inner ${iconColorClass}`;
+                icon.className = `fa-solid ${iconClass}`;
+                titleEl.innerText = title;
+                msgEl.innerText = message;
+                inputContainer.classList.add('hidden');
+                btnCancel.classList.add('hidden');
+                btnConfirm.innerText = 'OK';
+                btnConfirm.className = 'w-full py-3 text-xs font-bold text-emerald-700 hover:bg-emerald-100/50 transition';
+
+                overlay.classList.remove('hidden');
+                setTimeout(() => card.classList.replace('scale-95', 'scale-100'), 10);
+
+                const handleConfirm = () => {
+                    card.classList.replace('scale-100', 'scale-95');
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        btnConfirm.removeEventListener('click', handleConfirm);
+                        resolve(true);
+                    }, 150);
+                };
+                btnConfirm.onclick = handleConfirm;
+            });
+        }
+
+        function customConfirm(message, title = 'Konfirmasi', iconClass = 'fa-circle-question', iconColorClass = 'bg-amber-100 text-amber-700') {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('custom-modal-overlay');
+                const card = document.getElementById('custom-modal-card');
+                const iconBg = document.getElementById('custom-modal-icon-bg');
+                const icon = document.getElementById('custom-modal-icon');
+                const titleEl = document.getElementById('custom-modal-title');
+                const msgEl = document.getElementById('custom-modal-message');
+                const inputContainer = document.getElementById('custom-modal-input-container');
+                const btnCancel = document.getElementById('custom-modal-btn-cancel');
+                const btnConfirm = document.getElementById('custom-modal-btn-confirm');
+
+                iconBg.className = `w-16 h-16 rounded-full flex items-center justify-center text-2xl mx-auto shadow-inner ${iconColorClass}`;
+                icon.className = `fa-solid ${iconClass}`;
+                titleEl.innerText = title;
+                msgEl.innerText = message;
+                inputContainer.classList.add('hidden');
+                btnCancel.classList.remove('hidden');
+                btnConfirm.innerText = 'Ya, Lanjutkan';
+                btnConfirm.className = 'flex-1 py-3 text-xs font-bold text-emerald-700 hover:bg-emerald-100/50 transition';
+
+                overlay.classList.remove('hidden');
+                setTimeout(() => card.classList.replace('scale-95', 'scale-100'), 10);
+
+                const closeWith = (val) => {
+                    card.classList.replace('scale-100', 'scale-95');
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        resolve(val);
+                    }, 150);
+                };
+
+                btnConfirm.onclick = () => closeWith(true);
+                btnCancel.onclick = () => closeWith(false);
+            });
+        }
+
+        function customPrompt(message, placeholder = '', title = 'Input Konfirmasi') {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('custom-modal-overlay');
+                const card = document.getElementById('custom-modal-card');
+                const iconBg = document.getElementById('custom-modal-icon-bg');
+                const icon = document.getElementById('custom-modal-icon');
+                const titleEl = document.getElementById('custom-modal-title');
+                const msgEl = document.getElementById('custom-modal-message');
+                const inputContainer = document.getElementById('custom-modal-input-container');
+                const input = document.getElementById('custom-modal-input');
+                const btnCancel = document.getElementById('custom-modal-btn-cancel');
+                const btnConfirm = document.getElementById('custom-modal-btn-confirm');
+
+                iconBg.className = `w-16 h-16 rounded-full flex items-center justify-center text-2xl mx-auto shadow-inner bg-red-100 text-red-700`;
+                icon.className = `fa-solid fa-triangle-exclamation`;
+                titleEl.innerText = title;
+                msgEl.innerText = message;
+                inputContainer.classList.remove('hidden');
+                input.value = '';
+                input.placeholder = placeholder;
+                btnCancel.classList.remove('hidden');
+                btnConfirm.innerText = 'Konfirmasi';
+
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    card.classList.replace('scale-95', 'scale-100');
+                    input.focus();
+                }, 10);
+
+                const closeWith = (val) => {
+                    card.classList.replace('scale-100', 'scale-95');
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        resolve(val);
+                    }, 150);
+                };
+
+                btnConfirm.onclick = () => closeWith(input.value.trim());
+                btnCancel.onclick = () => closeWith(null);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
                 checkSession();
@@ -827,9 +964,9 @@
         }
 
         // ================= LOGIKA FORM REQUEST DENGAN DROP-DOWN & TANGGAL DINAMIS =================
-        function openRequestModal(type) {
+        async function openRequestModal(type) {
             if (!currentUser) {
-                alert('Akses Ditolak: Anda belum login!');
+                await customAlert('Akses Ditolak: Anda belum login!', 'Peringatan', 'fa-lock', 'bg-red-100 text-red-700');
                 openAuthModal();
                 return;
             }
@@ -847,7 +984,6 @@
             const selectEl = document.getElementById('submission-option-select');
             const dateLabelEl = document.getElementById('request-date-label');
             
-            // Mutasi Teks Label & Kategori Sesuai Tombol Yang Dipilih
             if (type === 'Request Cuti') {
                 labelEl.innerText = "Pilih Jenis Cuti*";
                 dateLabelEl.innerText = "Pilih Tanggal Mulai Cuti*";
@@ -892,10 +1028,9 @@
             const textReason = document.getElementById('submission-reason').value.trim();
             const btn = document.getElementById('btn-submit-request');
 
-            if (!selectedDate) return alert('Silakan tentukan tanggal pengajuan Anda!');
-            if (!textReason) return alert('Silakan isi keterangan alasan detail pengajuan Anda!');
+            if (!selectedDate) return await customAlert('Silakan tentukan tanggal pengajuan Anda!', 'Informasi', 'fa-calendar');
+            if (!textReason) return await customAlert('Silakan isi keterangan alasan detail pengajuan Anda!', 'Informasi', 'fa-pen');
 
-            // Menggabungkan Kategori Pilihan + Tanggal Terpilih ke dalam Kolom Alasan/Keterangan Supabase
             const finalReason = `[Kategori: ${selectedOption}] [Tanggal: ${selectedDate}] - Ket: ${textReason}`;
 
             const userRole = currentUserData.jabatan || 'Teknisi/User';
@@ -919,10 +1054,10 @@
 
                 if (error) throw error;
 
-                alert(`Permohonan ${type} untuk tanggal ${selectedDate} berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`);
+                await customAlert(`Permohonan ${type} untuk tanggal ${selectedDate} berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`, 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 closeRequestModal();
             } catch(e) {
-                alert('Gagal mengirim permohonan: ' + e.message + '\n\nTips: Jika menggunakan Opera Mini, matikan Data Saving atau buka via Google Chrome.');
+                await customAlert('Gagal mengirim permohonan: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700');
             } finally {
                 btn.innerText = 'Kirim Permohonan';
                 btn.disabled = false;
@@ -983,7 +1118,7 @@
         }
 
         async function openMonthlyRosterViewModal() {
-            if (!currentUserEmail) { alert('Silakan login terlebih dahulu!'); return; }
+            if (!currentUserEmail) { await customAlert('Silakan login terlebih dahulu!', 'Akses Ditolak', 'fa-lock', 'bg-red-100 text-red-700'); return; }
 
             const now = new Date();
             const year = now.getFullYear();
@@ -1137,19 +1272,19 @@
                 const { error } = await supabaseClient.from('user_schedules').upsert(payload, { onConflict: 'user_email, schedule_date' });
                 if (error) throw error;
 
-                alert(`Jadwal Shift Roster 1 Bulan untuk (${selectedRosterTargetEmail}) berhasil disimpan!`);
+                await customAlert(`Jadwal Shift Roster 1 Bulan untuk (${selectedRosterTargetEmail}) berhasil disimpan!`, 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 closeMonthlyRosterBuilderModal();
 
                 if (selectedRosterTargetEmail === currentUserEmail) {
                     loadUserShiftCardInfo();
                 }
-            } catch(e) { alert("Gagal menyimpan roster bulanan: " + e.message); }
+            } catch(e) { await customAlert("Gagal menyimpan roster bulanan: " + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         // FUNGSI EXPORT DATA ABSENSI UNIT KE CSV (EXCEL)
         async function exportUnitAttendanceCSV() {
             if (!currentUserData.unit || currentUserData.unit === 'Belum dipilih') {
-                alert('Unit Kantor Anda belum ditentukan. Pilih/isi Unit Kantor di Profil Saya terlebih dahulu!');
+                await customAlert('Unit Kantor Anda belum ditentukan. Pilih/isi Unit Kantor di Profil Saya terlebih dahulu!', 'Informasi', 'fa-building');
                 return;
             }
 
@@ -1163,7 +1298,7 @@
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    alert('Belum ada data absensi untuk unit ' + currentUserData.unit);
+                    await customAlert('Belum ada data absensi untuk unit ' + currentUserData.unit, 'Kosong', 'fa-folder-open');
                     return;
                 }
 
@@ -1182,13 +1317,13 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-            } catch(e) { alert("Gagal export CSV: " + e.message); }
+            } catch(e) { await customAlert("Gagal export CSV: " + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
-        // FUNGSI EXPORT DATA ABSENSI UNIT KE PDF (NATIVE PRINT WINDOW)
+        // FUNGSI EXPORT DATA ABSENSI UNIT KE PDF
         async function exportUnitAttendancePDF() {
             if (!currentUserData.unit || currentUserData.unit === 'Belum dipilih') {
-                alert('Unit Kantor Anda belum ditentukan. Pilih/isi Unit Kantor di Profil Saya terlebih dahulu!');
+                await customAlert('Unit Kantor Anda belum ditentukan. Pilih/isi Unit Kantor di Profil Saya terlebih dahulu!', 'Informasi', 'fa-building');
                 return;
             }
 
@@ -1202,7 +1337,7 @@
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    alert('Belum ada data absensi untuk unit ' + currentUserData.unit);
+                    await customAlert('Belum ada data absensi untuk unit ' + currentUserData.unit, 'Kosong', 'fa-folder-open');
                     return;
                 }
 
@@ -1255,7 +1390,7 @@
                 printWindow.document.close();
                 printWindow.focus();
                 setTimeout(() => { printWindow.print(); }, 500);
-            } catch(e) { alert("Gagal export PDF: " + e.message); }
+            } catch(e) { await customAlert("Gagal export PDF: " + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         function base64ToBlob(base64, mimeType) {
@@ -1321,7 +1456,7 @@
 
         async function prepareClockIn() {
             if (!currentUser) {
-                alert('Akses Ditolak: Anda belum login!');
+                await customAlert('Akses Ditolak: Anda belum login!', 'Peringatan', 'fa-lock', 'bg-red-100 text-red-700');
                 openAuthModal();
                 return;
             }
@@ -1334,7 +1469,7 @@
                     .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
 
                 if ((logsToday || []).some(l => l.action_type === 'Clock In')) {
-                    alert('Anda sudah melakukan Clock In hari ini!');
+                    await customAlert('Anda sudah melakukan Clock In hari ini!', 'Informasi', 'fa-circle-check', 'bg-amber-100 text-amber-700');
                     return;
                 }
             } catch(e) {}
@@ -1353,7 +1488,7 @@
                 });
                 video.srcObject = mediaStream;
             } catch (err) {
-                alert("Gagal mengakses kamera: Pastikan izin kamera diaktifkan di browser Anda.");
+                await customAlert("Gagal mengakses kamera: Pastikan izin kamera diaktifkan di browser Anda.", 'Kamera Error', 'fa-video-slash', 'bg-red-100 text-red-700');
                 closeSelfieModal();
             }
         }
@@ -1398,13 +1533,13 @@
             } catch(e) {}
         }
 
-        function handleMenuClick(menuName) {
+        async function handleMenuClick(menuName) {
             if (!currentUser) {
-                alert('Akses Ditolak: Anda belum login!');
+                await customAlert('Akses Ditolak: Anda belum login!', 'Peringatan', 'fa-lock', 'bg-red-100 text-red-700');
                 openAuthModal();
                 return;
             }
-            alert(`Fitur "${menuName}" sedang dalam pengembangan.`);
+            await customAlert(`Fitur "${menuName}" sedang dalam tahap pengembangan.`, 'Informasi', 'fa-code');
         }
 
         function initGeolocation() {
@@ -1463,7 +1598,7 @@
 
         async function recordAttendance(actionType, selfieBase64 = null) {
             if (!currentUser) {
-                alert('Akses Ditolak: Anda belum login!');
+                await customAlert('Akses Ditolak: Anda belum login!', 'Peringatan', 'fa-lock', 'bg-red-100 text-red-700');
                 openAuthModal();
                 return;
             }
@@ -1479,7 +1614,7 @@
                     .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
 
                 if ((logsToday || []).some(l => l.action_type === actionType)) {
-                    alert(`Anda sudah melakukan ${actionType} hari ini!`);
+                    await customAlert(`Anda sudah melakukan ${actionType} hari ini!`, 'Sudah Absen', 'fa-circle-info', 'bg-amber-100 text-amber-700');
                     return;
                 }
             } catch(e) {}
@@ -1511,7 +1646,7 @@
                 if (userRole === 'Kepala Unit') targetApprover = 'Kepala Kanwil';
                 else if (userRole === 'Kepala Kanwil') targetApprover = 'Kepala Divisi';
 
-                alert(`PEMBERITAHUAN:\nAnda berada di luar jangkauan titik lokasi kantor (${Math.round(distance)} meter).\n\nAbsensi dikirimkan dan menunggu persetujuan dari ${targetApprover}.`);
+                await customAlert(`Anda berada di luar jangkauan titik lokasi kantor (${Math.round(distance)} meter).\n\nAbsensi dikirimkan dan menunggu persetujuan dari ${targetApprover}.`, 'Luar Jangkauan', 'fa-location-dot', 'bg-amber-100 text-amber-800');
 
                 try {
                     await supabaseClient.from('request_absensi').insert([{
@@ -1520,8 +1655,8 @@
                         alasan: `Diluar jangkauan radius ${targetOffice ? targetOffice.unit_name : 'Kantor'} (${Math.round(distance)}m)`,
                         target_approver: targetApprover, status: 'Pending'
                     }]);
-                    alert('Permohonan absensi luar jangkauan berhasil dikirim!');
-                } catch (err) { alert('Gagal mengirim: ' + err.message); }
+                    await customAlert('Permohonan absensi luar jangkauan berhasil dikirim!', 'Berhasil', 'fa-paper-plane', 'bg-emerald-100 text-emerald-700');
+                } catch (err) { await customAlert('Gagal mengirim: ' + err.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
                 return;
             }
 
@@ -1547,13 +1682,13 @@
                 if (error) throw error;
 
                 if (statusAbsen === 'Terlambat') {
-                    alert(`Clock In Berhasil. Catatan: Anda dicatat Terlambat hari ini.`);
+                    await customAlert(`Clock In Berhasil. Catatan: Anda dicatat Terlambat hari ini.`, 'Absen Terlambat', 'fa-clock', 'bg-amber-100 text-amber-700');
                 } else {
-                    alert(`Berhasil ${actionType}! Data absensi dicatat.`);
+                    await customAlert(`Berhasil ${actionType}! Data absensi dicatat.`, 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 }
 
                 fetchAttendanceLogs();
-            } catch (error) { alert(`Gagal absensi: ` + error.message); } 
+            } catch (error) { await customAlert(`Gagal absensi: ` + error.message, 'Error', 'fa-circle-xmark', 'bg-red-100 text-red-700'); } 
             finally { btnElement.innerHTML = originalContent; btnElement.disabled = false; }
         }
 
@@ -1734,7 +1869,7 @@
                             <div class="max-w-[75%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-green-700 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'} shadow-sm relative">
                                 <p>${m.message_text}</p>
                                 <div class="flex justify-between items-center gap-2 mt-1">
-                                    <button onclick="deleteSingleMessage(${m.id})" class="text-[9px] ${isMe ? 'text-red-200 hover:text-white' : 'text-red-500 hover:text-red-700'} underline"><i class="fa-solid fa-trash"></i> Hapus</button>
+                                    <button onclick="deleteSingleMessage(${m.id})" class="text-[9px] ${isMe ? 'text-red-200 hover:text-white' : 'text-red-500 hover:text-red-700'} underline cursor-pointer"><i class="fa-solid fa-trash"></i> Hapus</button>
                                     <span class="text-[8px] opacity-75">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                 </div>
                             </div>
@@ -1746,12 +1881,14 @@
         }
 
         async function deleteSingleMessage(msgId) {
-            if (!confirm("Hapus pesan ini secara permanen?")) return;
+            const confirmed = await customConfirm("Hapus pesan ini secara permanen?", "Hapus Pesan", "fa-trash", "bg-red-100 text-red-700");
+            if (!confirmed) return;
+
             try {
                 const { error } = await supabaseClient.from('messages').delete().eq('id', msgId);
                 if (error) throw error;
                 loadTwoWayMessages();
-            } catch(e) { alert("Gagal menghapus pesan: " + e.message); }
+            } catch(e) { await customAlert("Gagal menghapus pesan: " + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         async function sendChatReply() {
@@ -1769,7 +1906,7 @@
                 }]);
                 input.value = '';
                 loadTwoWayMessages();
-            } catch(e) { alert('Gagal mengirim: ' + e.message); }
+            } catch(e) { await customAlert('Gagal mengirim: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         function openSystemSettingsModal() {
@@ -1805,9 +1942,9 @@
                             <p class="text-[10px] text-gray-500">${p.user_email} | <span class="text-emerald-700 font-bold">${p.jabatan || 'Teknisi'}</span></p>
                         </div>
                         <div class="flex gap-1 flex-wrap justify-end">
-                            ${!p.is_approved ? `<button onclick="approveUserAccount('${p.user_email}')" class="bg-emerald-700 text-white font-bold text-[9px] px-2 py-1 rounded-lg hover:bg-emerald-800 transition">Approve</button>` : ''}
-                            <button onclick="openAdminUserEditModal('${p.user_email}')" class="bg-amber-600 text-white font-bold text-[9px] px-2 py-1 rounded-lg hover:bg-amber-700 transition"><i class="fa-solid fa-pen"></i> Profil</button>
-                            <button onclick="openMonthlyRosterBuilderModal('${p.user_email}')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[9px] px-2 py-1 rounded-lg transition"><i class="fa-solid fa-calendar-days"></i> Roster 1 Bln</button>
+                            ${!p.is_approved ? `<button onclick="approveUserAccount('${p.user_email}')" class="bg-emerald-700 text-white font-bold text-[9px] px-2 py-1 rounded-lg hover:bg-emerald-800 transition cursor-pointer">Approve</button>` : ''}
+                            <button onclick="openAdminUserEditModal('${p.user_email}')" class="bg-amber-600 text-white font-bold text-[9px] px-2 py-1 rounded-lg hover:bg-amber-700 transition cursor-pointer"><i class="fa-solid fa-pen"></i> Profil</button>
+                            <button onclick="openMonthlyRosterBuilderModal('${p.user_email}')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[9px] px-2 py-1 rounded-lg transition cursor-pointer"><i class="fa-solid fa-calendar-days"></i> Roster 1 Bln</button>
                         </div>
                     </div>
                 `).join('');
@@ -1836,7 +1973,7 @@
                 unitSel.innerHTML = officeLocations.map(o => `<option value="${o.unit_name}" ${p.unit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
 
                 document.getElementById('admin-user-edit-modal').classList.remove('hidden');
-            } catch(e) { alert("Gagal memuat data user: " + e.message); }
+            } catch(e) { await customAlert("Gagal memuat data user: " + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         function closeAdminUserEditModal() { document.getElementById('admin-user-edit-modal').classList.add('hidden'); }
@@ -1852,7 +1989,7 @@
             const status = document.getElementById('adm-edit-status').value;
             const dob = document.getElementById('adm-edit-dob').value;
 
-            if (!fullname) return alert("Nama Lengkap wajib diisi!");
+            if (!fullname) return await customAlert("Nama Lengkap wajib diisi!", 'Informasi', 'fa-pen');
 
             try {
                 const { error } = await supabaseClient.from('profiles').update({
@@ -1869,7 +2006,7 @@
 
                 if (error) throw error;
 
-                alert('Data profil user berhasil diperbarui!');
+                await customAlert('Data profil user berhasil diperbarui!', 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 closeAdminUserEditModal();
                 fetchPendingUserRegistrations();
                 fetchAllEmployees();
@@ -1877,15 +2014,15 @@
                 if (currentEditingAdminEmail === currentUserEmail) {
                     checkSession();
                 }
-            } catch(e) { alert('Gagal memperbarui profil: ' + e.message); }
+            } catch(e) { await customAlert('Gagal memperbarui profil: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         async function approveUserAccount(targetEmail) {
             try {
                 await supabaseClient.from('profiles').update({ is_approved: true }).eq('user_email', targetEmail);
-                alert(`Akun (${targetEmail}) berhasil disetujui!`);
+                await customAlert(`Akun (${targetEmail}) berhasil disetujui!`, 'Berhasil', 'fa-user-check', 'bg-emerald-100 text-emerald-700');
                 fetchPendingUserRegistrations();
-            } catch(e) { alert('Gagal: ' + e.message); }
+            } catch(e) { await customAlert('Gagal: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         async function saveScheduleShift() {
@@ -1895,8 +2032,8 @@
             const timeIn = document.getElementById('sch-in').value;
             const timeOut = document.getElementById('sch-out').value;
 
-            if (!code || code.length > 3) return alert('Kode shift wajib diisi dan maksimal 3 karakter!');
-            if (!name || !timeIn || !timeOut) return alert('Lengkapi nama, jam masuk, dan jam pulang!');
+            if (!code || code.length > 3) return await customAlert('Kode shift wajib diisi dan maksimal 3 karakter!', 'Informasi', 'fa-keyboard');
+            if (!name || !timeIn || !timeOut) return await customAlert('Lengkapi nama, jam masuk, dan jam pulang!', 'Informasi', 'fa-clock');
 
             try {
                 if (editId) {
@@ -1904,19 +2041,19 @@
                         shift_code: code, shift_name: name, time_in: timeIn, time_out: timeOut
                     }).eq('id', editId);
                     if (error) throw error;
-                    alert('Jadwal shift berhasil diperbarui!');
+                    await customAlert('Jadwal shift berhasil diperbarui!', 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 } else {
                     const { error } = await supabaseClient.from('schedules').insert([{
                         shift_code: code, shift_name: name, time_in: timeIn, time_out: timeOut
                     }]);
                     if (error) throw error;
-                    alert('Shift kerja baru disimpan!');
+                    await customAlert('Shift kerja baru disimpan!', 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 }
 
                 resetScheduleForm();
                 fetchScheduleShifts();
                 fetchShiftsListGlobal();
-            } catch(e) { alert('Gagal menyimpan shift: ' + e.message); }
+            } catch(e) { await customAlert('Gagal menyimpan shift: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         function openEditScheduleModal(id, code, name, timeIn, timeOut) {
@@ -1944,13 +2081,15 @@
         }
 
         async function deleteScheduleShift(id) {
-            if (!confirm('Yakin ingin menghapus shift kerja ini?')) return;
+            const confirmed = await customConfirm('Yakin ingin menghapus shift kerja ini?', 'Hapus Shift', 'fa-trash', 'bg-red-100 text-red-700');
+            if (!confirmed) return;
+
             try {
                 await supabaseClient.from('schedules').delete().eq('id', id);
-                alert('Shift berhasil dihapus.');
+                await customAlert('Shift berhasil dihapus.', 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 fetchScheduleShifts();
                 fetchShiftsListGlobal();
-            } catch(e) { alert('Gagal menghapus shift: ' + e.message); }
+            } catch(e) { await customAlert('Gagal menghapus shift: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         async function fetchScheduleShifts() {
@@ -1983,9 +2122,9 @@
             const lng = parseFloat(document.getElementById('admin-unit-lng').value);
             const radius = parseInt(document.getElementById('admin-unit-radius').value) || 100;
 
-            if (!name || isNaN(lat) || isNaN(lng)) return alert('Isi data lokasi unit dengan benar!');
+            if (!name || isNaN(lat) || isNaN(lng)) return await customAlert('Isi data lokasi unit dengan benar!', 'Informasi', 'fa-location-dot');
             await supabaseClient.from('offices').insert([{ unit_name: name, lat, lng, radius }]);
-            alert('Lokasi unit kantor disimpan!');
+            await customAlert('Lokasi unit kantor disimpan!', 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
             
             document.getElementById('admin-unit-name').value = '';
             document.getElementById('admin-unit-lat').value = '';
@@ -1996,13 +2135,15 @@
         }
 
         async function deleteOfficeUnit(id) {
-            if (!confirm('Yakin ingin menghapus unit kantor ini?')) return;
+            const confirmed = await customConfirm('Yakin ingin menghapus unit kantor ini?', 'Hapus Unit', 'fa-building-circle-xmark', 'bg-red-100 text-red-700');
+            if (!confirmed) return;
+
             try {
                 await supabaseClient.from('offices').delete().eq('id', id);
-                alert('Unit kantor berhasil dihapus.');
+                await customAlert('Unit kantor berhasil dihapus.', 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 fetchOfficeLocations();
                 renderAdminOfficeList();
-            } catch(e) { alert('Gagal menghapus unit kantor: ' + e.message); }
+            } catch(e) { await customAlert('Gagal menghapus unit kantor: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         function renderAdminOfficeList() {
@@ -2125,27 +2266,31 @@
                     }]);
                 }
                 
-                alert('Permohonan berhasil disetujui!');
+                await customAlert('Permohonan berhasil disetujui!', 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 fetchPendingRequests();
-            } catch(e) { alert('Gagal menyetujui: ' + e.message); }
+            } catch(e) { await customAlert('Gagal menyetujui: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         async function rejectRequest(reqId) {
-            if (!confirm('Yakin ingin menolak permohonan ini?')) return;
+            const confirmed = await customConfirm('Yakin ingin menolak permohonan ini?', 'Tolak Permohonan', 'fa-user-xmark', 'bg-red-100 text-red-700');
+            if (!confirmed) return;
+
             try {
                 await supabaseClient.from('request_absensi').update({ status: 'Rejected', approved_by: currentUser }).eq('id', reqId);
-                alert('Permohonan ditolak.');
+                await customAlert('Permohonan telah ditolak.', 'Ditolak', 'fa-circle-xmark', 'bg-red-100 text-red-700');
                 fetchPendingRequests();
-            } catch(e) { alert('Gagal: ' + e.message); }
+            } catch(e) { await customAlert('Gagal: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         async function deleteAccountPermanently() {
-            if (!currentUserEmail) { alert('Anda belum login!'); return; }
-            if (currentUserEmail === 'mastrisnocom@gmail.com') { alert('Akses Ditolak: Akun Super Admin Utama tidak dapat dihapus!'); return; }
+            if (!currentUserEmail) { await customAlert('Anda belum login!', 'Informasi', 'fa-lock'); return; }
+            if (currentUserEmail === 'mastrisnocom@gmail.com') { await customAlert('Akses Ditolak: Akun Super Admin Utama tidak dapat dihapus!', 'Akses Ditolak', 'fa-shield-halved', 'bg-red-100 text-red-700'); return; }
 
-            if (!confirm("PERINGATAN!\n\nApakah Anda yakin ingin MENGHAPUS AKUN ANDA PERMANEN?")) return;
-            const confirm2 = prompt(`Ketikkan email Anda (${currentUserEmail}) untuk mengonfirmasi:`);
-            if (confirm2 !== currentUserEmail) { alert("Konfirmasi batal."); return; }
+            const confirm1 = await customConfirm("PERINGATAN!\n\nApakah Anda yakin ingin MENGHAPUS AKUN ANDA PERMANEN?", "Hapus Akun", "fa-triangle-exclamation", "bg-red-100 text-red-700");
+            if (!confirm1) return;
+
+            const confirm2 = await customPrompt(`Ketikkan email Anda (${currentUserEmail}) untuk mengonfirmasi penghapusan permanen:`, currentUserEmail, "Konfirmasi Email");
+            if (confirm2 !== currentUserEmail) { await customAlert("Konfirmasi email tidak sesuai. Pembatalan dilakukan.", "Batal", "fa-ban", "bg-gray-100 text-gray-700"); return; }
 
             try {
                 await supabaseClient.from('profiles').delete().eq('user_email', currentUserEmail);
@@ -2157,17 +2302,17 @@
                 await supabaseClient.auth.signOut();
                 clearUserState();
                 switchTab('home');
-                alert("Akun Anda telah berhasil dihapus secara permanen.");
-            } catch (err) { alert("Gagal menghapus akun: " + err.message); }
+                await customAlert("Akun Anda telah berhasil dihapus secara permanen.", "Akun Dihapus", "fa-trash-can", "bg-gray-100 text-gray-700");
+            } catch (err) { await customAlert("Gagal menghapus akun: " + err.message, 'Error', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
-        function openEditFieldModal(fieldKey, title) {
+        async function openEditFieldModal(fieldKey, title) {
             if (!currentUser) { openAuthModal(); return; }
 
             const isSuper = isUserSuperAdmin();
 
             if ((fieldKey === 'jabatan' || fieldKey === 'unit') && !isSuper) {
-                alert('Akses Ditolak: Hanya Super Admin yang dapat mengubah Jabatan atau Unit Kantor!');
+                await customAlert('Akses Ditolak: Hanya Super Admin yang dapat mengubah Jabatan atau Unit Kantor!', 'Akses Ditolak', 'fa-lock', 'bg-red-100 text-red-700');
                 return;
             }
 
@@ -2213,9 +2358,9 @@
                 await supabaseClient.from('profiles').update({ [activeEditField]: val }).eq('user_email', currentUserEmail);
                 currentUserData[activeEditField] = val;
                 renderProfileData();
-                alert('Data profil diperbarui!');
+                await customAlert('Data profil diperbarui!', 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 closeEditFieldModal();
-            } catch(err) { alert('Gagal: ' + err.message); }
+            } catch(err) { await customAlert('Gagal: ' + err.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
         async function uploadProfilePhoto(event) {
@@ -2234,8 +2379,8 @@
                     await supabaseClient.from('profiles').update({ foto_url: finalPhotoUrl }).eq('user_email', currentUserEmail);
                     currentUserData.foto_url = finalPhotoUrl;
                     renderProfileData();
-                    alert('Foto profil diperbarui!');
-                } catch (err) { alert('Gagal: ' + err.message); }
+                    await customAlert('Foto profil diperbarui!', 'Berhasil', 'fa-camera', 'bg-emerald-100 text-emerald-700');
+                } catch (err) { await customAlert('Gagal: ' + err.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
             };
             reader.readAsDataURL(file);
         }
@@ -2315,17 +2460,17 @@
             try {
                 if (isLoginMode) {
                     await doLogin(email, password);
-                    alert('Berhasil Login!');
                     closeAuthModal();
+                    await customAlert('Berhasil Login!', 'Selamat Datang', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                     checkSession();
                 } else {
                     const fullName = document.getElementById('fullname').value.trim();
                     await doSignUp(email, password, fullName);
-                    alert('Registrasi berhasil! Akun Anda membutuhkan persetujuan Super Admin.');
+                    await customAlert('Registrasi berhasil! Akun Anda membutuhkan persetujuan Super Admin.', 'Pendaftaran Sukses', 'fa-user-clock', 'bg-amber-100 text-amber-700');
                     toggleAuthMode();
                     fetchAllEmployees();
                 }
-            } catch (error) { alert("Gagal: " + (error.message || "Email/Password salah!")); } 
+            } catch (error) { await customAlert("Gagal: " + (error.message || "Email/Password salah!"), 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); } 
             finally { btn.innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang'; btn.disabled = false; }
         });
 
@@ -2456,16 +2601,18 @@
         }
 
         async function logout() {
-            if (!confirm('Apakah Anda yakin ingin keluar?')) return;
+            const confirmed = await customConfirm('Apakah Anda yakin ingin keluar dari akun ini?', 'Keluar Akun', 'fa-right-from-bracket', 'bg-red-100 text-red-700');
+            if (!confirmed) return;
+
             await supabaseClient.auth.signOut();
             clearUserState();
             switchTab('home');
-            alert('Berhasil keluar.');
+            await customAlert('Anda telah berhasil keluar.', 'Sampai Jumpa', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
         }
 
-        function switchTab(tab) {
+        async function switchTab(tab) {
             if (!currentUser && tab !== 'home') {
-                alert('Akses Ditolak: Anda belum login!');
+                await customAlert('Akses Ditolak: Anda belum login!', 'Peringatan', 'fa-lock', 'bg-red-100 text-red-700');
                 openAuthModal();
                 return;
             }
