@@ -249,10 +249,10 @@
                         </div>
                     </div>
 
-                    <!-- SUPER ADMIN CONTAINER -->
+                    <!-- SUPER ADMIN & KEPALA UNIT SYSTEM SETTINGS CONTAINER -->
                     <div id="superadmin-menu-container" class="hidden pt-2 border-t space-y-2">
                         <button onclick="openSystemSettingsModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold py-2.5 rounded-xl transition text-xs border border-amber-300 cursor-pointer flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-gears text-amber-700"></i> Pengaturan Sistem (Super Admin)
+                            <i class="fa-solid fa-gears text-amber-700"></i> Pengaturan Sistem & Shift
                         </button>
                     </div>
 
@@ -402,12 +402,22 @@
                     </div>
                 </div>
 
+                <!-- TAB 2: MENGATUR JADWAL SHIFT DENGAN KODE MAKSIMAL 3 HURUF -->
                 <div id="adm-sec-jadwal" class="hidden space-y-3 text-xs">
-                    <h4 class="font-bold text-gray-700">Tambah Shift Kerja Baru</h4>
-                    <div>
-                        <label class="font-semibold text-gray-600">Nama Shift</label>
-                        <input type="text" id="sch-name" placeholder="Contoh: Shift Pagi / Shift Malam" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
+                    <h4 class="font-bold text-gray-700" id="schedule-form-title">Tambah Shift Kerja Baru</h4>
+                    <input type="hidden" id="sch-edit-id" value="" />
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="font-semibold text-gray-600">Kode (Max 3)*</label>
+                            <input type="text" id="sch-code" maxlength="3" placeholder="PAG" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none uppercase font-bold" />
+                        </div>
+                        <div class="col-span-2">
+                            <label class="font-semibold text-gray-600">Nama Shift*</label>
+                            <input type="text" id="sch-name" placeholder="Shift Pagi" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
+                        </div>
                     </div>
+
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="font-semibold text-gray-600">Jam Masuk</label>
@@ -418,11 +428,15 @@
                             <input type="time" id="sch-out" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
                         </div>
                     </div>
-                    <button onclick="addNewScheduleShift()" class="w-full bg-green-700 text-white font-bold py-2 rounded-xl transition">Simpan Shift Baru</button>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="saveScheduleShift()" id="btn-save-schedule" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-2 rounded-xl transition">Simpan Shift</button>
+                        <button onclick="resetScheduleForm()" id="btn-cancel-schedule" class="hidden bg-gray-300 text-gray-700 font-bold px-3 py-2 rounded-xl transition">Batal</button>
+                    </div>
 
                     <div class="pt-2 border-t">
                         <h5 class="font-bold text-gray-600 mb-1">Daftar Shift Kerja</h5>
-                        <div id="admin-schedule-list" class="space-y-1.5 max-h-24 overflow-y-auto"></div>
+                        <div id="admin-schedule-list" class="space-y-1.5 max-h-28 overflow-y-auto"></div>
                     </div>
                 </div>
 
@@ -563,7 +577,6 @@
                     let quality = 0.85;
                     let dataUrl = canvas.toDataURL('image/jpeg', quality);
 
-                    // Turunkan kualitas secara berulang jika ukuran Base64 masih melebihi target maxSizeBytes (200 KB)
                     while (dataUrl.length * 0.75 > maxSizeBytes && quality > 0.2) {
                         quality -= 0.1;
                         dataUrl = canvas.toDataURL('image/jpeg', quality);
@@ -629,10 +642,7 @@
 
             closeSelfieModal();
 
-            // Kompres foto selfie di bawah 200 KB secara otomatis
             const compressedSelfie = await compressImage(rawSelfieBase64, 800, 200 * 1024);
-
-            // Lanjutkan Proses Clock In
             await recordAttendance('Clock In', compressedSelfie);
         }
 
@@ -943,16 +953,29 @@
                 body.innerHTML = (data || []).map(m => {
                     const isMe = m.sender_email === currentUserEmail;
                     return `
-                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-                            <div class="max-w-[75%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-green-700 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'} shadow-sm">
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} group items-center gap-1">
+                            <div class="max-w-[75%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-green-700 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'} shadow-sm relative">
                                 <p>${m.message_text}</p>
-                                <span class="text-[8px] opacity-75 block text-right mt-1">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                <div class="flex justify-between items-center gap-2 mt-1">
+                                    <button onclick="deleteSingleMessage(${m.id})" class="text-[9px] ${isMe ? 'text-red-200 hover:text-white' : 'text-red-500 hover:text-red-700'} underline"><i class="fa-solid fa-trash"></i> Hapus</button>
+                                    <span class="text-[8px] opacity-75">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                </div>
                             </div>
                         </div>
                     `;
                 }).join('');
                 body.scrollTop = body.scrollHeight;
             } catch(e) {}
+        }
+
+        // FUNGSI HAPUS SATU PESAN
+        async function deleteSingleMessage(msgId) {
+            if (!confirm("Hapus pesan ini secara permanen?")) return;
+            try {
+                const { error } = await supabaseClient.from('messages').delete().eq('id', msgId);
+                if (error) throw error;
+                loadTwoWayMessages();
+            } catch(e) { alert("Gagal menghapus pesan: " + e.message); }
         }
 
         async function sendChatReply() {
@@ -970,7 +993,7 @@
             } catch(e) { alert('Gagal mengirim: ' + e.message); }
         }
 
-        // ================= SUPER ADMIN =================
+        // ================= SUPER ADMIN & KEPALA UNIT SYSTEM SETTINGS =================
         function openSystemSettingsModal() {
             renderAdminOfficeList();
             fetchPendingUserRegistrations();
@@ -1047,36 +1070,97 @@
             } catch(e) { alert('Gagal: ' + e.message); }
         }
 
-        async function addNewScheduleShift() {
+        // ================= KELOLA SHIFT WORK SCHEDULE (MAX KODE 3 HURUF, EDIT & DELETE) =================
+        async function saveScheduleShift() {
+            const editId = document.getElementById('sch-edit-id').value;
+            const code = document.getElementById('sch-code').value.trim().toUpperCase();
             const name = document.getElementById('sch-name').value.trim();
             const timeIn = document.getElementById('sch-in').value;
             const timeOut = document.getElementById('sch-out').value;
 
-            if (!name || !timeIn || !timeOut) return alert('Lengkapi data shift!');
+            if (!code || code.length > 3) return alert('Kode shift wajib diisi dan maksimal 3 karakter!');
+            if (!name || !timeIn || !timeOut) return alert('Lengkapi nama, jam masuk, dan jam pulang!');
 
             try {
-                await supabaseClient.from('schedules').insert([{ shift_name: name, time_in: timeIn, time_out: timeOut }]);
-                alert('Shift kerja baru disimpan!');
-                document.getElementById('sch-name').value = '';
+                if (editId) {
+                    // Update Shift
+                    const { error } = await supabaseClient.from('schedules').update({
+                        shift_code: code, shift_name: name, time_in: timeIn, time_out: timeOut
+                    }).eq('id', editId);
+                    if (error) throw error;
+                    alert('Jadwal shift berhasil diperbarui!');
+                } else {
+                    // Insert Shift Baru
+                    const { error } = await supabaseClient.from('schedules').insert([{
+                        shift_code: code, shift_name: name, time_in: timeIn, time_out: timeOut
+                    }]);
+                    if (error) throw error;
+                    alert('Shift kerja baru disimpan!');
+                }
+
+                resetScheduleForm();
                 fetchScheduleShifts();
-            } catch(e) { alert('Gagal: ' + e.message); }
+            } catch(e) { alert('Gagal menyimpan shift: ' + e.message); }
+        }
+
+        function openEditScheduleModal(id, code, name, timeIn, timeOut) {
+            document.getElementById('sch-edit-id').value = id;
+            document.getElementById('sch-code').value = code || '';
+            document.getElementById('sch-name').value = name || '';
+            document.getElementById('sch-in').value = timeIn || '';
+            document.getElementById('sch-out').value = timeOut || '';
+
+            document.getElementById('schedule-form-title').innerText = "Edit Shift Kerja";
+            document.getElementById('btn-save-schedule').innerText = "Update Shift";
+            document.getElementById('btn-cancel-schedule').classList.remove('hidden');
+        }
+
+        function resetScheduleForm() {
+            document.getElementById('sch-edit-id').value = '';
+            document.getElementById('sch-code').value = '';
+            document.getElementById('sch-name').value = '';
+            document.getElementById('sch-in').value = '';
+            document.getElementById('sch-out').value = '';
+
+            document.getElementById('schedule-form-title').innerText = "Tambah Shift Kerja Baru";
+            document.getElementById('btn-save-schedule').innerText = "Simpan Shift";
+            document.getElementById('btn-cancel-schedule').classList.add('hidden');
+        }
+
+        async function deleteScheduleShift(id) {
+            if (!confirm('Yakin ingin menghapus shift kerja ini?')) return;
+            try {
+                await supabaseClient.from('schedules').delete().eq('id', id);
+                alert('Shift berhasil dihapus.');
+                fetchScheduleShifts();
+            } catch(e) { alert('Gagal menghapus shift: ' + e.message); }
         }
 
         async function fetchScheduleShifts() {
             const listEl = document.getElementById('admin-schedule-list');
             try {
                 const { data } = await supabaseClient.from('schedules').select('*').order('created_at', { ascending: false });
-                listEl.innerHTML = (data || []).map(s => `
-                    <div class="flex justify-between items-center bg-gray-50 p-1.5 rounded border">
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = '<p class="text-gray-400 text-center py-2">Belum ada shift kerja.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.map(s => `
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded border">
                         <div>
-                            <p class="font-bold text-gray-800">${s.shift_name}</p>
+                            <p class="font-bold text-gray-800"><span class="bg-green-100 text-green-800 text-[9px] px-1.5 py-0.5 rounded mr-1 font-bold">[${s.shift_code || 'SFT'}]</span> ${s.shift_name}</p>
                             <p class="text-[9px] text-gray-500">Masuk: ${s.time_in} - Pulang: ${s.time_out}</p>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="openEditScheduleModal(${s.id}, '${s.shift_code || ''}', '${s.shift_name}', '${s.time_in}', '${s.time_out}')" class="text-amber-600 hover:text-amber-800 p-1 text-xs"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteScheduleShift(${s.id})" class="text-red-600 hover:text-red-800 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `).join('');
             } catch(e) {}
         }
 
+        // ================= KELOLA LOKASI UNIT KANTOR & HAPUS KANTOR =================
         async function addNewOfficeUnit() {
             const name = document.getElementById('admin-unit-name').value.trim();
             const lat = parseFloat(document.getElementById('admin-unit-lat').value);
@@ -1086,8 +1170,23 @@
             if (!name || isNaN(lat) || isNaN(lng)) return alert('Isi data lokasi unit dengan benar!');
             await supabaseClient.from('offices').insert([{ unit_name: name, lat, lng, radius }]);
             alert('Lokasi unit kantor disimpan!');
+            
+            document.getElementById('admin-unit-name').value = '';
+            document.getElementById('admin-unit-lat').value = '';
+            document.getElementById('admin-unit-lng').value = '';
+
             fetchOfficeLocations();
             renderAdminOfficeList();
+        }
+
+        async function deleteOfficeUnit(id) {
+            if (!confirm('Yakin ingin menghapus unit kantor ini?')) return;
+            try {
+                await supabaseClient.from('offices').delete().eq('id', id);
+                alert('Unit kantor berhasil dihapus.');
+                fetchOfficeLocations();
+                renderAdminOfficeList();
+            } catch(e) { alert('Gagal menghapus unit kantor: ' + e.message); }
         }
 
         function renderAdminOfficeList() {
@@ -1099,6 +1198,7 @@
                         <p class="font-bold text-gray-800">${o.unit_name}</p>
                         <p class="text-[9px] text-gray-500">${o.lat}, ${o.lng} (${o.radius}m)</p>
                     </div>
+                    <button onclick="deleteOfficeUnit(${o.id})" class="text-red-600 hover:text-red-800 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('');
         }
@@ -1271,7 +1371,6 @@
             } catch(err) { alert('Gagal: ' + err.message); }
         }
 
-        // UNGGAN FOTO PROFIL DENGAN KOMPRESI DI BAWAH 200 KB
         async function uploadProfilePhoto(event) {
             if (!currentUser) { openAuthModal(); return; }
             const file = event.target.files[0];
@@ -1281,14 +1380,12 @@
             reader.onload = async function(e) {
                 const rawImage = e.target.result;
                 try {
-                    // Kompres foto profil otomatis di bawah 200 KB
                     const compressedImage = await compressImage(rawImage, 800, 200 * 1024);
-
                     await supabaseClient.auth.updateUser({ data: { foto_url: compressedImage } });
                     await supabaseClient.from('profiles').update({ foto_url: compressedImage }).eq('user_email', currentUserEmail);
                     currentUserData.foto_url = compressedImage;
                     renderProfileData();
-                    alert('Foto profil berhasil diperbarui (Ukuran di bawah 200 KB)!');
+                    alert('Foto profil diperbarui!');
                 } catch (err) { alert('Gagal: ' + err.message); }
             };
             reader.readAsDataURL(file);
@@ -1302,6 +1399,7 @@
             }
 
             const isSuperAdmin = (currentUserEmail === 'mastrisnocom@gmail.com' || role === 'Super Admin');
+            const isKepalaUnit = (role === 'Kepala Unit');
 
             document.getElementById('prof-nama').innerText = name;
             document.getElementById('prof-role').innerText = role;
@@ -1320,8 +1418,10 @@
             if (btnEditRole) isSuperAdmin ? btnEditRole.classList.remove('hidden') : btnEditRole.classList.add('hidden');
             if (btnEditUnit) isSuperAdmin ? btnEditUnit.classList.remove('hidden') : btnEditUnit.classList.add('hidden');
 
+            // AKSES PENGATURAN SISTEM DAN SHIFT UNTUK SUPER ADMIN DAN KEPALA UNIT
             const superAdminContainer = document.getElementById('superadmin-menu-container');
-            isSuperAdmin ? superAdminContainer.classList.remove('hidden') : superAdminContainer.classList.add('hidden');
+            if (isSuperAdmin || isKepalaUnit) superAdminContainer.classList.remove('hidden');
+            else superAdminContainer.classList.add('hidden');
 
             const approvalMenu = document.getElementById('menu-approval-container');
             if (isSuperAdmin || ['Kepala Divisi', 'Kepala Kanwil', 'Kepala Unit'].includes(role)) {
