@@ -108,7 +108,7 @@
                 </div>
             </div>
 
-            <!-- 3. APPROVAL REQUEST TAB (KHUSUS ATASAN & SUPER ADMIN) -->
+            <!-- 3. APPROVAL REQUEST TAB -->
             <div id="approval-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xl font-bold text-gray-800">Persetujuan Absensi</h2>
@@ -135,7 +135,7 @@
                 </div>
             </div>
 
-            <!-- 5. PROFIL SAYA (TAB LENGKAP) -->
+            <!-- 5. PROFIL SAYA TAB -->
             <div id="profile-section" class="hidden px-6 py-6 space-y-4">
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Profil Saya</h2>
                 
@@ -537,8 +537,8 @@
             try {
                 let query = supabaseClient.from('request_absensi').select('*').eq('status', 'Pending');
                 
-                // Filter berdasarkan hirarki approver
-                if (currentUserEmail !== 'mastrisnocom@gmail.com' && userRole !== 'Kepala Divisi') {
+                // Filter berdasarkan hirarki approver (Kecuali Super Admin dan Kepala Divisi)
+                if (currentUserEmail !== 'mastrisnocom@gmail.com' && userRole !== 'Kepala Divisi' && userRole !== 'Super Admin') {
                     query = query.eq('target_approver', userRole);
                 }
 
@@ -571,10 +571,8 @@
         async function approveRequest(reqId, userEmail, userName, actionType, userRole) {
             const todayStr = new Date().toISOString().split('T')[0];
             try {
-                // Update status request menjadi Approved
                 await supabaseClient.from('request_absensi').update({ status: 'Approved', approved_by: currentUser }).eq('id', reqId);
 
-                // Masukkan ke log absensi resmi
                 await supabaseClient.from('attendance_logs').insert([{
                     user_email: userEmail,
                     user_name: userName,
@@ -597,7 +595,7 @@
             } catch(e) { alert('Gagal: ' + e.message); }
         }
 
-        // EDIT PROFIL FIELD DYNAMIK
+        // EDIT PROFIL FIELD DYNAMIC
         function openEditFieldModal(fieldKey, title) {
             activeEditField = fieldKey;
             document.getElementById('edit-modal-title').innerText = title;
@@ -664,8 +662,14 @@
         // TAMPILAN DATA PROFIL SAYA
         function renderProfileData() {
             const name = currentUserData.full_name || currentUser || 'Tamu';
-            const role = currentUserData.jabatan || 'Teknisi/User';
             
+            // SET OTOMATIS SUPER ADMIN JIKA EMAIL MASTTRISNOCOM@GMAIL.COM
+            let role = currentUserData.jabatan || 'Teknisi/User';
+            if (currentUserEmail === 'mastrisnocom@gmail.com') {
+                role = 'Super Admin';
+                currentUserData.jabatan = 'Super Admin';
+            }
+
             document.getElementById('prof-nama').innerText = name;
             document.getElementById('prof-role').innerText = role;
             document.getElementById('user-display-role').innerText = role;
@@ -680,7 +684,7 @@
 
             // HAK AKSES CONTAINER MENU
             const superAdminContainer = document.getElementById('superadmin-menu-container');
-            if (currentUserEmail === 'mastrisnocom@gmail.com') {
+            if (currentUserEmail === 'mastrisnocom@gmail.com' || role === 'Super Admin') {
                 superAdminContainer.classList.remove('hidden');
             } else {
                 superAdminContainer.classList.add('hidden');
@@ -837,10 +841,12 @@
         }
 
         async function doSignUp(email, password, fullName) {
+            let roleDefault = (email === 'mastrisnocom@gmail.com') ? 'Super Admin' : 'Teknisi/User';
+
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
                     email, password,
-                    options: { data: { full_name: fullName, jabatan: 'Teknisi/User' } }
+                    options: { data: { full_name: fullName, jabatan: roleDefault } }
                 });
                 if (!error && data && data.user) return data;
             } catch (err) {}
@@ -848,7 +854,7 @@
             const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                 method: 'POST',
                 headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, data: { full_name: fullName, jabatan: 'Teknisi/User' } })
+                body: JSON.stringify({ email, password, data: { full_name: fullName, jabatan: roleDefault } })
             });
 
             const result = await res.json();
@@ -866,10 +872,16 @@
                     const userName = meta.full_name || session.user.email.split('@')[0];
                     currentUser = userName;
                     currentUserEmail = session.user.email;
+                    
+                    let roleUser = meta.jabatan || 'Teknisi/User';
+                    if (session.user.email === 'mastrisnocom@gmail.com') {
+                        roleUser = 'Super Admin';
+                    }
+
                     currentUserData = { 
                         full_name: userName, 
                         email: session.user.email, 
-                        jabatan: meta.jabatan || 'Teknisi/User',
+                        jabatan: roleUser,
                         nip: meta.nip,
                         unit: meta.unit,
                         gender: meta.gender,
