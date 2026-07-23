@@ -112,7 +112,7 @@
             <div id="karyawan-section" class="hidden px-6 py-6 space-y-4">
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Anggota Tim Operational</h2>
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-full bg-primary-dark text-gold flex items-center justify-center font-bold text-lg">
+                    <div class="w-12 h-12 rounded-full bg-primary-dark text-gold flex items-center justify-center font-bold text-lg overflow-hidden" id="karyawan-avatar-card">
                         <span id="karyawan-initial">T</span>
                     </div>
                     <div>
@@ -131,24 +131,95 @@
                 </div>
             </div>
 
-            <!-- 5. PROFIL TAB -->
+            <!-- 5. PROFIL SAYA (TAB LENGKAP) -->
             <div id="profile-section" class="hidden px-6 py-6 space-y-4">
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Profil Saya</h2>
                 
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
                     <div class="flex flex-col items-center border-b pb-4">
-                        <div class="w-20 h-20 rounded-full bg-primary-dark text-gold flex items-center justify-center text-3xl font-bold shadow-inner mb-3 overflow-hidden border-2 border-gold relative group" id="profile-avatar-container">
+                        <div class="w-20 h-20 rounded-full bg-primary-dark text-gold flex items-center justify-center text-3xl font-bold shadow-inner mb-2 overflow-hidden border-2 border-gold relative" id="profile-avatar-container">
                             <i class="fa-solid fa-user"></i>
                         </div>
+                        <label class="text-[10px] bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold px-3 py-1 rounded-full cursor-pointer transition mb-2">
+                            <i class="fa-solid fa-camera mr-1"></i> Ganti Photo Profil
+                            <input type="file" id="upload-foto-input" accept="image/*" class="hidden" onchange="uploadProfilePhoto(event)" />
+                        </label>
+
                         <h3 id="prof-nama" class="font-bold text-lg text-gray-800 text-center px-2">Tamu</h3>
-                        <p id="prof-role" class="text-xs text-green-700 font-semibold mt-1">Staff Operational</p>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <p id="prof-role" class="text-xs text-green-700 font-semibold">Staff Operational</p>
+                            <button onclick="openEditFieldModal('jabatan', 'Ubah Jabatan')" class="text-gray-400 hover:text-green-700 text-xs cursor-pointer"><i class="fa-solid fa-pen-to-square"></i></button>
+                        </div>
                     </div>
 
-                    <div class="space-y-4 text-xs">
-                        <div class="flex items-center justify-between border-b pb-2 gap-4">
-                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-envelope w-5 text-green-700"></i> Email</span>
-                            <span id="prof-email" class="font-bold text-gray-700 text-right break-all">Belum Login</span>
+                    <div class="space-y-3.5 text-xs">
+                        <div class="flex items-center justify-between border-b pb-2 gap-2">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-id-card w-5 text-green-700"></i> NIP</span>
+                            <div class="flex items-center gap-1.5 overflow-hidden">
+                                <span id="prof-nip" class="font-bold text-gray-700 truncate">-</span>
+                                <button onclick="openEditFieldModal('nip', 'Ubah NIP')" class="text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
                         </div>
+
+                        <div class="flex items-center justify-between border-b pb-2 gap-2">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-building w-5 text-green-700"></i> Unit Kantor</span>
+                            <div class="flex items-center gap-1.5 overflow-hidden">
+                                <span id="prof-unit" class="font-bold text-gray-700 truncate">-</span>
+                                <button onclick="openEditFieldModal('unit', 'Pilih Unit Kantor')" class="text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between border-b pb-2 gap-2">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-venus-mars w-5 text-green-700"></i> Jenis Kelamin</span>
+                            <div class="flex items-center gap-1.5 overflow-hidden">
+                                <span id="prof-gender" class="font-bold text-gray-700 truncate">-</span>
+                                <button onclick="openEditFieldModal('gender', 'Pilih Jenis Kelamin')" class="text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between border-b pb-2 gap-2">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-phone w-5 text-green-700"></i> No Handphone</span>
+                            <div class="flex items-center gap-1.5 overflow-hidden">
+                                <span id="prof-phone" class="font-bold text-gray-700 truncate">-</span>
+                                <button onclick="openEditFieldModal('phone', 'Ubah No Handphone')" class="text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between border-b pb-2 gap-2">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-hands-praying w-5 text-green-700"></i> Agama</span>
+                            <div class="flex items-center gap-1.5 overflow-hidden">
+                                <span id="prof-religion" class="font-bold text-gray-700 truncate">-</span>
+                                <button onclick="openEditFieldModal('religion', 'Pilih Agama')" class="text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between border-b pb-2 gap-2">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-user-tag w-5 text-green-700"></i> Status Karyawan</span>
+                            <div class="flex items-center gap-1.5 overflow-hidden">
+                                <span id="prof-status" class="font-bold text-gray-700 truncate">-</span>
+                                <button onclick="openEditFieldModal('status_karyawan', 'Pilih Status Karyawan')" class="text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between border-b pb-2 gap-2">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-cake-candles w-5 text-green-700"></i> Tanggal Lahir</span>
+                            <div class="flex items-center gap-1.5 overflow-hidden">
+                                <span id="prof-dob" class="font-bold text-gray-700 truncate">-</span>
+                                <button onclick="openEditFieldModal('dob', 'Ubah Tanggal Lahir')" class="text-gray-400 hover:text-green-700 shrink-0"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pb-1 gap-2">
+                            <span class="text-gray-400 font-medium shrink-0"><i class="fa-solid fa-envelope w-5 text-green-700"></i> Email</span>
+                            <span id="prof-email" class="font-bold text-gray-700 break-all text-right">Belum Login</span>
+                        </div>
+                    </div>
+
+                    <!-- TOMBOL PENGATURAN SISTEM SUPER ADMIN (KHUSUS mastrisnocom@gmail.com) -->
+                    <div id="superadmin-menu-container" class="hidden pt-2 border-t space-y-2">
+                        <button onclick="openSystemSettingsModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold py-2.5 rounded-xl transition text-xs border border-amber-300 cursor-pointer flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-gears text-amber-700"></i> Pengaturan Sistem (Super Admin)
+                        </button>
                     </div>
 
                     <div class="pt-2 space-y-2">
@@ -179,6 +250,109 @@
                 <i class="fa-regular fa-user mb-1 text-base"></i><span class="text-[10px] font-medium">Profil</span>
             </div>
         </nav>
+
+        <!-- ================= MODAL EDIT FIELD PROFIL ================= -->
+        <div id="edit-field-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative space-y-4">
+                <button onclick="closeEditFieldModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <h3 id="edit-modal-title" class="text-lg font-bold text-gray-800">Edit Data</h3>
+                <div class="space-y-3 text-xs">
+                    <div id="edit-input-container"></div>
+                    <button onclick="saveProfileField()" class="w-full bg-primary-dark text-white font-bold py-2.5 rounded-xl shadow transition cursor-pointer">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= MODAL PENGATURAN SISTEM SUPER ADMIN ================= -->
+        <div id="sys-settings-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-4">
+                <button onclick="closeSystemSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <div class="text-center">
+                    <h3 class="text-lg font-bold text-gray-800">Pengaturan Sistem</h3>
+                    <p class="text-gray-500 text-[11px] mt-0.5">Kelola Jadwal, LongLat Kantor, & Gaji</p>
+                </div>
+
+                <!-- Navigasi Tab Admin -->
+                <div class="flex border-b text-xs font-semibold">
+                    <button onclick="switchAdminSubTab('jadwal')" id="adm-tab-jadwal" class="flex-1 py-2 text-green-700 border-b-2 border-green-700">Jadwal</button>
+                    <button onclick="switchAdminSubTab('lokasi')" id="adm-tab-lokasi" class="flex-1 py-2 text-gray-400">LongLat Kantor</button>
+                    <button onclick="switchAdminSubTab('gaji')" id="adm-tab-gaji" class="flex-1 py-2 text-gray-400">Gaji</button>
+                </div>
+
+                <!-- 1. TAB MENGATUR JADWAL -->
+                <div id="adm-sec-jadwal" class="space-y-3 text-xs">
+                    <h4 class="font-bold text-gray-700">Atur Shift Kerja</h4>
+                    <div>
+                        <label class="font-semibold text-gray-600">Nama Shift</label>
+                        <input type="text" id="sch-name" placeholder="Contoh: Shift Reguler / Pagi" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold text-gray-600">Jam Masuk</label>
+                            <input type="time" id="sch-in" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
+                        </div>
+                        <div>
+                            <label class="font-semibold text-gray-600">Jam Pulang</label>
+                            <input type="time" id="sch-out" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
+                        </div>
+                    </div>
+                    <button onclick="saveScheduleSetting()" class="w-full bg-green-700 text-white font-bold py-2 rounded-xl transition">Simpan Jadwal</button>
+                </div>
+
+                <!-- 2. TAB MENGATUR LONGLAT UNIT KANTOR -->
+                <div id="adm-sec-lokasi" class="hidden space-y-3 text-xs">
+                    <h4 class="font-bold text-gray-700">Tambah / Edit Unit Kantor</h4>
+                    <div>
+                        <label class="font-semibold text-gray-600">Nama Unit / Cabang</label>
+                        <input type="text" id="admin-unit-name" placeholder="Contoh: Unit Pusat / Cabang A" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold text-gray-600">Latitude</label>
+                            <input type="number" step="any" id="admin-unit-lat" placeholder="-7.2575" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
+                        </div>
+                        <div>
+                            <label class="font-semibold text-gray-600">Longitude</label>
+                            <input type="number" step="any" id="admin-unit-lng" placeholder="112.7521" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-gray-600">Radius Absensi (Meter)</label>
+                        <input type="number" id="admin-unit-radius" value="100" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
+                    </div>
+                    <button onclick="addNewOfficeUnit()" class="w-full bg-green-700 text-white font-bold py-2 rounded-xl transition">Simpan Lokasi Unit</button>
+                    
+                    <div class="pt-2 border-t">
+                        <h5 class="font-bold text-gray-600 mb-1">Daftar Unit</h5>
+                        <div id="admin-office-list" class="space-y-1.5 max-h-28 overflow-y-auto"></div>
+                    </div>
+                </div>
+
+                <!-- 3. TAB MENGATUR GAJI KARYAWAN -->
+                <div id="adm-sec-gaji" class="hidden space-y-3 text-xs">
+                    <h4 class="font-bold text-gray-700">Atur Gaji Per Karyawan</h4>
+                    <div>
+                        <label class="font-semibold text-gray-600">Email Karyawan</label>
+                        <input type="email" id="sal-email" placeholder="karyawan@email.com" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
+                    </div>
+                    <div>
+                        <label class="font-semibold text-gray-600">Gaji Pokok (Rp)</label>
+                        <input type="number" id="sal-basic" placeholder="5000000" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold text-gray-600">Tunjangan/Hari (Rp)</label>
+                            <input type="number" id="sal-allowance" placeholder="50000" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
+                        </div>
+                        <div>
+                            <label class="font-semibold text-gray-600">Denda Telat (Rp)</label>
+                            <input type="number" id="sal-penalty" placeholder="20000" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
+                        </div>
+                    </div>
+                    <button onclick="saveSalarySetting()" class="w-full bg-green-700 text-white font-bold py-2 rounded-xl transition">Simpan Setting Gaji</button>
+                </div>
+            </div>
+        </div>
 
         <!-- ================= MODAL LOGIN & DAFTAR ================= -->
         <div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
@@ -236,9 +410,14 @@
         let currentUserEmail = null;
         let currentUserData = {};
         let currentCoords = null;
+        let officeLocations = [];
+        let activeEditField = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (supabaseClient) checkSession();
+            if (supabaseClient) {
+                checkSession();
+                fetchOfficeLocations();
+            }
             initGeolocation();
         });
 
@@ -249,8 +428,7 @@
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         currentCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
-                        gpsBadge.className = "text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold";
-                        gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> GPS Aktif`;
+                        evaluateGPSWithUserOffice();
                     },
                     (error) => {
                         gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
@@ -263,10 +441,47 @@
             }
         }
 
+        async function fetchOfficeLocations() {
+            try {
+                const { data } = await supabaseClient.from('offices').select('*');
+                officeLocations = data || [];
+                evaluateGPSWithUserOffice();
+            } catch(e) {}
+        }
+
+        function evaluateGPSWithUserOffice() {
+            if (!currentCoords) return;
+            const gpsBadge = document.getElementById('gps-status-badge');
+            let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
+            
+            if (!targetOffice) {
+                gpsBadge.className = "text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold";
+                gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> GPS Aktif`;
+                return;
+            }
+
+            const dist = calculateDistance(currentCoords.lat, currentCoords.lng, targetOffice.lat, targetOffice.lng);
+            if (dist <= targetOffice.radius) {
+                gpsBadge.className = "text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold";
+                gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> Area ${targetOffice.unit_name} (${Math.round(dist)}m)`;
+            } else {
+                gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
+                gpsBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Luar Area (${Math.round(dist)}m)`;
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3;
+            const φ1 = lat1 * Math.PI/180, φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180, Δλ = (lon2-lon1) * Math.PI/180;
+            const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+        }
+
         // FUNGSI UTAMA CLOCK IN / CLOCK OUT
         async function recordAttendance(actionType) {
             if (!currentUser) {
-                alert('Silakan Login terlebih dahulu untuk mencatat absensi!');
+                alert('Silakan Login terlebih dahulu!');
                 openAuthModal();
                 return;
             }
@@ -283,70 +498,213 @@
                     .insert([{ 
                         user_name: currentUser, 
                         action_type: actionType,
-                        jabatan: currentUserData.jabatan || 'Staff Operational'
+                        jabatan: currentUserData.jabatan || 'Staff Operational',
+                        foto_url: currentUserData.foto_url || ''
                     }]);
 
                 if (error) throw error;
 
-                alert(`Berhasil ${actionType}! Data absensi telah dicatat.`);
-                fetchAttendanceLogs(); // Refresh riwayat
+                alert(`Berhasil ${actionType}! Data absensi dicatat.`);
+                fetchAttendanceLogs();
             } catch (error) {
-                console.error('Error Absensi:', error);
-                alert(`Gagal mencatat absensi: ` + (error.message || "Terjadi kesalahan koneksi"));
+                alert(`Gagal absensi: ` + error.message);
             } finally {
                 btnElement.innerHTML = originalContent;
                 btnElement.disabled = false;
             }
         }
 
-        // Ambil Data Riwayat Absensi
-        async function fetchAttendanceLogs() {
-            const logList = document.getElementById('log-list');
-            logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data riwayat...</p>';
+        // EDIT PROFIL FIELD DYNAMIK
+        function openEditFieldModal(fieldKey, title) {
+            activeEditField = fieldKey;
+            document.getElementById('edit-modal-title').innerText = title;
+            const container = document.getElementById('edit-input-container');
+            
+            if (fieldKey === 'unit') {
+                let options = officeLocations.map(o => `<option value="${o.unit_name}" ${currentUserData.unit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="">-- Pilih Unit Kantor --</option>${options}</select>`;
+            } else if (fieldKey === 'religion') {
+                let religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];
+                let options = religions.map(r => `<option value="${r}" ${currentUserData.religion === r ? 'selected' : ''}>${r}</option>`).join('');
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white">${options}</select>`;
+            } else if (fieldKey === 'gender') {
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="Laki-laki" ${currentUserData.gender==='Laki-laki'?'selected':''}>Laki-laki</option><option value="Perempuan" ${currentUserData.gender==='Perempuan'?'selected':''}>Perempuan</option></select>`;
+            } else if (fieldKey === 'status_karyawan') {
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="Tetap">Tetap</option><option value="Kontrak">Kontrak</option><option value="Magang">Magang</option></select>`;
+            } else if (fieldKey === 'dob') {
+                let val = currentUserData.dob || '';
+                container.innerHTML = `<input type="date" id="modal-dynamic-input" value="${val}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-green-600" />`;
+            } else {
+                let val = currentUserData[fieldKey] || '';
+                container.innerHTML = `<input type="text" id="modal-dynamic-input" value="${val}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-green-600" />`;
+            }
+
+            document.getElementById('edit-field-modal').classList.remove('hidden');
+        }
+        function closeEditFieldModal() { document.getElementById('edit-field-modal').classList.add('hidden'); }
+
+        async function saveProfileField() {
+            const val = document.getElementById('modal-dynamic-input').value.trim();
+            let updatePayload = {};
+            updatePayload[activeEditField] = val;
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('attendance_logs')
-                    .select('*')
-                    .order('timestamp', { ascending: false });
-
+                const { error } = await supabaseClient.auth.updateUser({ data: updatePayload });
                 if (error) throw error;
+                currentUserData[activeEditField] = val;
+                renderProfileData();
+                alert('Data profil berhasil diperbarui!');
+                closeEditFieldModal();
+            } catch(err) { alert('Gagal: ' + err.message); }
+        }
 
-                if (!data || data.length === 0) {
-                    logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi.</p>';
-                    return;
-                }
+        async function uploadProfilePhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                alert('Mengunggah foto profil...');
+                const fileName = `profile_${currentUserEmail.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.jpg`;
+                await supabaseClient.storage.from('foto-absensi').upload(fileName, file, { upsert: true });
+                const { data: urlData } = supabaseClient.storage.from('foto-absensi').getPublicUrl(fileName);
+                
+                await supabaseClient.auth.updateUser({ data: { foto_url: urlData.publicUrl } });
+                currentUserData.foto_url = urlData.publicUrl;
+                renderProfileData();
+                alert('Foto profil diperbarui!');
+            } catch (err) { alert('Gagal upload: ' + err.message); }
+        }
 
-                logList.innerHTML = data.map(item => {
-                    const timeStr = new Date(item.timestamp || Date.now()).toLocaleString('id-ID', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short'
-                    });
-                    const isIn = item.action_type === 'Clock In';
-                    const badgeColor = isIn ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-                    const iconClass = isIn ? 'fa-arrow-right-to-bracket text-green-700' : 'fa-arrow-right-from-bracket text-red-700';
+        // TAMPILAN DATA PROFIL SAYA
+        function renderProfileData() {
+            const name = currentUserData.full_name || currentUser || 'Tamu';
+            const role = currentUserData.jabatan || 'Staff Operational';
+            
+            document.getElementById('prof-nama').innerText = name;
+            document.getElementById('prof-role').innerText = role;
+            document.getElementById('user-display-role').innerText = role;
+            document.getElementById('prof-email').innerText = currentUserData.email || '-';
+            document.getElementById('prof-nip').innerText = currentUserData.nip || '-';
+            document.getElementById('prof-unit').innerText = currentUserData.unit || 'Belum dipilih';
+            document.getElementById('prof-gender').innerText = currentUserData.gender || '-';
+            document.getElementById('prof-phone').innerText = currentUserData.phone || '-';
+            document.getElementById('prof-religion').innerText = currentUserData.religion || '-';
+            document.getElementById('prof-status').innerText = currentUserData.status_karyawan || '-';
+            document.getElementById('prof-dob').innerText = currentUserData.dob || '-';
 
-                    return `
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                    <i class="fa-solid ${iconClass}"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-xs text-gray-800">${item.user_name || 'Karyawan'}</h4>
-                                    <p class="text-[11px] text-gray-400">${timeStr}</p>
-                                </div>
-                            </div>
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${badgeColor}">${item.action_type}</span>
-                        </div>
-                    `;
-                }).join('');
-            } catch (err) {
-                console.error("Gagal memuat log:", err);
-                logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data: ${err.message}</p>`;
+            // KHUSUS SUPER ADMIN (mastrisnocom@gmail.com)
+            const superAdminContainer = document.getElementById('superadmin-menu-container');
+            if (currentUserEmail === 'mastrisnocom@gmail.com') {
+                superAdminContainer.classList.remove('hidden');
+            } else {
+                superAdminContainer.classList.add('hidden');
+            }
+
+            const avatarContainer = document.getElementById('profile-avatar-container');
+            const kAvatar = document.getElementById('karyawan-avatar-card');
+            
+            if (currentUserData.foto_url) {
+                avatarContainer.innerHTML = `<img src="${currentUserData.foto_url}" class="w-full h-full object-cover" />`;
+                kAvatar.innerHTML = `<img src="${currentUserData.foto_url}" class="w-full h-full object-cover" />`;
+            } else {
+                const initial = name.charAt(0).toUpperCase();
+                avatarContainer.innerHTML = `<span class="text-gold font-bold text-3xl">${initial}</span>`;
+                kAvatar.innerHTML = `<span class="text-gold font-bold text-lg">${initial}</span>`;
             }
         }
 
+        // SUPER ADMIN - PENGATURAN SISTEM
+        function openSystemSettingsModal() {
+            renderAdminOfficeList();
+            document.getElementById('sys-settings-modal').classList.remove('hidden');
+        }
+        function closeSystemSettingsModal() { document.getElementById('sys-settings-modal').classList.add('hidden'); }
+
+        function switchAdminSubTab(sub) {
+            ['jadwal', 'lokasi', 'gaji'].forEach(s => {
+                document.getElementById('adm-sec-' + s).classList.add('hidden');
+                document.getElementById('adm-tab-' + s).className = "flex-1 py-2 text-gray-400";
+            });
+            document.getElementById('adm-sec-' + sub).classList.remove('hidden');
+            document.getElementById('adm-tab-' + sub).className = "flex-1 py-2 text-green-700 border-b-2 border-green-700";
+        }
+
+        async function saveScheduleSetting() {
+            const name = document.getElementById('sch-name').value;
+            const timeIn = document.getElementById('sch-in').value;
+            const timeOut = document.getElementById('sch-out').value;
+            if (!name || !timeIn || !timeOut) return alert('Lengkapi jam shift!');
+
+            const { error } = await supabaseClient.from('schedules').insert([{ shift_name: name, time_in: timeIn, time_out: timeOut }]);
+            if (error) alert('Gagal: ' + error.message);
+            else alert('Jadwal shift berhasil disimpan!');
+        }
+
+        async function addNewOfficeUnit() {
+            const name = document.getElementById('admin-unit-name').value.trim();
+            const lat = parseFloat(document.getElementById('admin-unit-lat').value);
+            const lng = parseFloat(document.getElementById('admin-unit-lng').value);
+            const radius = parseInt(document.getElementById('admin-unit-radius').value) || 100;
+
+            if (!name || isNaN(lat) || isNaN(lng)) return alert('Isi data lokasi unit dengan benar!');
+            await supabaseClient.from('offices').insert([{ unit_name: name, lat, lng, radius }]);
+            alert('Lokasi unit kantor disimpan!');
+            fetchOfficeLocations();
+            renderAdminOfficeList();
+        }
+
+        function renderAdminOfficeList() {
+            const listEl = document.getElementById('admin-office-list');
+            if (officeLocations.length === 0) { listEl.innerHTML = '<p class="text-gray-400 text-center py-1">Belum ada unit.</p>'; return; }
+            listEl.innerHTML = officeLocations.map(o => `
+                <div class="flex justify-between items-center bg-gray-50 p-1.5 rounded border">
+                    <div>
+                        <p class="font-bold text-gray-800">${o.unit_name}</p>
+                        <p class="text-[9px] text-gray-500">${o.lat}, ${o.lng} (${o.radius}m)</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function saveSalarySetting() {
+            const email = document.getElementById('sal-email').value;
+            const basic = parseFloat(document.getElementById('sal-basic').value) || 0;
+            const allowance = parseFloat(document.getElementById('sal-allowance').value) || 0;
+            const penalty = parseFloat(document.getElementById('sal-penalty').value) || 0;
+
+            if (!email) return alert('Masukkan email karyawan!');
+
+            const { error } = await supabaseClient.from('salaries').upsert([{ user_email: email, basic_salary: basic, allowance, penalty }], { onConflict: 'user_email' });
+            if (error) alert('Gagal: ' + error.message);
+            else alert('Pengaturan gaji karyawan berhasil disimpan!');
+        }
+
+        // LOG ABSENSI
+        async function fetchAttendanceLogs() {
+            const logList = document.getElementById('log-list');
+            logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data...</p>';
+
+            try {
+                const { data } = await supabaseClient.from('attendance_logs').select('*').order('timestamp', { ascending: false });
+                if (!data || data.length === 0) { logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi.</p>'; return; }
+
+                logList.innerHTML = data.map(item => `
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                <i class="fa-solid ${item.action_type==='Clock In'?'fa-arrow-right-to-bracket text-green-700':'fa-arrow-right-from-bracket text-red-700'}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-gray-800">${item.user_name}</h4>
+                                <p class="text-[11px] text-gray-400">${new Date(item.timestamp || Date.now()).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${item.action_type==='Clock In'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${item.action_type}</span>
+                    </div>
+                `).join('');
+            } catch (err) { logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data.</p>`; }
+        }
+
+        // AUTHENTICATION
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
@@ -367,7 +725,6 @@
             }
         }
 
-        // AUTHENTICATION LOGIC (SDK + REST FALLBACK)
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -390,8 +747,7 @@
                     toggleAuthMode();
                 }
             } catch (error) {
-                console.error("Auth Exception:", error);
-                alert("Gagal: " + (error.message || "Terjadi kesalahan koneksi. Periksa email/password!"));
+                alert("Gagal: " + (error.message || "Email/Password salah!"));
             } finally {
                 btn.innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
                 btn.disabled = false;
@@ -402,10 +758,7 @@
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (!error && data && data.session) return data;
-                if (error && error.message && !error.message.includes('fetch')) throw error;
-            } catch (err) {
-                if (err.message && err.message.includes("Invalid login credentials")) throw err;
-            }
+            } catch (err) {}
 
             const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
                 method: 'POST',
@@ -414,17 +767,10 @@
             });
 
             const result = await res.json();
-            if (!res.ok) {
-                let msg = result.error_description || result.msg || result.message;
-                if (msg === 'Invalid login credentials') msg = 'Email atau Password salah!';
-                throw new Error(msg || 'Gagal login.');
-            }
+            if (!res.ok) throw new Error(result.error_description || result.msg || 'Email/Password salah!');
 
             if (result.access_token && supabaseClient) {
-                await supabaseClient.auth.setSession({
-                    access_token: result.access_token,
-                    refresh_token: result.refresh_token
-                });
+                await supabaseClient.auth.setSession({ access_token: result.access_token, refresh_token: result.refresh_token });
             }
             return result;
         }
@@ -441,18 +787,11 @@
             const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                 method: 'POST',
                 headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email, password,
-                    data: { full_name: fullName, jabatan: 'Staff Operational' }
-                })
+                body: JSON.stringify({ email, password, data: { full_name: fullName, jabatan: 'Staff Operational' } })
             });
 
             const result = await res.json();
-            if (!res.ok) {
-                let msg = result.msg || result.message || result.error_description;
-                if (msg && msg.includes('already registered')) msg = 'Email sudah terdaftar. Silakan login!';
-                throw new Error(msg || 'Gagal mendaftar.');
-            }
+            if (!res.ok) throw new Error(result.msg || result.message || 'Gagal mendaftar.');
             return result;
         }
 
@@ -466,13 +805,25 @@
                     const userName = meta.full_name || session.user.email.split('@')[0];
                     currentUser = userName;
                     currentUserEmail = session.user.email;
-                    currentUserData = { full_name: userName, email: session.user.email, jabatan: meta.jabatan || 'Staff Operational' };
+                    currentUserData = { 
+                        full_name: userName, 
+                        email: session.user.email, 
+                        jabatan: meta.jabatan || 'Staff Operational',
+                        nip: meta.nip,
+                        unit: meta.unit,
+                        gender: meta.gender,
+                        phone: meta.phone,
+                        religion: meta.religion,
+                        status_karyawan: meta.status_karyawan,
+                        dob: meta.dob,
+                        foto_url: meta.foto_url
+                    };
 
                     document.getElementById('user-display-name').innerText = userName;
-                    document.getElementById('prof-nama').innerText = userName;
-                    document.getElementById('prof-email').innerText = session.user.email;
                     document.getElementById('karyawan-name-card').innerText = userName;
                     document.getElementById('karyawan-initial').innerText = userName.charAt(0).toUpperCase();
+
+                    renderProfileData();
 
                     btnContainer.innerHTML = `<button onclick="logout()" class="bg-red-500/25 text-red-100 text-xs font-semibold py-2 px-3 rounded-full border border-red-400/35 cursor-pointer"><i class="fa-solid fa-power-off"></i> Keluar</button>`;
                 } else {
@@ -514,6 +865,7 @@
             }
 
             if (tab === 'log') fetchAttendanceLogs();
+            if (tab === 'profile') renderProfileData();
         }
     </script>
 </body>
