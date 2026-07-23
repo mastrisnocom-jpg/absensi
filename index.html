@@ -88,19 +88,19 @@
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition bg-amber-600"><i class="fa-solid fa-user-check"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Persetujuan<br>Absensi</span>
                     </div>
-                    <div onclick="handleMenuClick('Daftar Pengajuan')" class="flex flex-col items-center cursor-pointer group">
+                    <div onclick="switchTab('log')" class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-clipboard-list"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Daftar<br>Pengajuan</span>
                     </div>
-                    <div onclick="handleMenuClick('Request Absensi')" class="flex flex-col items-center cursor-pointer group">
+                    <div onclick="openRequestModal('Request Absensi')" class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-clock-rotate-left"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Absensi</span>
                     </div>
-                    <div onclick="handleMenuClick('Request Lembur')" class="flex flex-col items-center cursor-pointer group">
+                    <div onclick="openRequestModal('Request Lembur')" class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-business-time"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Lembur</span>
                     </div>
-                    <div onclick="handleMenuClick('Request Cuti')" class="flex flex-col items-center cursor-pointer group">
+                    <div onclick="openRequestModal('Request Cuti')" class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-plane-departure"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Request<br>Cuti</span>
                     </div>
@@ -146,7 +146,7 @@
             <!-- 3. APPROVAL REQUEST TAB -->
             <div id="approval-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xl font-bold text-gray-800">Persetujuan Absensi</h2>
+                    <h2 class="text-xl font-bold text-gray-800">Persetujuan Absensi & Izin</h2>
                     <button onclick="fetchPendingRequests()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-800 transition active:scale-95">
                         <i class="fa-solid fa-rotate mr-1"></i> Refresh
                     </button>
@@ -302,6 +302,34 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- ================= MODAL REQUEST FORM BARU (DENGAN DROP-DOWN DINAMIS OTOMATIS) ================= -->
+        <div id="request-submission-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
+                <button onclick="closeRequestModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <h3 id="request-modal-title" class="text-base font-bold text-gray-800">Form Pengajuan</h3>
+                <p id="request-modal-subtitle" class="text-xs text-green-700 font-bold border-b pb-2">-</p>
+                
+                <form id="submission-form" onsubmit="submitFormPengajuan(event)" class="space-y-3 text-xs">
+                    <input type="hidden" id="submission-type" value="">
+                    
+                    <!-- Drop-down Opsi Pilihan Otomatis Dinamis -->
+                    <div>
+                        <label id="request-option-label" class="font-semibold text-gray-600">Pilih Opsi Kategori*</label>
+                        <select id="submission-option-select" class="w-full mt-1 border rounded-lg p-2 bg-white outline-none focus:border-green-600 font-medium"></select>
+                    </div>
+
+                    <div>
+                        <label class="font-semibold text-gray-600">Alasan / Keterangan Tambahan*</label>
+                        <textarea id="submission-reason" required placeholder="Tulis alasan detail atau keterangan pelengkap di sini..." rows="3" class="w-full mt-1 border rounded-lg p-2 bg-white outline-none focus:border-green-600"></textarea>
+                    </div>
+                    
+                    <button type="submit" id="btn-submit-request" class="w-full bg-green-700 text-white font-bold py-2.5 rounded-xl transition shadow text-xs mt-2 cursor-pointer">
+                        Kirim Permohonan
+                    </button>
+                </form>
+            </div>
         </div>
 
         <!-- ================= MODAL JADWAL SHIFT 1 BULAN (VIEW TEKNISI) ================= -->
@@ -684,6 +712,99 @@
 
         function isUserSuperAdmin() {
             return (currentUserEmail === 'mastrisnocom@gmail.com' || (currentUserData && currentUserData.jabatan === 'Super Admin'));
+        }
+
+        // ================= LOGIKA FORM REQUEST ABSENSI, LEMBUR, CUTI DENGAN DROP-DOWN DINAMIS =================
+        function openRequestModal(type) {
+            if (!currentUser) {
+                alert('Akses Ditolak: Anda belum login!');
+                openAuthModal();
+                return;
+            }
+            
+            document.getElementById('submission-type').value = type;
+            document.getElementById('request-modal-title').innerText = `Pengajuan ${type}`;
+            document.getElementById('request-modal-subtitle').innerText = `Oleh: ${currentUser} (${currentUserEmail})`;
+            document.getElementById('submission-reason').value = '';
+            
+            const labelEl = document.getElementById('request-option-label');
+            const selectEl = document.getElementById('submission-option-select');
+            
+            // Konfigurasi Pilihan Drop-down Berdasarkan Menu yang Di-klik
+            if (type === 'Request Cuti') {
+                labelEl.innerText = "Pilih Jenis Cuti*";
+                selectEl.innerHTML = `
+                    <option value="Cuti Tahunan">Cuti Tahunan</option>
+                    <option value="Cuti Sakit">Cuti Sakit (Perlu Bukti/Surat Dokter)</option>
+                    <option value="Cuti Melahirkan / Bersalin">Cuti Melahirkan / Bersalin</option>
+                    <option value="Cuti Izin Khusus (Pernikahan / Kedukaan)">Cuti Izin Khusus (Nikah / Duka)</option>
+                    <option value="Cuti Keagamaan (Umroh / Haji)">Cuti Keagamaan (Umroh / Haji)</option>
+                `;
+            } else if (type === 'Request Lembur') {
+                labelEl.innerText = "Pilih Kategori Lembur*";
+                selectEl.innerHTML = `
+                    <option value="Lembur Hari Kerja (Setelah Jam Kantor)">Lembur Hari Kerja (Hari Biasa)</option>
+                    <option value="Lembur Hari Libur / Akhir Pekan">Lembur Hari Libur / Weekend</option>
+                    <option value="Lembur Panggilan Darurat (On-Call Tugas)">Lembur Panggilan Darurat (On-Call)</option>
+                `;
+            } else if (type === 'Request Absensi') {
+                labelEl.innerText = "Pilih Jenis Kendala Absen*";
+                selectEl.innerHTML = `
+                    <option value="Lupa Melakukan Clock In / Clock Out">Lupa Melakukan Clock In / Out</option>
+                    <option value="Kendala Aplikasi / Error Kamera / GPS HP">Kendala Aplikasi / Kamera / GPS HP</option>
+                    <option value="Dinas Luar Kota / Tugas Lapangan Remote">Dinas Luar Kota / Lapangan Remote</option>
+                    <option value="Izin Datang Terlambat (Ada Keperluan Mendesak)">Izin Datang Terlambat (Mendesak)</option>
+                `;
+            }
+            
+            document.getElementById('request-submission-modal').classList.remove('hidden');
+        }
+
+        function closeRequestModal() {
+            document.getElementById('request-submission-modal').classList.add('hidden');
+        }
+
+        async function submitFormPengajuan(event) {
+            event.preventDefault();
+            const type = document.getElementById('submission-type').value;
+            const selectedOption = document.getElementById('submission-option-select').value;
+            const textReason = document.getElementById('submission-reason').value.trim();
+            const btn = document.getElementById('btn-submit-request');
+
+            if (!textReason) return alert('Silakan isi keterangan alasan detail pengajuan Anda!');
+
+            // Format Penggabungan Opsi Kategori dengan Keterangan Alasan
+            const finalReason = `[${selectedOption}] - Ket: ${textReason}`;
+
+            const userRole = currentUserData.jabatan || 'Teknisi/User';
+            let targetApprover = 'Kepala Unit';
+            if (userRole === 'Kepala Unit') targetApprover = 'Kepala Kanwil';
+            else if (userRole === 'Kepala Kanwil') targetApprover = 'Kepala Divisi';
+
+            btn.innerText = 'Mengirim...';
+            btn.disabled = true;
+
+            try {
+                const { error } = await supabaseClient.from('request_absensi').insert([{
+                    user_email: currentUserEmail,
+                    nama: currentUser,
+                    jabatan: userRole,
+                    jenis_request: type,
+                    alasan: finalReason,
+                    target_approver: targetApprover,
+                    status: 'Pending'
+                }]);
+
+                if (error) throw error;
+
+                alert(`Permohonan ${type} Anda berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`);
+                closeRequestModal();
+            } catch(e) {
+                alert('Gagal mengirim permohonan: ' + e.message);
+            } finally {
+                btn.innerText = 'Kirim Permohonan';
+                btn.disabled = false;
+            }
         }
 
         async function fetchShiftsListGlobal() {
@@ -1869,14 +1990,26 @@
             const todayStr = new Date().toISOString().split('T')[0];
             try {
                 await supabaseClient.from('request_absensi').update({ status: 'Approved', approved_by: currentUser }).eq('id', reqId);
-                await supabaseClient.from('attendance_logs').insert([{ user_email: userEmail, user_name: userName, action_type: actionType, jabatan: userRole, date_recorded: todayStr }]);
-                alert('Permohonan absensi berhasil disetujui!');
+                
+                if (actionType.includes('Absen') || actionType.includes('Lembur') || actionType.includes('Clock')) {
+                    await supabaseClient.from('attendance_logs').insert([{ 
+                        user_email: userEmail, 
+                        user_name: userName, 
+                        action_type: actionType, 
+                        jabatan: userRole, 
+                        unit: currentUserData.unit || 'Pusat',
+                        date_recorded: todayStr,
+                        status_absen: 'Disetujui Atasan'
+                    }]);
+                }
+                
+                alert('Permohonan berhasil disetujui!');
                 fetchPendingRequests();
             } catch(e) { alert('Gagal menyetujui: ' + e.message); }
         }
 
         async function rejectRequest(reqId) {
-            if (!confirm('Yakin ingin menolak permohonan absensi ini?')) return;
+            if (!confirm('Yakin ingin menolak permohonan ini?')) return;
             try {
                 await supabaseClient.from('request_absensi').update({ status: 'Rejected', approved_by: currentUser }).eq('id', reqId);
                 alert('Permohonan ditolak.');
