@@ -148,19 +148,40 @@
                 </div>
             </div>
 
-            <!-- 2. ABSEN LOG TAB DENGAN FILTER TANGGAL & CHECKBOX KARYAWAN UNTUK EXPORT -->
+            <!-- 2. DAFTAR PENGAJUAN TAB (SHEETS TERPISAH: CUTI, ABSEN, LEMBUR, DAN EXPORT REKAP) -->
             <div id="log-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-1">
-                    <h2 class="text-xl font-bold text-gray-800" id="log-section-title">Riwayat Absen Log</h2>
-                    <button onclick="fetchAttendanceLogs()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-800 transition active:scale-95 cursor-pointer">
+                    <h2 class="text-xl font-bold text-gray-800" id="log-section-title">Daftar Pengajuan</h2>
+                    <button onclick="fetchSubmissionRequestsList()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-800 transition active:scale-95 cursor-pointer">
                         <i class="fa-solid fa-rotate mr-1"></i> Refresh
                     </button>
                 </div>
 
-                <!-- PANEL FILTER EXPORT LOG DENGAN PILIHAN RENTANG TANGGAL DAN CENTANG KARYAWAN -->
-                <div class="bg-white border border-emerald-200 p-3.5 rounded-2xl space-y-3 shadow-xs">
+                <!-- SUB-SHEET TABS FOR PENGAJUAN -->
+                <div class="flex bg-gray-200 p-1 rounded-2xl text-xs font-bold">
+                    <button onclick="switchSubmissionSheet('cuti')" id="sheet-btn-cuti" class="flex-1 py-2 rounded-xl bg-white text-emerald-800 shadow-sm transition">
+                        <i class="fa-solid fa-plane-departure mr-1"></i> Cuti
+                    </button>
+                    <button onclick="switchSubmissionSheet('absen')" id="sheet-btn-absen" class="flex-1 py-2 rounded-xl text-gray-500 hover:text-gray-800 transition">
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> Absensi
+                    </button>
+                    <button onclick="switchSubmissionSheet('lembur')" id="sheet-btn-lembur" class="flex-1 py-2 rounded-xl text-gray-500 hover:text-gray-800 transition">
+                        <i class="fa-solid fa-business-time mr-1"></i> Lembur
+                    </button>
+                    <button onclick="switchSubmissionSheet('export')" id="sheet-btn-export" class="flex-1 py-2 rounded-xl text-gray-500 hover:text-gray-800 transition">
+                        <i class="fa-solid fa-file-export mr-1"></i> Export
+                    </button>
+                </div>
+
+                <!-- CONTAINER LIST PENGAJUAN (CUTI, ABSEN, LEMBUR) -->
+                <div id="submission-list-container" class="space-y-3 pb-4">
+                    <p class="text-gray-400 text-sm text-center py-10">Memuat data pengajuan...</p>
+                </div>
+
+                <!-- PANEL EXPORT (BILA SHEET EXPORT DIPILIH) -->
+                <div id="export-panel-container" class="hidden bg-white border border-emerald-200 p-3.5 rounded-2xl space-y-3 shadow-xs">
                     <div class="flex justify-between items-center border-b pb-1.5">
-                        <h4 class="font-bold text-xs text-gray-800 flex items-center gap-1.5"><i class="fa-solid fa-filter text-emerald-700"></i> Filter Rekapitulasi Data</h4>
+                        <h4 class="font-bold text-xs text-gray-800 flex items-center gap-1.5"><i class="fa-solid fa-filter text-emerald-700"></i> Export Rekapitulasi Presensi</h4>
                         <span class="text-[9px] text-gray-400">PDF & CSV</span>
                     </div>
 
@@ -199,10 +220,6 @@
                         </button>
                     </div>
                 </div>
-
-                <div id="log-list" class="space-y-3 pb-4">
-                    <p class="text-gray-400 text-sm text-center py-10">Memuat data riwayat...</p>
-                </div>
             </div>
 
             <!-- 3. APPROVAL REQUEST TAB -->
@@ -218,7 +235,7 @@
                 </div>
             </div>
 
-            <!-- 4. KARYAWAN / TIM KAMI TAB (FILTER UNIT SAMA) -->
+            <!-- 4. KARYAWAN / TIM KAMI TAB -->
             <div id="karyawan-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-1">
                     <div>
@@ -413,7 +430,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL REQUEST FORM BARU (DENGAN TANGGAL SAMPAI & DOKUMEN FOTO CUTI) ================= -->
+        <!-- ================= MODAL REQUEST FORM BARU ================= -->
         <div id="request-submission-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden transition-all duration-300 overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden relative my-auto border border-emerald-100 transform transition-all">
                 <div class="bg-gradient-to-r from-emerald-800 to-teal-900 p-5 text-white relative">
@@ -596,7 +613,7 @@
                 <i class="fa-solid fa-users mb-1 text-base"></i><span class="text-[10px] font-medium">Karyawan</span>
             </div>
             <div onclick="switchTab('log')" id="nav-log" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
-                <i class="fa-regular fa-calendar-check mb-1 text-base"></i><span class="text-[10px] font-medium">Absen Log</span>
+                <i class="fa-regular fa-calendar-check mb-1 text-base"></i><span class="text-[10px] font-medium">Daftar Pengajuan</span>
             </div>
             
             <div onclick="switchTab('inbox')" id="nav-inbox" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none relative">
@@ -859,7 +876,7 @@
                         </div>
                     </div>
 
-                    <!-- SUB-TAB KHUSUS INPUT SLIP GAJI (SUPER ADMIN & KANWIL) -->
+                    <!-- SUB-TAB KHUSUS INPUT SLIP GAJI -->
                     <div id="adm-sec-slip-gaji" class="hidden space-y-3 text-xs">
                         <h4 class="font-bold text-gray-700 flex items-center gap-1.5"><i class="fa-solid fa-file-invoice-dollar text-emerald-700"></i> Form Input Slip Gaji Karyawan</h4>
                         
@@ -1015,6 +1032,7 @@
         let selectedRosterTargetEmail = null;
         let allEmployeesListForExport = [];
         let selectedDocBase64 = null;
+        let currentSubmissionSheet = 'cuti'; // 'cuti', 'absen', 'lembur', 'export'
 
         function isUserSuperAdmin() {
             return (currentUserEmail === 'mastrisnocom@gmail.com' || (currentUserData && currentUserData.jabatan === 'Super Admin'));
@@ -1230,13 +1248,101 @@
             initGeolocation();
             fetchLatestEarthquakeBMKG();
             
-            // Set Default Tanggal Filter Export (Awal Bulan s/d Hari Ini)
+            // Set Default Tanggal Filter Export
             const now = new Date();
             const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
             const today = now.toISOString().split('T')[0];
             document.getElementById('export-date-from').value = firstDay;
             document.getElementById('export-date-to').value = today;
         });
+
+        // ================= LOGIKA TAB DAFTAR PENGAJUAN (SHEET CUTI, ABSEN, LEMBUR, EXPORT) =================
+        function switchSubmissionSheet(sheetKey) {
+            currentSubmissionSheet = sheetKey;
+            
+            ['cuti', 'absen', 'lembur', 'export'].forEach(key => {
+                const btn = document.getElementById('sheet-btn-' + key);
+                if (key === sheetKey) {
+                    btn.className = "flex-1 py-2 rounded-xl bg-white text-emerald-800 shadow-sm transition font-bold";
+                } else {
+                    btn.className = "flex-1 py-2 rounded-xl text-gray-500 hover:text-gray-800 transition font-semibold";
+                }
+            });
+
+            const listContainer = document.getElementById('submission-list-container');
+            const exportContainer = document.getElementById('export-panel-container');
+
+            if (sheetKey === 'export') {
+                listContainer.classList.add('hidden');
+                exportContainer.classList.remove('hidden');
+                populateUsersCheckboxForExport();
+            } else {
+                exportContainer.classList.add('hidden');
+                listContainer.classList.remove('hidden');
+                fetchSubmissionRequestsList();
+            }
+        }
+
+        async function fetchSubmissionRequestsList() {
+            const listEl = document.getElementById('submission-list-container');
+            listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data pengajuan...</p>';
+
+            if (!currentUserEmail) {
+                listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Silakan login terlebih dahulu.</p>';
+                return;
+            }
+
+            let typeFilter = 'Request Cuti';
+            if (currentSubmissionSheet === 'absen') typeFilter = 'Request Absensi';
+            if (currentSubmissionSheet === 'lembur') typeFilter = 'Request Lembur';
+
+            try {
+                let query = supabaseClient.from('request_absensi').select('*').eq('jenis_request', typeFilter);
+                
+                if (!isUserSuperAdmin()) {
+                    query = query.eq('user_email', currentUserEmail);
+                }
+
+                const { data, error } = await query.order('created_at', { ascending: false });
+
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = `<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat pengajuan ${currentSubmissionSheet.toUpperCase()}.</p>`;
+                    return;
+                }
+
+                listEl.innerHTML = data.map(item => {
+                    let statusBadge = '';
+                    if (item.status === 'Approved') statusBadge = '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[9px] font-bold">Disetujui</span>';
+                    else if (item.status === 'Rejected') statusBadge = '<span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-[9px] font-bold">Ditolak</span>';
+                    else statusBadge = '<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[9px] font-bold">Pending</span>';
+
+                    return `
+                        <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 space-y-2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-xs text-gray-800">${item.nama} (${item.jabatan || 'Teknisi'})</h4>
+                                    <p class="text-[11px] text-gray-600 font-medium mt-0.5">${item.alasan}</p>
+                                    ${item.cuti_sampai ? `<p class="text-[9px] text-emerald-800 font-bold mt-1"><i class="fa-regular fa-calendar-days mr-1"></i> Durasi: ${item.durasi_hari || 1} Hari (s/d ${item.cuti_sampai})</p>` : ''}
+                                </div>
+                                <div class="text-right shrink-0">
+                                    ${statusBadge}
+                                    <p class="text-[8px] text-gray-400 mt-1">${new Date(item.created_at).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+
+                            ${item.foto_dokumen ? `
+                                <a href="${item.foto_dokumen}" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] bg-emerald-50 text-emerald-800 font-bold px-2.5 py-1 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition mt-1">
+                                    <i class="fa-solid fa-paperclip"></i> Lihat Foto Lampiran Dokumen
+                                </a>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) {
+                listEl.innerHTML = '<p class="text-rose-500 text-xs text-center py-10">Gagal memuat data pengajuan.</p>';
+            }
+        }
 
         // ================= LOGIKA SLIP GAJI =================
         function formatRupiah(number) {
@@ -1345,7 +1451,7 @@
                             .salary-table th { background-color: #0A4D3C; color: white; padding: 8px; text-align: left; }
                             .salary-table td { padding: 8px; border-bottom: 1px solid #ddd; }
                             .total-row { font-weight: bold; background-color: #f3f4f6; font-size: 14px; }
-                            .footer { margin-top: 40px; display: flex; justify-content: space-between; font-size: 12px; text-align: center; }
+                            .footer { margin-top: 40px; display: flex; justify-between; font-size: 12px; text-align: center; }
                             .signature { margin-top: 50px; }
                         </style>
                     </head>
@@ -1658,6 +1764,7 @@
 
                 await customAlert(`Permohonan ${type} berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`, 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 closeRequestModal();
+                fetchSubmissionRequestsList();
             } catch(e) {
                 await customAlert('Gagal mengirim permohonan: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700');
             } finally {
@@ -2347,7 +2454,7 @@
                     await customAlert(`Berhasil ${actionType}! Data absensi dicatat.`, 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 }
 
-                fetchAttendanceLogs();
+                fetchSubmissionRequestsList();
             } catch (error) { await customAlert(`Gagal absensi: ` + error.message, 'Error', 'fa-circle-xmark', 'bg-red-100 text-red-700'); } 
             finally { btnElement.innerHTML = originalContent; btnElement.disabled = false; }
         }
@@ -2834,56 +2941,6 @@
             `).join('');
         }
 
-        async function fetchAttendanceLogs() {
-            const logList = document.getElementById('log-list');
-            const logTitle = document.getElementById('log-section-title');
-            logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data...</p>';
-
-            if (!currentUserEmail) {
-                logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Silakan login terlebih dahulu.</p>';
-                return;
-            }
-
-            const isSuper = isUserSuperAdmin();
-
-            try {
-                let query = supabaseClient.from('attendance_logs').select('*');
-                
-                if (isSuper) {
-                    logTitle.innerText = "Riwayat Absen Global (Super Admin)";
-                } else {
-                    logTitle.innerText = "Riwayat Absen Saya";
-                    query = query.eq('user_email', currentUserEmail);
-                }
-
-                const { data, error } = await query.order('timestamp', { ascending: false });
-
-                if (error) throw error;
-                if (!data || data.length === 0) { logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi.</p>'; return; }
-
-                logList.innerHTML = data.map(item => {
-                    const isLate = (item.status_absen === 'Terlambat');
-                    const badgeColor = isLate ? 'bg-red-100 text-red-800' : (item.action_type==='Clock In'?'bg-green-100 text-green-800':'bg-amber-100 text-amber-800');
-                    const badgeText = isLate ? 'Terlambat' : item.action_type;
-
-                    return `
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-                                    ${item.foto_url ? `<img src="${item.foto_url}" class="w-full h-full object-cover" />` : `<i class="fa-solid ${item.action_type==='Clock In'?'fa-arrow-right-to-bracket text-green-700':'fa-arrow-right-from-bracket text-red-700'}"></i>`}
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-xs text-gray-800">${item.user_name} (${item.jabatan || 'Teknisi/User'})</h4>
-                                    <p class="text-[11px] text-gray-400">${new Date(item.timestamp || Date.now()).toLocaleString()}</p>
-                                </div>
-                            </div>
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${badgeColor}">${badgeText}</span>
-                        </div>
-                    `;
-                }).join('');
-            } catch (err) { logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data.</p>`; }
-        }
-
         async function fetchPendingRequests() {
             const listEl = document.getElementById('approval-list');
             listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat permohonan...</p>';
@@ -3274,7 +3331,6 @@
                     renderProfileData();
                     loadUserShiftCardInfo();
                     checkUnreadMessages();
-                    populateUsersCheckboxForExport();
 
                     btnContainer.innerHTML = `
                         <button onclick="logout()" class="bg-red-500/30 hover:bg-red-600/50 text-red-100 text-xs font-semibold py-2 px-3.5 rounded-full border border-red-400/40 transition flex items-center gap-1.5 cursor-pointer shadow-sm backdrop-blur-md">
@@ -3327,8 +3383,7 @@
             }
 
             if (tab === 'log') {
-                fetchAttendanceLogs();
-                populateUsersCheckboxForExport();
+                switchSubmissionSheet('cuti');
             }
             if (tab === 'karyawan') fetchAllEmployees();
             if (tab === 'inbox') fetchInboxMessages();
