@@ -136,14 +136,36 @@
                 </div>
             </div>
 
-            <!-- 5. INBOX TAB -->
+            <!-- 5. INBOX / CHAT 2 ARAH TAB -->
             <div id="inbox-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xl font-bold text-gray-800">Kotak Masuk (Inbox)</h2>
+                    <h2 class="text-xl font-bold text-gray-800" id="inbox-header-title">Kotak Masuk (Obrolan)</h2>
                     <button onclick="fetchInboxMessages()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold"><i class="fa-solid fa-rotate"></i> Refresh</button>
                 </div>
-                <div id="inbox-list-container" class="space-y-3 pb-4">
-                    <p class="text-gray-400 text-sm text-center py-10">Memuat pesan masuk...</p>
+                
+                <!-- Daftar Kontak Chat -->
+                <div id="inbox-threads-container" class="space-y-2.5 pb-4">
+                    <p class="text-gray-400 text-sm text-center py-10">Memuat obrolan...</p>
+                </div>
+
+                <!-- Tampilan Percakapan 2 Arah (Aktif jika kontak dipilih) -->
+                <div id="active-chat-container" class="hidden bg-white rounded-2xl shadow-sm border p-4 space-y-3 flex flex-col h-[65vh]">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <div class="flex items-center gap-2">
+                            <button onclick="closeActiveChat()" class="text-gray-500 hover:text-gray-800 mr-1"><i class="fa-solid fa-arrow-left"></i></button>
+                            <h4 id="active-chat-user-name" class="font-bold text-sm text-gray-800">User</h4>
+                        </div>
+                        <span id="active-chat-user-email" class="text-[10px] text-gray-400">email@user.com</span>
+                    </div>
+
+                    <!-- Area Pesan 2 Arah -->
+                    <div id="chat-messages-body" class="flex-1 overflow-y-auto space-y-2 p-1"></div>
+
+                    <!-- Input Balas Pesan -->
+                    <div class="flex gap-2 pt-2 border-t">
+                        <input type="text" id="chat-reply-input" placeholder="Tulis balasan..." class="flex-1 border rounded-xl px-3 py-2 text-xs outline-none focus:border-green-600" />
+                        <button onclick="sendChatReply()" class="bg-green-700 text-white font-bold px-4 py-2 rounded-xl text-xs hover:bg-green-800 transition">Kirim</button>
+                    </div>
                 </div>
             </div>
 
@@ -290,18 +312,6 @@
             </div>
         </div>
 
-        <!-- ================= MODAL KIRIM PESAN PRIVAT ================= -->
-        <div id="send-msg-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
-            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative space-y-3">
-                <button onclick="closeSendMsgModal()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                <h3 class="text-base font-bold text-gray-800">Kirim Pesan Ke <span id="target-receiver-name" class="text-green-700">User</span></h3>
-                <textarea id="private-message-text" rows="4" placeholder="Tuliskan pesan Anda di sini..." class="w-full border rounded-xl p-3 text-xs outline-none focus:border-green-600"></textarea>
-                <button onclick="submitPrivateMessage()" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 rounded-xl transition text-xs">
-                    Kirim Pesan
-                </button>
-            </div>
-        </div>
-
         <!-- ================= MODAL EDIT FIELD PROFIL ================= -->
         <div id="edit-field-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative space-y-4">
@@ -314,30 +324,87 @@
             </div>
         </div>
 
-        <!-- ================= MODAL PENGATURAN SISTEM ================= -->
+        <!-- ================= MODAL EDIT JABATAN & UNIT USER KHUSUS SUPER ADMIN ================= -->
+        <div id="admin-user-edit-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative space-y-4">
+                <button onclick="closeAdminUserEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <h3 class="text-base font-bold text-gray-800">Kelola Role & Unit User</h3>
+                <p id="adm-edit-user-email" class="text-xs text-green-700 font-bold truncate">-</p>
+                
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-gray-600">Jabatan Role</label>
+                        <select id="adm-select-role" class="w-full border rounded-lg p-2 mt-1 bg-white outline-none">
+                            <option value="Teknisi/User">Teknisi/User</option>
+                            <option value="Kepala Unit">Kepala Unit</option>
+                            <option value="Kepala Kanwil">Kepala Kanwil</option>
+                            <option value="Kepala Divisi">Kepala Divisi</option>
+                            <option value="Super Admin">Super Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-gray-600">Unit Kantor</label>
+                        <select id="adm-select-unit" class="w-full border rounded-lg p-2 mt-1 bg-white outline-none"></select>
+                    </div>
+                    <button onclick="saveAdminUserEdit()" class="w-full bg-green-700 text-white font-bold py-2.5 rounded-xl transition shadow">
+                        Simpan Perubahan User
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= MODAL PENGATURAN SISTEM (SUPER ADMIN) ================= -->
         <div id="sys-settings-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-4">
                 <button onclick="closeSystemSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                 <div class="text-center">
                     <h3 class="text-lg font-bold text-gray-800">Pengaturan Sistem</h3>
-                    <p class="text-gray-500 text-[11px] mt-0.5">Kelola Persetujuan Akun & Unit Kantor</p>
+                    <p class="text-gray-500 text-[11px] mt-0.5">Persetujuan Akun, Jadwal Kerja, & Lokasi Unit</p>
                 </div>
 
-                <div class="flex border-b text-xs font-semibold">
-                    <button onclick="switchAdminSubTab('acc-approval')" id="adm-tab-acc-approval" class="flex-1 py-2 text-green-700 border-b-2 border-green-700">Persetujuan Akun</button>
+                <div class="flex border-b text-[11px] font-semibold">
+                    <button onclick="switchAdminSubTab('acc-approval')" id="adm-tab-acc-approval" class="flex-1 py-2 text-green-700 border-b-2 border-green-700">Persetujuan & Role</button>
+                    <button onclick="switchAdminSubTab('jadwal')" id="adm-tab-jadwal" class="flex-1 py-2 text-gray-400">Jadwal Shift</button>
                     <button onclick="switchAdminSubTab('lokasi')" id="adm-tab-lokasi" class="flex-1 py-2 text-gray-400">Unit Kantor</button>
                 </div>
 
+                <!-- TAB 1: PERSETUJUAN & KELOLA ROLE USER -->
                 <div id="adm-sec-acc-approval" class="space-y-3 text-xs">
                     <div class="flex justify-between items-center">
-                        <h4 class="font-bold text-gray-700">Daftar Pendaftar Pending</h4>
+                        <h4 class="font-bold text-gray-700">Daftar Pendaftar & User</h4>
                         <button onclick="fetchPendingUserRegistrations()" class="text-[10px] bg-green-700 text-white px-2 py-1 rounded font-semibold"><i class="fa-solid fa-rotate"></i> Refresh</button>
                     </div>
-                    <div id="admin-pending-users-list" class="space-y-2 max-h-48 overflow-y-auto">
-                        <p class="text-gray-400 text-center py-4">Memuat data pendaftar...</p>
+                    <div id="admin-pending-users-list" class="space-y-2 max-h-56 overflow-y-auto">
+                        <p class="text-gray-400 text-center py-4">Memuat data user...</p>
                     </div>
                 </div>
 
+                <!-- TAB 2: MENGATUR JADWAL SHIFT -->
+                <div id="adm-sec-jadwal" class="hidden space-y-3 text-xs">
+                    <h4 class="font-bold text-gray-700">Tambah Shift Kerja Baru</h4>
+                    <div>
+                        <label class="font-semibold text-gray-600">Nama Shift</label>
+                        <input type="text" id="sch-name" placeholder="Contoh: Shift Pagi / Shift Malam" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold text-gray-600">Jam Masuk</label>
+                            <input type="time" id="sch-in" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
+                        </div>
+                        <div>
+                            <label class="font-semibold text-gray-600">Jam Pulang</label>
+                            <input type="time" id="sch-out" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
+                        </div>
+                    </div>
+                    <button onclick="addNewScheduleShift()" class="w-full bg-green-700 text-white font-bold py-2 rounded-xl transition">Simpan Shift Baru</button>
+
+                    <div class="pt-2 border-t">
+                        <h5 class="font-bold text-gray-600 mb-1">Daftar Shift Kerja</h5>
+                        <div id="admin-schedule-list" class="space-y-1.5 max-h-24 overflow-y-auto"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: LONGLAT KANTOR -->
                 <div id="adm-sec-lokasi" class="hidden space-y-3 text-xs">
                     <h4 class="font-bold text-gray-700">Tambah / Edit Unit Kantor</h4>
                     <div>
@@ -417,11 +484,7 @@
         let supabaseClient = null;
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                auth: {
-                    persistSession: true,
-                    autoRefreshToken: true,
-                    storage: window.localStorage
-                }
+                auth: { persistSession: true, autoRefreshToken: true, storage: window.localStorage }
             });
         } catch (err) { console.error(err); }
 
@@ -432,20 +495,17 @@
         let currentCoords = null;
         let officeLocations = [];
         let activeEditField = null;
-        let targetMsgReceiver = null;
+
+        // VARIABLE PENGATURAN CHAT 2 ARAH
+        let activeChatUser = null; 
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
                 checkSession();
-                
                 supabaseClient.auth.onAuthStateChange((event, session) => {
-                    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                        checkSession();
-                    } else if (event === 'SIGNED_OUT') {
-                        clearUserState();
-                    }
+                    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') checkSession();
+                    else if (event === 'SIGNED_OUT') clearUserState();
                 });
-
                 fetchOfficeLocations();
             }
             initGeolocation();
@@ -474,9 +534,7 @@
                     },
                     { enableHighAccuracy: true }
                 );
-            } else {
-                gpsBadge.innerHTML = "GPS Tidak Didukung";
-            }
+            } else { gpsBadge.innerHTML = "GPS Tidak Didukung"; }
         }
 
         async function fetchOfficeLocations() {
@@ -518,7 +576,7 @@
 
         async function recordAttendance(actionType) {
             if (!currentUser) {
-                alert('Akses Ditolak: Anda belum login! Silakan Login atau Daftar terlebih dahulu untuk mencatat absensi.');
+                alert('Akses Ditolak: Anda belum login!');
                 openAuthModal();
                 return;
             }
@@ -527,34 +585,26 @@
 
             try {
                 const { data: logsToday } = await supabaseClient
-                    .from('attendance_logs')
-                    .select('*')
-                    .eq('user_email', currentUserEmail)
-                    .eq('date_recorded', todayStr);
+                    .from('attendance_logs').select('*')
+                    .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
 
                 const existingClockIn = (logsToday || []).some(l => l.action_type === 'Clock In');
                 const existingClockOut = (logsToday || []).some(l => l.action_type === 'Clock Out');
 
                 if (actionType === 'Clock In' && existingClockIn) {
-                    alert('Anda sudah melakukan Clock In hari ini! Clock In kedua tidak dapat diproses.');
-                    return;
+                    alert('Anda sudah melakukan Clock In hari ini!'); return;
                 }
-
                 if (actionType === 'Clock Out' && existingClockOut) {
-                    alert('Anda sudah melakukan Clock Out hari ini! Clock Out kedua tidak dapat diproses.');
-                    return;
+                    alert('Anda sudah melakukan Clock Out hari ini!'); return;
                 }
             } catch(e) {}
 
             let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
-            let isOutOfRange = false;
-            let distance = 0;
+            let isOutOfRange = false, distance = 0;
 
             if (currentCoords && targetOffice) {
                 distance = calculateDistance(currentCoords.lat, currentCoords.lng, targetOffice.lat, targetOffice.lng);
-                if (distance > targetOffice.radius) {
-                    isOutOfRange = true;
-                }
+                if (distance > targetOffice.radius) isOutOfRange = true;
             }
 
             const userRole = currentUserData.jabatan || 'Teknisi/User';
@@ -564,20 +614,17 @@
                 if (userRole === 'Kepala Unit') targetApprover = 'Kepala Kanwil';
                 else if (userRole === 'Kepala Kanwil') targetApprover = 'Kepala Divisi';
 
-                alert(`PEMBERITAHUAN:\nAnda berada di luar jangkauan titik lokasi kantor (${Math.round(distance)} meter).\n\nAbsensi tetap dikirimkan dan menunggu persetujuan (Approve) dari ${targetApprover}.`);
+                alert(`PEMBERITAHUAN:\nAnda berada di luar jangkauan titik lokasi kantor (${Math.round(distance)} meter).\n\nAbsensi dikirimkan dan menunggu persetujuan dari ${targetApprover}.`);
 
                 try {
                     await supabaseClient.from('request_absensi').insert([{
-                        user_email: currentUserEmail,
-                        nama: currentUser,
-                        jabatan: userRole,
+                        user_email: currentUserEmail, nama: currentUser, jabatan: userRole,
                         jenis_request: actionType,
                         alasan: `Diluar jangkauan radius ${targetOffice ? targetOffice.unit_name : 'Kantor'} (${Math.round(distance)}m)`,
-                        target_approver: targetApprover,
-                        status: 'Pending'
+                        target_approver: targetApprover, status: 'Pending'
                     }]);
                     alert('Permohonan absensi luar jangkauan berhasil dikirim!');
-                } catch (err) { alert('Gagal mengirim permohonan: ' + err.message); }
+                } catch (err) { alert('Gagal mengirim: ' + err.message); }
                 return;
             }
 
@@ -588,27 +635,15 @@
             btnElement.disabled = true;
 
             try {
-                const { error } = await supabaseClient
-                    .from('attendance_logs')
-                    .insert([{ 
-                        user_email: currentUserEmail,
-                        user_name: currentUser, 
-                        action_type: actionType,
-                        jabatan: userRole,
-                        unit: currentUserData.unit || 'Pusat',
-                        date_recorded: todayStr
-                    }]);
-
+                const { error } = await supabaseClient.from('attendance_logs').insert([{ 
+                    user_email: currentUserEmail, user_name: currentUser, action_type: actionType,
+                    jabatan: userRole, unit: currentUserData.unit || 'Pusat', date_recorded: todayStr
+                }]);
                 if (error) throw error;
-
-                alert(`Berhasil ${actionType}! Data absensi hari ini telah dicatat.`);
+                alert(`Berhasil ${actionType}! Data absensi dicatat.`);
                 fetchAttendanceLogs();
-            } catch (error) {
-                alert(`Gagal absensi: ` + error.message);
-            } finally {
-                btnElement.innerHTML = originalContent;
-                btnElement.disabled = false;
-            }
+            } catch (error) { alert(`Gagal absensi: ` + error.message); } 
+            finally { btnElement.innerHTML = originalContent; btnElement.disabled = false; }
         }
 
         async function fetchAllEmployees() {
@@ -618,11 +653,7 @@
             try {
                 const { data, error } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada anggota tim terdaftar.</p>';
-                    return;
-                }
+                if (!data || data.length === 0) { listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada anggota tim.</p>'; return; }
 
                 listEl.innerHTML = data.map(u => {
                     const avatarHtml = u.foto_url ? `<img src="${u.foto_url}" class="w-full h-full object-cover" />` : `<span class="text-gold font-bold text-lg">${(u.full_name || 'U').charAt(0).toUpperCase()}</span>`;
@@ -646,9 +677,7 @@
                         </div>
                     `;
                 }).join('');
-            } catch(e) {
-                listEl.innerHTML = '<p class="text-red-500 text-xs text-center py-10">Gagal memuat tim.</p>';
-            }
+            } catch(e) { listEl.innerHTML = '<p class="text-red-500 text-xs text-center py-10">Gagal memuat tim.</p>'; }
         }
 
         async function openUserDetailModal(targetEmail) {
@@ -657,8 +686,6 @@
             try {
                 const { data } = await supabaseClient.from('profiles').select('*').eq('user_email', targetEmail).single();
                 if (!data) return;
-
-                targetMsgReceiver = data;
 
                 document.getElementById('detail-user-name').innerText = data.full_name;
                 document.getElementById('detail-user-role').innerText = data.jabatan || 'Teknisi/User';
@@ -673,7 +700,8 @@
 
                 document.getElementById('btn-open-send-msg').onclick = () => {
                     closeUserDetailModal();
-                    openSendMsgModal(data.full_name);
+                    switchTab('inbox');
+                    startTwoWayChat(data.user_email, data.full_name);
                 };
 
                 document.getElementById('user-detail-modal').classList.remove('hidden');
@@ -681,60 +709,278 @@
         }
         function closeUserDetailModal() { document.getElementById('user-detail-modal').classList.add('hidden'); }
 
-        function openSendMsgModal(name) {
-            document.getElementById('target-receiver-name').innerText = name;
-            document.getElementById('private-message-text').value = '';
-            document.getElementById('send-msg-modal').classList.remove('hidden');
-        }
-        function closeSendMsgModal() { document.getElementById('send-msg-modal').classList.add('hidden'); }
-
-        async function submitPrivateMessage() {
-            const txt = document.getElementById('private-message-text').value.trim();
-            if (!txt) return alert('Masukkan isi pesan!');
-            if (!targetMsgReceiver) return;
-
-            try {
-                await supabaseClient.from('messages').insert([{
-                    sender_email: currentUserEmail,
-                    sender_name: currentUser,
-                    receiver_email: targetMsgReceiver.user_email,
-                    message_text: txt
-                }]);
-                alert('Pesan privat berhasil terkirim!');
-                closeSendMsgModal();
-            } catch(e) { alert('Gagal mengirim pesan: ' + e.message); }
-        }
-
+        // ================= LOGIKA PERCAKAPAN 2 ARAH (INBOX CHAT) =================
         async function fetchInboxMessages() {
-            const listEl = document.getElementById('inbox-list-container');
-            listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat pesan...</p>';
+            if (!currentUserEmail) return;
+
+            const threadsContainer = document.getElementById('inbox-threads-container');
+            threadsContainer.classList.remove('hidden');
+            document.getElementById('active-chat-container').classList.add('hidden');
+            document.getElementById('inbox-header-title').innerText = "Kotak Masuk (Obrolan)";
+
+            threadsContainer.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat obrolan...</p>';
 
             try {
-                const { data, error } = await supabaseClient.from('messages').select('*').eq('receiver_email', currentUserEmail).order('created_at', { ascending: false });
+                const { data, error } = await supabaseClient.from('messages').select('*')
+                    .or(`sender_email.eq.${currentUserEmail},receiver_email.eq.${currentUserEmail}`)
+                    .order('created_at', { ascending: false });
+
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    listEl.innerHTML = `
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center py-12">
-                            <i class="fa-regular fa-envelope-open text-4xl text-gray-300 mb-3"></i>
-                            <p class="text-gray-500 text-xs font-medium">Belum ada pesan masuk saat ini.</p>
-                        </div>
-                    `;
+                    threadsContainer.innerHTML = `<div class="bg-white p-5 rounded-2xl shadow-sm border text-center py-12"><i class="fa-regular fa-envelope-open text-4xl text-gray-300 mb-3"></i><p class="text-gray-500 text-xs font-medium">Belum ada obrolan.</p></div>`;
                     return;
                 }
 
-                listEl.innerHTML = data.map(m => `
-                    <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 space-y-1.5">
-                        <div class="flex justify-between items-center border-b pb-1">
-                            <h4 class="font-bold text-xs text-gray-800"><i class="fa-solid fa-user-pen text-green-700 mr-1"></i> ${m.sender_name}</h4>
-                            <span class="text-[9px] text-gray-400">${new Date(m.created_at).toLocaleString()}</span>
+                // Dapatkan daftar kontak obrolan unik
+                let contacts = {};
+                data.forEach(m => {
+                    let otherEmail = m.sender_email === currentUserEmail ? m.receiver_email : m.sender_email;
+                    let otherName = m.sender_email === currentUserEmail ? otherEmail : m.sender_name;
+                    if (!contacts[otherEmail]) {
+                        contacts[otherEmail] = { email: otherEmail, name: otherName, lastMsg: m.message_text, time: m.created_at };
+                    }
+                });
+
+                threadsContainer.innerHTML = Object.values(contacts).map(c => `
+                    <div onclick="startTwoWayChat('${c.email}', '${c.name}')" class="bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div class="w-10 h-10 rounded-full bg-primary-dark text-gold flex items-center justify-center font-bold text-base shrink-0">
+                                ${(c.name || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            <div class="overflow-hidden">
+                                <h4 class="font-bold text-xs text-gray-800 truncate">${c.name}</h4>
+                                <p class="text-[11px] text-gray-500 truncate">${c.lastMsg}</p>
+                            </div>
                         </div>
-                        <p class="text-xs text-gray-600 leading-relaxed break-words">${m.message_text}</p>
+                        <span class="text-[9px] text-gray-400 shrink-0">${new Date(c.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
                 `).join('');
-            } catch(e) {
-                listEl.innerHTML = '<p class="text-red-500 text-xs text-center py-10">Gagal memuat pesan.</p>';
+
+            } catch(e) { threadsContainer.innerHTML = '<p class="text-red-500 text-xs text-center py-10">Gagal memuat obrolan.</p>'; }
+        }
+
+        async function startTwoWayChat(targetEmail, targetName) {
+            activeChatUser = { email: targetEmail, name: targetName };
+            document.getElementById('inbox-threads-container').classList.add('hidden');
+            document.getElementById('active-chat-container').classList.remove('hidden');
+            
+            document.getElementById('active-chat-user-name').innerText = targetName;
+            document.getElementById('active-chat-user-email').innerText = targetEmail;
+
+            loadTwoWayMessages();
+        }
+
+        function closeActiveChat() {
+            activeChatUser = null;
+            document.getElementById('active-chat-container').classList.add('hidden');
+            fetchInboxMessages();
+        }
+
+        async function loadTwoWayMessages() {
+            if (!activeChatUser) return;
+            const body = document.getElementById('chat-messages-body');
+
+            try {
+                const { data } = await supabaseClient.from('messages').select('*')
+                    .or(`and(sender_email.eq.${currentUserEmail},receiver_email.eq.${activeChatUser.email}),and(sender_email.eq.${activeChatUser.email},receiver_email.eq.${currentUserEmail})`)
+                    .order('created_at', { ascending: true });
+
+                body.innerHTML = (data || []).map(m => {
+                    const isMe = m.sender_email === currentUserEmail;
+                    return `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                            <div class="max-w-[75%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-green-700 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'} shadow-sm">
+                                <p>${m.message_text}</p>
+                                <span class="text-[8px] opacity-75 block text-right mt-1">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                body.scrollTop = body.scrollHeight;
+            } catch(e) {}
+        }
+
+        async function sendChatReply() {
+            const input = document.getElementById('chat-reply-input');
+            const txt = input.value.trim();
+            if (!txt || !activeChatUser) return;
+
+            try {
+                await supabaseClient.from('messages').insert([{
+                    sender_email: currentUserEmail, sender_name: currentUser,
+                    receiver_email: activeChatUser.email, message_text: txt
+                }]);
+                input.value = '';
+                loadTwoWayMessages();
+            } catch(e) { alert('Gagal mengirim: ' + e.message); }
+        }
+
+        // ================= SUPER ADMIN: PERSUJUAN, ROLE, JADWAL, & LOKASI =================
+        function openSystemSettingsModal() {
+            renderAdminOfficeList();
+            fetchPendingUserRegistrations();
+            fetchScheduleShifts();
+            document.getElementById('sys-settings-modal').classList.remove('hidden');
+        }
+        function closeSystemSettingsModal() { document.getElementById('sys-settings-modal').classList.add('hidden'); }
+
+        function switchAdminSubTab(sub) {
+            ['acc-approval', 'jadwal', 'lokasi'].forEach(s => {
+                document.getElementById('adm-sec-' + s).classList.add('hidden');
+                document.getElementById('adm-tab-' + s).className = "flex-1 py-2 text-gray-400";
+            });
+            document.getElementById('adm-sec-' + sub).classList.remove('hidden');
+            document.getElementById('adm-tab-' + sub).className = "flex-1 py-2 text-green-700 border-b-2 border-green-700";
+        }
+
+        async function fetchPendingUserRegistrations() {
+            const listEl = document.getElementById('admin-pending-users-list');
+            listEl.innerHTML = '<p class="text-gray-400 text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Memuat user...</p>';
+
+            try {
+                const { data, error } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+
+                listEl.innerHTML = (data || []).map(p => `
+                    <div class="bg-gray-50 p-2.5 rounded-lg border flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-gray-800">${p.full_name}</p>
+                            <p class="text-[10px] text-gray-500">${p.user_email} | <span class="text-green-700 font-bold">${p.jabatan || 'Teknisi'}</span></p>
+                        </div>
+                        <div class="flex gap-1">
+                            ${!p.is_approved ? `<button onclick="approveUserAccount('${p.user_email}')" class="bg-green-700 text-white font-bold text-[9px] px-2 py-1 rounded">Approve</button>` : ''}
+                            <button onclick="openAdminUserEditModal('${p.user_email}', '${p.jabatan}', '${p.unit}')" class="bg-amber-600 text-white font-bold text-[9px] px-2 py-1 rounded"><i class="fa-solid fa-pen"></i> Role</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { listEl.innerHTML = '<p class="text-red-500 text-center py-4">Gagal memuat data.</p>'; }
+        }
+
+        let currentEditingAdminEmail = null;
+        function openAdminUserEditModal(email, currentRole, currentUnit) {
+            currentEditingAdminEmail = email;
+            document.getElementById('adm-edit-user-email').innerText = email;
+            
+            const roleSel = document.getElementById('adm-select-role');
+            roleSel.value = currentRole || 'Teknisi/User';
+
+            const unitSel = document.getElementById('adm-select-unit');
+            unitSel.innerHTML = officeLocations.map(o => `<option value="${o.unit_name}" ${currentUnit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
+
+            document.getElementById('admin-user-edit-modal').classList.remove('hidden');
+        }
+        function closeAdminUserEditModal() { document.getElementById('admin-user-edit-modal').classList.add('hidden'); }
+
+        async function saveAdminUserEdit() {
+            const newRole = document.getElementById('adm-select-role').value;
+            const newUnit = document.getElementById('adm-select-unit').value;
+
+            try {
+                await supabaseClient.from('profiles').update({ jabatan: newRole, unit: newUnit }).eq('user_email', currentEditingAdminEmail);
+                alert('Jabatan & Unit User berhasil diperbarui oleh Super Admin!');
+                closeAdminUserEditModal();
+                fetchPendingUserRegistrations();
+                fetchAllEmployees();
+            } catch(e) { alert('Gagal: ' + e.message); }
+        }
+
+        async function approveUserAccount(targetEmail) {
+            try {
+                await supabaseClient.from('profiles').update({ is_approved: true }).eq('user_email', targetEmail);
+                alert(`Akun (${targetEmail}) berhasil disetujui!`);
+                fetchPendingUserRegistrations();
+            } catch(e) { alert('Gagal: ' + e.message); }
+        }
+
+        // TAMBAH JADWAL SHIFT BERHASIL DILENGKAPI
+        async function addNewScheduleShift() {
+            const name = document.getElementById('sch-name').value.trim();
+            const timeIn = document.getElementById('sch-in').value;
+            const timeOut = document.getElementById('sch-out').value;
+
+            if (!name || !timeIn || !timeOut) return alert('Lengkapi data shift!');
+
+            try {
+                await supabaseClient.from('schedules').insert([{ shift_name: name, time_in: timeIn, time_out: timeOut }]);
+                alert('Shift kerja baru disimpan!');
+                document.getElementById('sch-name').value = '';
+                fetchScheduleShifts();
+            } catch(e) { alert('Gagal menyimpan shift: ' + e.message); }
+        }
+
+        async function fetchScheduleShifts() {
+            const listEl = document.getElementById('admin-schedule-list');
+            try {
+                const { data } = await supabaseClient.from('schedules').select('*').order('created_at', { ascending: false });
+                listEl.innerHTML = (data || []).map(s => `
+                    <div class="flex justify-between items-center bg-gray-50 p-1.5 rounded border">
+                        <div>
+                            <p class="font-bold text-gray-800">${s.shift_name}</p>
+                            <p class="text-[9px] text-gray-500">Masuk: ${s.time_in} - Pulang: ${s.time_out}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) {}
+        }
+
+        async function addNewOfficeUnit() {
+            const name = document.getElementById('admin-unit-name').value.trim();
+            const lat = parseFloat(document.getElementById('admin-unit-lat').value);
+            const lng = parseFloat(document.getElementById('admin-unit-lng').value);
+            const radius = parseInt(document.getElementById('admin-unit-radius').value) || 100;
+
+            if (!name || isNaN(lat) || isNaN(lng)) return alert('Isi data lokasi unit dengan benar!');
+            await supabaseClient.from('offices').insert([{ unit_name: name, lat, lng, radius }]);
+            alert('Lokasi unit kantor disimpan!');
+            fetchOfficeLocations();
+            renderAdminOfficeList();
+        }
+
+        function renderAdminOfficeList() {
+            const listEl = document.getElementById('admin-office-list');
+            if (officeLocations.length === 0) { listEl.innerHTML = '<p class="text-gray-400 text-center py-1">Belum ada unit.</p>'; return; }
+            listEl.innerHTML = officeLocations.map(o => `
+                <div class="flex justify-between items-center bg-gray-50 p-1.5 rounded border">
+                    <div>
+                        <p class="font-bold text-gray-800">${o.unit_name}</p>
+                        <p class="text-[9px] text-gray-500">${o.lat}, ${o.lng} (${o.radius}m)</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function fetchAttendanceLogs() {
+            const logList = document.getElementById('log-list');
+            logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data...</p>';
+
+            if (!currentUserEmail) {
+                logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Silakan login terlebih dahulu.</p>';
+                return;
             }
+
+            try {
+                const { data, error } = await supabaseClient.from('attendance_logs').select('*')
+                    .eq('user_email', currentUserEmail).order('timestamp', { ascending: false });
+
+                if (error) throw error;
+                if (!data || data.length === 0) { logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi Anda.</p>'; return; }
+
+                logList.innerHTML = data.map(item => `
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                <i class="fa-solid ${item.action_type==='Clock In'?'fa-arrow-right-to-bracket text-green-700':'fa-arrow-right-from-bracket text-red-700'}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-gray-800">${item.user_name} (${item.jabatan || 'Teknisi/User'})</h4>
+                                <p class="text-[11px] text-gray-400">${new Date(item.timestamp || Date.now()).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${item.action_type==='Clock In'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${item.action_type}</span>
+                    </div>
+                `).join('');
+            } catch (err) { logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data.</p>`; }
         }
 
         async function fetchPendingRequests() {
@@ -780,15 +1026,7 @@
             const todayStr = new Date().toISOString().split('T')[0];
             try {
                 await supabaseClient.from('request_absensi').update({ status: 'Approved', approved_by: currentUser }).eq('id', reqId);
-
-                await supabaseClient.from('attendance_logs').insert([{
-                    user_email: userEmail,
-                    user_name: userName,
-                    action_type: actionType,
-                    jabatan: userRole,
-                    date_recorded: todayStr
-                }]);
-
+                await supabaseClient.from('attendance_logs').insert([{ user_email: userEmail, user_name: userName, action_type: actionType, jabatan: userRole, date_recorded: todayStr }]);
                 alert('Permohonan absensi berhasil disetujui!');
                 fetchPendingRequests();
             } catch(e) { alert('Gagal menyetujui: ' + e.message); }
@@ -852,10 +1090,9 @@
             try {
                 await supabaseClient.auth.updateUser({ data: updatePayload });
                 await supabaseClient.from('profiles').update({ [activeEditField]: val }).eq('user_email', currentUserEmail);
-
                 currentUserData[activeEditField] = val;
                 renderProfileData();
-                alert('Data profil berhasil diperbarui!');
+                alert('Data profil diperbarui!');
                 closeEditFieldModal();
             } catch(err) { alert('Gagal: ' + err.message); }
         }
@@ -871,22 +1108,19 @@
                 try {
                     await supabaseClient.auth.updateUser({ data: { foto_url: base64Image } });
                     await supabaseClient.from('profiles').update({ foto_url: base64Image }).eq('user_email', currentUserEmail);
-                    
                     currentUserData.foto_url = base64Image;
                     renderProfileData();
-                    alert('Foto profil berhasil diperbarui!');
-                } catch (err) { alert('Gagal memperbarui foto: ' + err.message); }
+                    alert('Foto profil diperbarui!');
+                } catch (err) { alert('Gagal: ' + err.message); }
             };
             reader.readAsDataURL(file);
         }
 
         function renderProfileData() {
             const name = currentUserData.full_name || currentUser || 'Tamu';
-            
             let role = currentUserData.jabatan || 'Teknisi/User';
             if (currentUserEmail === 'mastrisnocom@gmail.com') {
-                role = 'Super Admin';
-                currentUserData.jabatan = 'Super Admin';
+                role = 'Super Admin'; currentUserData.jabatan = 'Super Admin';
             }
 
             const isSuperAdmin = (currentUserEmail === 'mastrisnocom@gmail.com' || role === 'Super Admin');
@@ -905,164 +1139,23 @@
 
             const btnEditRole = document.getElementById('btn-edit-role');
             const btnEditUnit = document.getElementById('btn-edit-unit');
-
-            if (btnEditRole) {
-                if (isSuperAdmin) btnEditRole.classList.remove('hidden');
-                else btnEditRole.classList.add('hidden');
-            }
-
-            if (btnEditUnit) {
-                if (isSuperAdmin) btnEditUnit.classList.remove('hidden');
-                else btnEditUnit.classList.add('hidden');
-            }
+            if (btnEditRole) isSuperAdmin ? btnEditRole.classList.remove('hidden') : btnEditRole.classList.add('hidden');
+            if (btnEditUnit) isSuperAdmin ? btnEditUnit.classList.remove('hidden') : btnEditUnit.classList.add('hidden');
 
             const superAdminContainer = document.getElementById('superadmin-menu-container');
-            if (isSuperAdmin) {
-                superAdminContainer.classList.remove('hidden');
-            } else {
-                superAdminContainer.classList.add('hidden');
-            }
+            isSuperAdmin ? superAdminContainer.classList.remove('hidden') : superAdminContainer.classList.add('hidden');
 
             const approvalMenu = document.getElementById('menu-approval-container');
             if (isSuperAdmin || ['Kepala Divisi', 'Kepala Kanwil', 'Kepala Unit'].includes(role)) {
                 approvalMenu.classList.remove('hidden');
-            } else {
-                approvalMenu.classList.add('hidden');
-            }
+            } else { approvalMenu.classList.add('hidden'); }
 
             const avatarContainer = document.getElementById('profile-avatar-container');
-            
             if (currentUserData.foto_url) {
                 avatarContainer.innerHTML = `<img src="${currentUserData.foto_url}" class="w-full h-full object-cover" />`;
             } else {
-                const initial = name.charAt(0).toUpperCase();
-                avatarContainer.innerHTML = `<span class="text-gold font-bold text-3xl">${initial}</span>`;
+                avatarContainer.innerHTML = `<span class="text-gold font-bold text-3xl">${name.charAt(0).toUpperCase()}</span>`;
             }
-        }
-
-        function openSystemSettingsModal() {
-            renderAdminOfficeList();
-            fetchPendingUserRegistrations();
-            document.getElementById('sys-settings-modal').classList.remove('hidden');
-        }
-        function closeSystemSettingsModal() { document.getElementById('sys-settings-modal').classList.add('hidden'); }
-
-        function switchAdminSubTab(sub) {
-            ['acc-approval', 'lokasi'].forEach(s => {
-                document.getElementById('adm-sec-' + s).classList.add('hidden');
-                document.getElementById('adm-tab-' + s).className = "flex-1 py-2 text-gray-400";
-            });
-            document.getElementById('adm-sec-' + sub).classList.remove('hidden');
-            document.getElementById('adm-tab-' + sub).className = "flex-1 py-2 text-green-700 border-b-2 border-green-700";
-        }
-
-        async function fetchPendingUserRegistrations() {
-            const listEl = document.getElementById('admin-pending-users-list');
-            listEl.innerHTML = '<p class="text-gray-400 text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Memuat pendaftar...</p>';
-
-            try {
-                const { data, error } = await supabaseClient.from('profiles').select('*').eq('is_approved', false).order('created_at', { ascending: false });
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    listEl.innerHTML = '<p class="text-gray-400 text-center py-4">Tidak ada pendaftar pending saat ini.</p>';
-                    return;
-                }
-
-                listEl.innerHTML = data.map(p => `
-                    <div class="bg-gray-50 p-2.5 rounded-lg border flex justify-between items-center">
-                        <div>
-                            <p class="font-bold text-gray-800">${p.full_name}</p>
-                            <p class="text-[10px] text-gray-500">${p.user_email}</p>
-                        </div>
-                        <button onclick="approveUserAccount('${p.user_email}')" class="bg-green-700 hover:bg-green-800 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition">
-                            Setujui Akun
-                        </button>
-                    </div>
-                `).join('');
-            } catch(e) {
-                listEl.innerHTML = '<p class="text-red-500 text-center py-4">Gagal memuat data.</p>';
-            }
-        }
-
-        async function approveUserAccount(targetEmail) {
-            try {
-                const { error } = await supabaseClient.from('profiles').update({ is_approved: true }).eq('user_email', targetEmail);
-                if (error) throw error;
-                alert(`Akun (${targetEmail}) berhasil disetujui! Pengguna kini dapat login.`);
-                fetchPendingUserRegistrations();
-                fetchAllEmployees();
-            } catch(e) {
-                alert('Gagal menyetujui akun: ' + e.message);
-            }
-        }
-
-        async function addNewOfficeUnit() {
-            const name = document.getElementById('admin-unit-name').value.trim();
-            const lat = parseFloat(document.getElementById('admin-unit-lat').value);
-            const lng = parseFloat(document.getElementById('admin-unit-lng').value);
-            const radius = parseInt(document.getElementById('admin-unit-radius').value) || 100;
-
-            if (!name || isNaN(lat) || isNaN(lng)) return alert('Isi data lokasi unit dengan benar!');
-            await supabaseClient.from('offices').insert([{ unit_name: name, lat, lng, radius }]);
-            alert('Lokasi unit kantor disimpan!');
-            fetchOfficeLocations();
-            renderAdminOfficeList();
-        }
-
-        function renderAdminOfficeList() {
-            const listEl = document.getElementById('admin-office-list');
-            if (officeLocations.length === 0) { listEl.innerHTML = '<p class="text-gray-400 text-center py-1">Belum ada unit.</p>'; return; }
-            listEl.innerHTML = officeLocations.map(o => `
-                <div class="flex justify-between items-center bg-gray-50 p-1.5 rounded border">
-                    <div>
-                        <p class="font-bold text-gray-800">${o.unit_name}</p>
-                        <p class="text-[9px] text-gray-500">${o.lat}, ${o.lng} (${o.radius}m)</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // FUNGSI ABSEN LOG DENGAN FILTER KHUSUS USER LOGIN
-        async function fetchAttendanceLogs() {
-            const logList = document.getElementById('log-list');
-            logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data...</p>';
-
-            if (!currentUserEmail) {
-                logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Silakan login terlebih dahulu.</p>';
-                return;
-            }
-
-            try {
-                // FILTER HANYA LOG MILIK USER YANG LOGIN (EQ user_email)
-                const { data, error } = await supabaseClient
-                    .from('attendance_logs')
-                    .select('*')
-                    .eq('user_email', currentUserEmail)
-                    .order('timestamp', { ascending: false });
-
-                if (error) throw error;
-
-                if (!data || data.length === 0) { 
-                    logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi Anda.</p>'; 
-                    return; 
-                }
-
-                logList.innerHTML = data.map(item => `
-                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                <i class="fa-solid ${item.action_type==='Clock In'?'fa-arrow-right-to-bracket text-green-700':'fa-arrow-right-from-bracket text-red-700'}"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-xs text-gray-800">${item.user_name} (${item.jabatan || 'Teknisi/User'})</h4>
-                                <p class="text-[11px] text-gray-400">${new Date(item.timestamp || Date.now()).toLocaleString()}</p>
-                            </div>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${item.action_type==='Clock In'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${item.action_type}</span>
-                    </div>
-                `).join('');
-            } catch (err) { logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data.</p>`; }
         }
 
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
@@ -1091,8 +1184,7 @@
             const password = document.getElementById('password').value;
             const btn = document.getElementById('auth-btn');
             
-            btn.innerText = "Memproses...";
-            btn.disabled = true;
+            btn.innerText = "Memproses..."; btn.disabled = true;
 
             try {
                 if (isLoginMode) {
@@ -1103,16 +1195,12 @@
                 } else {
                     const fullName = document.getElementById('fullname').value.trim();
                     await doSignUp(email, password, fullName);
-                    alert('Registrasi berhasil! Akun Anda membutuhkan persetujuan Super Admin sebelum dapat digunakan untuk login.');
+                    alert('Registrasi berhasil! Akun Anda membutuhkan persetujuan Super Admin.');
                     toggleAuthMode();
                     fetchAllEmployees();
                 }
-            } catch (error) {
-                alert("Gagal: " + (error.message || "Email/Password salah!"));
-            } finally {
-                btn.innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
-                btn.disabled = false;
-            }
+            } catch (error) { alert("Gagal: " + (error.message || "Email/Password salah!")); } 
+            finally { btn.innerText = isLoginMode ? 'Masuk' : 'Daftar Sekarang'; btn.disabled = false; }
         });
 
         async function doLogin(email, password) {
@@ -1124,11 +1212,9 @@
 
             if (!authResult) {
                 const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-                    method: 'POST',
-                    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-
                 const result = await res.json();
                 if (!res.ok) throw new Error(result.error_description || result.msg || 'Email/Password salah!');
 
@@ -1141,10 +1227,9 @@
                 const { data: prof } = await supabaseClient.from('profiles').select('is_approved').eq('user_email', email).single();
                 if (prof && !prof.is_approved) {
                     await supabaseClient.auth.signOut();
-                    throw new Error("Akun Anda belum disetujui oleh Super Admin. Harap hubungi Super Admin untuk aktivasi akun.");
+                    throw new Error("Akun Anda belum disetujui oleh Super Admin.");
                 }
             }
-
             return true;
         }
 
@@ -1154,32 +1239,24 @@
 
             try {
                 await supabaseClient.auth.signUp({
-                    email, password,
-                    options: { data: { full_name: fullName, jabatan: roleDefault } }
+                    email, password, options: { data: { full_name: fullName, jabatan: roleDefault } }
                 });
             } catch (err) {}
 
             await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-                method: 'POST',
-                headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, data: { full_name: fullName, jabatan: roleDefault } })
             });
 
             await supabaseClient.from('profiles').upsert([{
-                user_email: email,
-                full_name: fullName,
-                jabatan: roleDefault,
-                is_approved: isSuper
+                user_email: email, full_name: fullName, jabatan: roleDefault, is_approved: isSuper
             }], { onConflict: 'user_email' });
 
             return true;
         }
 
         function clearUserState() {
-            currentUser = null; 
-            currentUserEmail = null; 
-            currentUserData = {};
-
+            currentUser = null; currentUserEmail = null; currentUserData = {};
             document.getElementById('user-display-name').innerText = 'Tamu';
             document.getElementById('user-display-role').innerText = 'Teknisi / User';
             document.getElementById('prof-nama').innerText = 'Tamu';
@@ -1191,7 +1268,6 @@
                     <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
                 </button>
             `;
-
             renderProfileData();
         }
 
@@ -1218,26 +1294,17 @@
                     const { data: profDb } = await supabaseClient.from('profiles').select('*').eq('user_email', session.user.email).single();
 
                     let roleUser = (profDb && profDb.jabatan) ? profDb.jabatan : (meta.jabatan || 'Teknisi/User');
-                    if (session.user.email === 'mastrisnocom@gmail.com') {
-                        roleUser = 'Super Admin';
-                    }
+                    if (session.user.email === 'mastrisnocom@gmail.com') roleUser = 'Super Admin';
 
                     currentUserData = { 
-                        full_name: userName, 
-                        email: session.user.email, 
-                        jabatan: roleUser,
-                        nip: (profDb && profDb.nip) || meta.nip,
-                        unit: (profDb && profDb.unit) || meta.unit,
-                        gender: (profDb && profDb.gender) || meta.gender,
-                        phone: (profDb && profDb.phone) || meta.phone,
-                        religion: (profDb && profDb.religion) || meta.religion,
-                        status_karyawan: (profDb && profDb.status_karyawan) || meta.status_karyawan,
-                        dob: (profDb && profDb.dob) || meta.dob,
-                        foto_url: (profDb && profDb.foto_url) || meta.foto_url
+                        full_name: userName, email: session.user.email, jabatan: roleUser,
+                        nip: (profDb && profDb.nip) || meta.nip, unit: (profDb && profDb.unit) || meta.unit,
+                        gender: (profDb && profDb.gender) || meta.gender, phone: (profDb && profDb.phone) || meta.phone,
+                        religion: (profDb && profDb.religion) || meta.religion, status_karyawan: (profDb && profDb.status_karyawan) || meta.status_karyawan,
+                        dob: (profDb && profDb.dob) || meta.dob, foto_url: (profDb && profDb.foto_url) || meta.foto_url
                     };
 
                     document.getElementById('user-display-name').innerText = userName;
-
                     renderProfileData();
 
                     btnContainer.innerHTML = `
@@ -1245,25 +1312,21 @@
                             <i class="fa-solid fa-power-off"></i> Keluar
                         </button>
                     `;
-                } else {
-                    clearUserState();
-                }
-            } catch(e) {
-                clearUserState();
-            }
+                } else { clearUserState(); }
+            } catch(e) { clearUserState(); }
         }
 
         async function logout() {
-            if (!confirm('Apakah Anda yakin ingin keluar dari akun?')) return;
+            if (!confirm('Apakah Anda yakin ingin keluar?')) return;
             await supabaseClient.auth.signOut();
             clearUserState();
             switchTab('home');
-            alert('Berhasil keluar akun.');
+            alert('Berhasil keluar.');
         }
 
         function switchTab(tab) {
             if (!currentUser && tab !== 'home') {
-                alert('Akses Ditolak: Anda belum login! Silakan Login atau Daftar akun terlebih dahulu.');
+                alert('Akses Ditolak: Anda belum login!');
                 openAuthModal();
                 return;
             }
