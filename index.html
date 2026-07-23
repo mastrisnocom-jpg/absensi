@@ -770,6 +770,7 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
+        // AKSI ABSENSI TERMASUK LOGIKA HITUNG KETERLAMBATAN JAM SHIFT
         async function recordAttendance(actionType, selfieBase64 = null) {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
@@ -778,7 +779,27 @@
             }
 
             const isSuper = isUserSuperAdmin();
-            const todayStr = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            let statusAbsen = 'Tepat Waktu';
+
+            // Pengecekan Keterlambatan Khusus Clock In
+            if (actionType === 'Clock In' && !isSuper) {
+                try {
+                    const { data: schedules } = await supabaseClient.from('schedules').select('*').limit(1);
+                    if (schedules && schedules.length > 0) {
+                        const targetTimeIn = schedules[0].time_in; // HH:MM:SS
+                        const [sHour, sMinute] = targetTimeIn.split(':').map(Number);
+
+                        const currentHour = now.getHours();
+                        const currentMinute = now.getMinutes();
+
+                        if (currentHour > sHour || (currentHour === sHour && currentMinute > sMinute)) {
+                            statusAbsen = 'Terlambat';
+                        }
+                    }
+                } catch(e) {}
+            }
 
             if (actionType === 'Clock Out' && !isSuper) {
                 try {
@@ -832,10 +853,16 @@
                 const { error } = await supabaseClient.from('attendance_logs').insert([{ 
                     user_email: currentUserEmail, user_name: currentUser, action_type: actionType,
                     jabatan: userRole, unit: currentUserData.unit || 'Pusat', date_recorded: todayStr,
-                    foto_url: selfieBase64 || ''
+                    foto_url: selfieBase64 || '', status_absen: statusAbsen
                 }]);
                 if (error) throw error;
-                alert(`Berhasil ${actionType}! Data absensi dicatat.`);
+                
+                if (statusAbsen === 'Terlambat') {
+                    alert(`Clock In Berhasil. Catatan: Anda dicatat Terlambat hari ini.`);
+                } else {
+                    alert(`Berhasil ${actionType}! Data absensi dicatat.`);
+                }
+
                 fetchAttendanceLogs();
             } catch (error) { alert(`Gagal absensi: ` + error.message); } 
             finally { btnElement.innerHTML = originalContent; btnElement.disabled = false; }
@@ -1105,7 +1132,6 @@
 
         function closeAdminUserEditModal() { document.getElementById('admin-user-edit-modal').classList.add('hidden'); }
 
-        // MENGEDIT PROFIL LENGKAP USER (BARU/LAMA) OLEH SUPER ADMIN
         async function saveAdminUserEdit() {
             const fullname = document.getElementById('adm-edit-fullname').value.trim();
             const role = document.getElementById('adm-select-role').value;
@@ -1278,6 +1304,7 @@
             `).join('');
         }
 
+        // TAMPILKAN RIWAYAT ABSEN DENGAN BADGE TERLAMBAT JIKA KETERANGAN DITEMUKAN
         async function fetchAttendanceLogs() {
             const logList = document.getElementById('log-list');
             const logTitle = document.getElementById('log-section-title');
@@ -1305,20 +1332,26 @@
                 if (error) throw error;
                 if (!data || data.length === 0) { logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi.</p>'; return; }
 
-                logList.innerHTML = data.map(item => `
-                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-                                ${item.foto_url ? `<img src="${item.foto_url}" class="w-full h-full object-cover" />` : `<i class="fa-solid ${item.action_type==='Clock In'?'fa-arrow-right-to-bracket text-green-700':'fa-arrow-right-from-bracket text-red-700'}"></i>`}
+                logList.innerHTML = data.map(item => {
+                    const isLate = (item.status_absen === 'Terlambat');
+                    const badgeColor = isLate ? 'bg-red-100 text-red-800' : (item.action_type==='Clock In'?'bg-green-100 text-green-800':'bg-amber-100 text-amber-800');
+                    const badgeText = isLate ? 'Terlambat' : item.action_type;
+
+                    return `
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+                                    ${item.foto_url ? `<img src="${item.foto_url}" class="w-full h-full object-cover" />` : `<i class="fa-solid ${item.action_type==='Clock In'?'fa-arrow-right-to-bracket text-green-700':'fa-arrow-right-from-bracket text-red-700'}"></i>`}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-gray-800">${item.user_name} (${item.jabatan || 'Teknisi/User'})</h4>
+                                    <p class="text-[11px] text-gray-400">${new Date(item.timestamp || Date.now()).toLocaleString()}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="font-bold text-xs text-gray-800">${item.user_name} (${item.jabatan || 'Teknisi/User'})</h4>
-                                <p class="text-[11px] text-gray-400">${new Date(item.timestamp || Date.now()).toLocaleString()}</p>
-                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${badgeColor}">${badgeText}</span>
                         </div>
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${item.action_type==='Clock In'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${item.action_type}</span>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             } catch (err) { logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data.</p>`; }
         }
 
