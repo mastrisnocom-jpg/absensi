@@ -76,7 +76,6 @@
                             <span class="text-[9px] bg-emerald-200 text-emerald-900 px-2 py-1 rounded-lg font-bold">Hari Ini</span>
                         </div>
 
-                        <!-- TOMBOL BUKA MODAL JADWAL 1 BULAN -->
                         <button onclick="openMonthlyRosterViewModal()" class="w-full bg-white hover:bg-green-100 text-green-800 font-bold py-1.5 rounded-xl border border-green-300 text-[10px] flex items-center justify-center gap-1.5 transition">
                             <i class="fa-solid fa-calendar-week"></i> Lihat Jadwal Shift Bulan Ini
                         </button>
@@ -120,14 +119,25 @@
                 </div>
             </div>
 
-            <!-- 2. ABSEN LOG TAB -->
+            <!-- 2. ABSEN LOG TAB DENGAN EKSUM EXPORT CSV & PDF -->
             <div id="log-section" class="hidden px-6 py-6 space-y-4">
-                <div class="flex justify-between items-center mb-2">
+                <div class="flex justify-between items-center mb-1">
                     <h2 class="text-xl font-bold text-gray-800" id="log-section-title">Riwayat Absen Log</h2>
                     <button onclick="fetchAttendanceLogs()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-800 transition active:scale-95">
                         <i class="fa-solid fa-rotate mr-1"></i> Refresh
                     </button>
                 </div>
+
+                <!-- TOMBOL EXPORT REKAPITULASI KANTOR -->
+                <div class="flex gap-2 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl">
+                    <button onclick="exportUnitAttendanceCSV()" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white text-[10px] font-bold py-1.5 rounded-lg transition flex items-center justify-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-file-csv"></i> Export CSV Unit
+                    </button>
+                    <button onclick="exportUnitAttendancePDF()" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-1.5 rounded-lg transition flex items-center justify-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-file-pdf"></i> Export PDF Unit
+                    </button>
+                </div>
+
                 <div id="log-list" class="space-y-3 pb-4">
                     <p class="text-gray-400 text-sm text-center py-10">Memuat data riwayat...</p>
                 </div>
@@ -146,14 +156,17 @@
                 </div>
             </div>
 
-            <!-- 4. KARYAWAN TAB -->
+            <!-- 4. KARYAWAN / TIM KAMI TAB (FILTER UNIT SAMA) -->
             <div id="karyawan-section" class="hidden px-6 py-6 space-y-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xl font-bold text-gray-800">Anggota Tim Operational</h2>
+                <div class="flex justify-between items-center mb-1">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Tim Kami</h2>
+                        <p class="text-[10px] text-gray-500" id="team-unit-label">Unit Kantor: -</p>
+                    </div>
                     <button onclick="fetchAllEmployees()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold"><i class="fa-solid fa-rotate"></i> Refresh</button>
                 </div>
                 <div id="employee-list-container" class="space-y-3 pb-4">
-                    <p class="text-gray-400 text-sm text-center py-10">Memuat anggota tim...</p>
+                    <p class="text-gray-400 text-sm text-center py-10">Memuat tim unit...</p>
                 </div>
             </div>
 
@@ -680,7 +693,6 @@
             } catch(e) {}
         }
 
-        // LOAD SHIFT HARIAN PADA TANGGAL HARI INI DARI TABEL ROSTER USER_SCHEDULES
         async function loadUserShiftCardInfo() {
             const shiftNameEl = document.getElementById('user-shift-name');
             const shiftTimesEl = document.getElementById('user-shift-times');
@@ -727,7 +739,6 @@
             }
         }
 
-        // BUKA MODAL JADWAL SHIFT 1 BULAN UNTUK TEKNISI/USER
         async function openMonthlyRosterViewModal() {
             if (!currentUserEmail) { alert('Silakan login terlebih dahulu!'); return; }
 
@@ -781,7 +792,6 @@
             document.getElementById('user-monthly-schedule-modal').classList.add('hidden');
         }
 
-        // ================= FORM PENGATURAN ROSTER 1 BULAN (KEPALA UNIT & SUPER ADMIN) =================
         async function openMonthlyRosterBuilderModal(userEmail) {
             selectedRosterTargetEmail = userEmail;
             document.getElementById('roster-target-user-email').innerText = userEmail;
@@ -828,8 +838,6 @@
             let html = '';
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const selectedVal = existingScheduleMap[dateStr] || "OFF";
-
                 html += `
                     <div class="flex items-center justify-between border-b pb-1 gap-2">
                         <span class="font-bold text-gray-700 shrink-0 w-20">Tgl ${String(d).padStart(2, '0')}/${String(month).padStart(2, '0')}</span>
@@ -842,7 +850,6 @@
 
             container.innerHTML = html;
 
-            // Set nilai terpilih
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const el = document.getElementById(`roster-day-val-${d}`);
@@ -894,6 +901,118 @@
                     loadUserShiftCardInfo();
                 }
             } catch(e) { alert("Gagal menyimpan roster bulanan: " + e.message); }
+        }
+
+        // FUNGSI EXPORT DATA ABSENSI UNIT KE CSV (EXCEL)
+        async function exportUnitAttendanceCSV() {
+            if (!currentUserData.unit || currentUserData.unit === 'Belum dipilih') {
+                alert('Unit Kantor Anda belum ditentukan. Pilih/isi Unit Kantor di Profil Saya terlebih dahulu!');
+                return;
+            }
+
+            try {
+                let query = supabaseClient.from('attendance_logs').select('*');
+                if (!isUserSuperAdmin()) {
+                    query = query.eq('unit', currentUserData.unit);
+                }
+
+                const { data, error } = await query.order('timestamp', { ascending: false });
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    alert('Belum ada data absensi untuk unit ' + currentUserData.unit);
+                    return;
+                }
+
+                let csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += "ID,Email,Nama,Jabatan,Unit,Tipe Absen,Status Absen,Tanggal,Waktu\n";
+
+                data.forEach(row => {
+                    const timeStr = new Date(row.timestamp).toLocaleString();
+                    csvContent += `"${row.id}","${row.user_email}","${row.user_name}","${row.jabatan || '-'}","${row.unit || '-'}","${row.action_type}","${row.status_absen || 'Tepat Waktu'}","${row.date_recorded}","${timeStr}"\n`;
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `Rekap_Absensi_${currentUserData.unit.replace(/\s+/g, '_')}_${Date.now()}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch(e) { alert("Gagal export CSV: " + e.message); }
+        }
+
+        // FUNGSI EXPORT DATA ABSENSI UNIT KE PDF (NATIVE PRINT WINDOW)
+        async function exportUnitAttendancePDF() {
+            if (!currentUserData.unit || currentUserData.unit === 'Belum dipilih') {
+                alert('Unit Kantor Anda belum ditentukan. Pilih/isi Unit Kantor di Profil Saya terlebih dahulu!');
+                return;
+            }
+
+            try {
+                let query = supabaseClient.from('attendance_logs').select('*');
+                if (!isUserSuperAdmin()) {
+                    query = query.eq('unit', currentUserData.unit);
+                }
+
+                const { data, error } = await query.order('timestamp', { ascending: false });
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    alert('Belum ada data absensi untuk unit ' + currentUserData.unit);
+                    return;
+                }
+
+                let printWindow = window.open('', '_blank');
+                let rowsHtml = data.map((item, idx) => `
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">${idx + 1}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px;">${item.user_name}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px;">${item.jabatan || '-'}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">${item.action_type}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">${item.status_absen || 'Tepat Waktu'}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">${new Date(item.timestamp).toLocaleString()}</td>
+                    </tr>
+                `).join('');
+
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Rekap Absensi - ${currentUserData.unit}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+                            h2 { text-align: center; margin-bottom: 5px; color: #0A4D3C; }
+                            p { text-align: center; font-size: 12px; color: #666; margin-top: 0; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11px; }
+                            th { background-color: #0A4D3C; color: white; padding: 8px; border: 1px solid #ddd; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>REKAPITULASI ABSENSI KARYAWAN</h2>
+                        <p>Unit Kantor: <strong>${currentUserData.unit}</strong> | Dicetak Tanggal: ${new Date().toLocaleDateString()}</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Karyawan</th>
+                                    <th>Jabatan</th>
+                                    <th>Tipe Absen</th>
+                                    <th>Keterangan</th>
+                                    <th>Waktu Absen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+                    </body>
+                    </html>
+                `);
+
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(() => { printWindow.print(); }, 500);
+            } catch(e) { alert("Gagal export PDF: " + e.message); }
         }
 
         function compressImage(imageSource, maxDimension = 800, maxSizeBytes = 200 * 1024) {
@@ -1158,14 +1277,30 @@
             finally { btnElement.innerHTML = originalContent; btnElement.disabled = false; }
         }
 
+        // FUNGSI TIM KAMI: HANYA MENAMPILKAN KARYAWAN DALAM 1 UNIT SAMA (KECUALI SUPER ADMIN)
         async function fetchAllEmployees() {
             const listEl = document.getElementById('employee-list-container');
+            const unitLabel = document.getElementById('team-unit-label');
+
             listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat anggota tim...</p>';
 
+            const isSuper = isUserSuperAdmin();
+            const myUnit = currentUserData.unit || 'Belum dipilih';
+            unitLabel.innerText = isSuper ? "Seluruh Unit Kantor (Super Admin)" : `Unit Kantor: ${myUnit}`;
+
             try {
-                const { data, error } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
+                let query = supabaseClient.from('profiles').select('*');
+                if (!isSuper) {
+                    query = query.eq('unit', myUnit);
+                }
+
+                const { data, error } = await query.order('created_at', { ascending: false });
+
                 if (error) throw error;
-                if (!data || data.length === 0) { listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada anggota tim.</p>'; return; }
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = `<p class="text-gray-400 text-sm text-center py-10">Belum ada anggota tim terdaftar di unit ${myUnit}.</p>`;
+                    return;
+                }
 
                 listEl.innerHTML = data.map(u => {
                     const avatarHtml = u.foto_url ? `<img src="${u.foto_url}" class="w-full h-full object-cover" />` : `<span class="text-gold font-bold text-lg">${(u.full_name || 'U').charAt(0).toUpperCase()}</span>`;
