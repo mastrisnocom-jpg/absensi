@@ -61,18 +61,25 @@
                         </div>
                     </div>
 
-                    <!-- CARD INFORMASI JADWAL SHIFT TEKNISI/USER -->
-                    <div id="user-shift-info-card" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-green-700 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm" id="user-shift-code-badge">
-                                SFT
+                    <!-- CARD INFORMASI JADWAL SHIFT TEKNISI HARI INI -->
+                    <div id="user-shift-info-card" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex flex-col space-y-2 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-green-700 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm" id="user-shift-code-badge">
+                                    SFT
+                                </div>
+                                <div>
+                                    <h4 id="user-shift-name" class="font-bold text-xs text-gray-800">Shift Hari Ini</h4>
+                                    <p id="user-shift-times" class="text-[11px] text-green-800 font-semibold mt-0.5">Memuat jadwal...</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 id="user-shift-name" class="font-bold text-xs text-gray-800">Jadwal Shift Kerja</h4>
-                                <p id="user-shift-times" class="text-[11px] text-green-800 font-semibold mt-0.5">Memuat jadwal...</p>
-                            </div>
+                            <span class="text-[9px] bg-emerald-200 text-emerald-900 px-2 py-1 rounded-lg font-bold">Hari Ini</span>
                         </div>
-                        <span class="text-[9px] bg-emerald-200 text-emerald-900 px-2 py-1 rounded-lg font-bold">Aktif</span>
+
+                        <!-- TOMBOL BUKA MODAL JADWAL 1 BULAN -->
+                        <button onclick="openMonthlyRosterViewModal()" class="w-full bg-white hover:bg-green-100 text-green-800 font-bold py-1.5 rounded-xl border border-green-300 text-[10px] flex items-center justify-center gap-1.5 transition">
+                            <i class="fa-solid fa-calendar-week"></i> Lihat Jadwal Shift Bulan Ini
+                        </button>
                     </div>
                 </div>
 
@@ -263,7 +270,7 @@
                         </div>
                     </div>
 
-                    <!-- SUPER ADMIN & KEPALA UNIT SYSTEM SETTINGS CONTAINER -->
+                    <!-- SUPER ADMIN CONTAINER -->
                     <div id="superadmin-menu-container" class="hidden pt-2 border-t space-y-2">
                         <button onclick="openSystemSettingsModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold py-2.5 rounded-xl transition text-xs border border-amber-300 cursor-pointer flex items-center justify-center gap-2">
                             <i class="fa-solid fa-gears text-amber-700"></i> Pengaturan Sistem & Shift
@@ -282,6 +289,55 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- ================= MODAL JADWAL SHIFT 1 BULAN (VIEW TEKNISI) ================= -->
+        <div id="user-monthly-schedule-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
+                <button onclick="closeMonthlyRosterViewModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-regular fa-calendar-check text-green-700"></i> Jadwal Shift Saya
+                </h3>
+                <p id="view-roster-month-title" class="text-xs text-green-700 font-semibold border-b pb-2">Memuat Bulan...</p>
+
+                <div id="user-monthly-schedule-list" class="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1 text-xs">
+                    <p class="text-gray-400 text-center py-6">Memuat jadwal bulanan...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= MODAL SETTING ROSTER BULANAN USER (KEPALA UNIT & SUPER ADMIN) ================= -->
+        <div id="monthly-roster-builder-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
+                <button onclick="closeMonthlyRosterBuilderModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <h3 class="text-base font-bold text-gray-800">Atur Roster Shift 1 Bulan</h3>
+                <p id="roster-target-user-email" class="text-xs text-green-700 font-bold truncate border-b pb-2">-</p>
+
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <label class="font-semibold text-gray-600">Bulan</label>
+                        <select id="roster-select-month" onchange="generateMonthlyDaysInputs()" class="w-full border rounded-lg p-2 mt-0.5 bg-white outline-none">
+                            <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+                            <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+                            <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+                            <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-gray-600">Tahun</label>
+                        <input type="number" id="roster-select-year" value="2026" onchange="generateMonthlyDaysInputs()" class="w-full border rounded-lg p-2 mt-0.5 outline-none font-bold" />
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <h5 class="font-bold text-xs text-gray-700 mb-1">Shift Per Tanggal</h5>
+                    <div id="roster-days-inputs-container" class="space-y-1.5 max-h-[45vh] overflow-y-auto pr-1 text-xs"></div>
+                </div>
+
+                <button onclick="saveMonthlyRosterData()" class="w-full bg-green-700 text-white font-bold py-2.5 rounded-xl transition shadow text-xs mt-2">
+                    Simpan Roster 1 Bulan
+                </button>
+            </div>
         </div>
 
         <!-- ================= MODAL KAMERA SELFIE CLOCK IN ================= -->
@@ -362,11 +418,11 @@
             </div>
         </div>
 
-        <!-- ================= MODAL EDIT PROFIL LENGKAP & SHIFT USER ================= -->
+        <!-- ================= MODAL EDIT PROFIL LENGKAP USER (KHUSUS SUPER ADMIN) ================= -->
         <div id="admin-user-edit-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
                 <button onclick="closeAdminUserEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                <h3 class="text-base font-bold text-gray-800">Kelola Profil & Shift User</h3>
+                <h3 class="text-base font-bold text-gray-800">Kelola Profil User (Super Admin)</h3>
                 <p id="adm-edit-user-email" class="text-xs text-green-700 font-bold truncate border-b pb-2">-</p>
                 
                 <div class="space-y-2.5 text-xs max-h-[60vh] overflow-y-auto pr-1">
@@ -390,13 +446,6 @@
                             <select id="adm-select-unit" class="w-full border rounded-lg p-2 mt-0.5 bg-white outline-none"></select>
                         </div>
                     </div>
-
-                    <!-- ATUR JADWAL SHIFT KHUSUS UNTUK TEKNISI/USER -->
-                    <div>
-                        <label class="font-bold text-green-800">Penetapan Shift Kerja</label>
-                        <select id="adm-select-shift" class="w-full border-2 border-green-600 rounded-lg p-2 mt-0.5 bg-green-50 outline-none font-bold text-gray-800"></select>
-                    </div>
-
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="font-semibold text-gray-600">NIP</label>
@@ -444,7 +493,7 @@
                 </div>
 
                 <button onclick="saveAdminUserEdit()" class="w-full bg-green-700 text-white font-bold py-2.5 rounded-xl transition shadow text-xs mt-2">
-                    Simpan Perubahan Profil & Shift
+                    Simpan Perubahan Profil
                 </button>
             </div>
         </div>
@@ -506,7 +555,7 @@
                     </div>
 
                     <div class="pt-2 border-t">
-                        <h5 class="font-bold text-gray-600 mb-1">Daftar Shift Kerja</h5>
+                        <h5 class="font-bold text-gray-600 mb-1">Daftar Shift Kerja Master</h5>
                         <div id="admin-schedule-list" class="space-y-1.5 max-h-28 overflow-y-auto"></div>
                     </div>
                 </div>
@@ -605,6 +654,7 @@
         let mediaStream = null;
         let allShiftsList = [];
         let userAssignedShift = null;
+        let selectedRosterTargetEmail = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
@@ -630,34 +680,220 @@
             } catch(e) {}
         }
 
-        // LOAD BACA SHIFT USER DIPASANG DI HOME CARD
+        // LOAD SHIFT HARIAN PADA TANGGAL HARI INI DARI TABEL ROSTER USER_SCHEDULES
         async function loadUserShiftCardInfo() {
             const shiftNameEl = document.getElementById('user-shift-name');
             const shiftTimesEl = document.getElementById('user-shift-times');
             const shiftBadgeEl = document.getElementById('user-shift-code-badge');
 
-            if (!currentUserEmail || !currentUserData.assigned_shift_id) {
-                shiftNameEl.innerText = "Non-Shift / Belum diatur";
-                shiftTimesEl.innerText = "Jam Masuk Bebas";
+            if (!currentUserEmail) {
+                shiftNameEl.innerText = "Belum Login";
+                shiftTimesEl.innerText = "-";
                 shiftBadgeEl.innerText = "OFF";
                 userAssignedShift = null;
                 return;
             }
 
+            const todayStr = new Date().toISOString().split('T')[0];
+
             try {
-                const { data: s } = await supabaseClient.from('schedules').select('*').eq('id', currentUserData.assigned_shift_id).single();
-                if (s) {
-                    userAssignedShift = s;
-                    shiftNameEl.innerText = `${s.shift_name}`;
-                    shiftTimesEl.innerText = `Masuk: ${s.time_in} - Pulang: ${s.time_out}`;
-                    shiftBadgeEl.innerText = `${s.shift_code || 'SFT'}`;
+                const { data: us } = await supabaseClient.from('user_schedules')
+                    .select('*, schedules(*)')
+                    .eq('user_email', currentUserEmail)
+                    .eq('schedule_date', todayStr)
+                    .single();
+
+                if (us && us.schedules) {
+                    userAssignedShift = us.schedules;
+                    shiftNameEl.innerText = `${us.schedules.shift_name}`;
+                    shiftTimesEl.innerText = `Masuk: ${us.schedules.time_in} - Pulang: ${us.schedules.time_out}`;
+                    shiftBadgeEl.innerText = `${us.schedules.shift_code || 'SFT'}`;
+                } else if (us && us.shift_code === 'OFF') {
+                    shiftNameEl.innerText = "Hari Libur (OFF)";
+                    shiftTimesEl.innerText = "Bebas Tugas";
+                    shiftBadgeEl.innerText = "OFF";
+                    userAssignedShift = null;
                 } else {
-                    shiftNameEl.innerText = "Shift Tidak Ditemukan";
-                    shiftTimesEl.innerText = "-";
+                    shiftNameEl.innerText = "Shift Belum Diatur Hari Ini";
+                    shiftTimesEl.innerText = "Menunggu jadwal Kepala Unit";
                     shiftBadgeEl.innerText = "OFF";
                     userAssignedShift = null;
                 }
+            } catch(e) {
+                shiftNameEl.innerText = "Shift Non-Jadwal";
+                shiftTimesEl.innerText = "Jam Masuk Bebas";
+                shiftBadgeEl.innerText = "OFF";
+                userAssignedShift = null;
+            }
+        }
+
+        // BUKA MODAL JADWAL SHIFT 1 BULAN UNTUK TEKNISI/USER
+        async function openMonthlyRosterViewModal() {
+            if (!currentUserEmail) { alert('Silakan login terlebih dahulu!'); return; }
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+            document.getElementById('view-roster-month-title').innerText = `Bulan ${monthNames[month - 1]} ${year}`;
+            const listEl = document.getElementById('user-monthly-schedule-list');
+            listEl.innerHTML = '<p class="text-gray-400 text-center py-6"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Memuat roster bulanan...</p>';
+
+            document.getElementById('user-monthly-schedule-modal').classList.remove('hidden');
+
+            try {
+                const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+                const endDate = `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
+
+                const { data } = await supabaseClient.from('user_schedules')
+                    .select('*, schedules(*)')
+                    .eq('user_email', currentUserEmail)
+                    .gte('schedule_date', startDate)
+                    .lte('schedule_date', endDate)
+                    .order('schedule_date', { ascending: true });
+
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = '<p class="text-gray-400 text-center py-6">Belum ada roster shift yang disusun untuk bulan ini.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.map(s => {
+                    const isOff = (!s.schedules || s.shift_code === 'OFF');
+                    const code = s.schedules ? s.schedules.shift_code : (s.shift_code || 'OFF');
+                    const name = s.schedules ? s.schedules.shift_name : 'Libur (OFF)';
+                    const times = s.schedules ? `${s.schedules.time_in} - ${s.schedules.time_out}` : 'Bebas Tugas';
+
+                    return `
+                        <div class="flex justify-between items-center p-2 rounded-xl border ${isOff ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}">
+                            <div>
+                                <p class="font-bold text-gray-800">${s.schedule_date}</p>
+                                <p class="text-[10px] text-gray-600">${name} (${times})</p>
+                            </div>
+                            <span class="px-2 py-0.5 rounded font-bold text-[10px] ${isOff ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-900'}">${code}</span>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) { listEl.innerHTML = '<p class="text-red-500 text-center py-6">Gagal memuat jadwal.</p>'; }
+        }
+
+        function closeMonthlyRosterViewModal() {
+            document.getElementById('user-monthly-schedule-modal').classList.add('hidden');
+        }
+
+        // ================= FORM PENGATURAN ROSTER 1 BULAN (KEPALA UNIT & SUPER ADMIN) =================
+        async function openMonthlyRosterBuilderModal(userEmail) {
+            selectedRosterTargetEmail = userEmail;
+            document.getElementById('roster-target-user-email').innerText = userEmail;
+
+            const now = new Date();
+            document.getElementById('roster-select-month').value = now.getMonth() + 1;
+            document.getElementById('roster-select-year').value = now.getFullYear();
+
+            await fetchShiftsListGlobal();
+            generateMonthlyDaysInputs();
+
+            document.getElementById('monthly-roster-builder-modal').classList.remove('hidden');
+        }
+
+        function closeMonthlyRosterBuilderModal() {
+            document.getElementById('monthly-roster-builder-modal').classList.add('hidden');
+        }
+
+        async function generateMonthlyDaysInputs() {
+            const container = document.getElementById('roster-days-inputs-container');
+            const month = parseInt(document.getElementById('roster-select-month').value);
+            const year = parseInt(document.getElementById('roster-select-year').value);
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+            const endDate = `${year}-${String(month).padStart(2, '0')}-${daysInMonth}`;
+
+            let existingScheduleMap = {};
+            try {
+                const { data } = await supabaseClient.from('user_schedules')
+                    .select('*')
+                    .eq('user_email', selectedRosterTargetEmail)
+                    .gte('schedule_date', startDate)
+                    .lte('schedule_date', endDate);
+
+                if (data) {
+                    data.forEach(item => { existingScheduleMap[item.schedule_date] = item.shift_id || 'OFF'; });
+                }
             } catch(e) {}
+
+            let optionsHtml = `<option value="OFF">OFF (Libur)</option>`;
+            optionsHtml += allShiftsList.map(s => `<option value="${s.id}">[${s.shift_code || 'SFT'}] ${s.shift_name} (${s.time_in}-${s.time_out})</option>`).join('');
+
+            let html = '';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const selectedVal = existingScheduleMap[dateStr] || "OFF";
+
+                html += `
+                    <div class="flex items-center justify-between border-b pb-1 gap-2">
+                        <span class="font-bold text-gray-700 shrink-0 w-20">Tgl ${String(d).padStart(2, '0')}/${String(month).padStart(2, '0')}</span>
+                        <select id="roster-day-val-${d}" data-date="${dateStr}" class="w-full border rounded px-2 py-1 bg-white outline-none">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+
+            // Set nilai terpilih
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const el = document.getElementById(`roster-day-val-${d}`);
+                if (el && existingScheduleMap[dateStr]) {
+                    el.value = existingScheduleMap[dateStr];
+                }
+            }
+        }
+
+        async function saveMonthlyRosterData() {
+            const month = parseInt(document.getElementById('roster-select-month').value);
+            const year = parseInt(document.getElementById('roster-select-year').value);
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            let payload = [];
+            for (let d = 1; d <= daysInMonth; d++) {
+                const el = document.getElementById(`roster-day-val-${d}`);
+                if (el) {
+                    const dateStr = el.getAttribute('data-date');
+                    const val = el.value;
+
+                    if (val === 'OFF') {
+                        payload.push({
+                            user_email: selectedRosterTargetEmail,
+                            schedule_date: dateStr,
+                            shift_id: null,
+                            shift_code: 'OFF'
+                        });
+                    } else {
+                        const shiftObj = allShiftsList.find(s => s.id == val);
+                        payload.push({
+                            user_email: selectedRosterTargetEmail,
+                            schedule_date: dateStr,
+                            shift_id: parseInt(val),
+                            shift_code: shiftObj ? shiftObj.shift_code : 'SFT'
+                        });
+                    }
+                }
+            }
+
+            try {
+                const { error } = await supabaseClient.from('user_schedules').upsert(payload, { onConflict: 'user_email, schedule_date' });
+                if (error) throw error;
+
+                alert(`Jadwal Shift Roster 1 Bulan untuk (${selectedRosterTargetEmail}) berhasil disimpan!`);
+                closeMonthlyRosterBuilderModal();
+
+                if (selectedRosterTargetEmail === currentUserEmail) {
+                    loadUserShiftCardInfo();
+                }
+            } catch(e) { alert("Gagal menyimpan roster bulanan: " + e.message); }
         }
 
         function compressImage(imageSource, maxDimension = 800, maxSizeBytes = 200 * 1024) {
@@ -831,7 +1067,6 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
-        // ABSENSI DENGAN PENGECEKAN KETERLAMBATAN PADA SHIFT TEKNISI
         async function recordAttendance(actionType, selfieBase64 = null) {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
@@ -844,7 +1079,6 @@
             const todayStr = now.toISOString().split('T')[0];
             let statusAbsen = 'Tepat Waktu';
 
-            // Pengecekan Keterlambatan Berdasarkan Shift Kerja User
             if (actionType === 'Clock In' && !isSuper) {
                 if (userAssignedShift && userAssignedShift.time_in) {
                     const [sHour, sMinute] = userAssignedShift.time_in.split(':').map(Number);
@@ -1152,9 +1386,10 @@
                             <p class="font-bold text-gray-800">${p.full_name}</p>
                             <p class="text-[10px] text-gray-500">${p.user_email} | <span class="text-green-700 font-bold">${p.jabatan || 'Teknisi'}</span></p>
                         </div>
-                        <div class="flex gap-1">
+                        <div class="flex gap-1 flex-wrap justify-end">
                             ${!p.is_approved ? `<button onclick="approveUserAccount('${p.user_email}')" class="bg-green-700 text-white font-bold text-[9px] px-2 py-1 rounded">Approve</button>` : ''}
-                            <button onclick="openAdminUserEditModal('${p.user_email}')" class="bg-amber-600 text-white font-bold text-[9px] px-2 py-1 rounded"><i class="fa-solid fa-pen"></i> Kelola Profil</button>
+                            <button onclick="openAdminUserEditModal('${p.user_email}')" class="bg-amber-600 text-white font-bold text-[9px] px-2 py-1 rounded"><i class="fa-solid fa-pen"></i> Profil</button>
+                            <button onclick="openMonthlyRosterBuilderModal('${p.user_email}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[9px] px-2 py-1 rounded"><i class="fa-solid fa-calendar-days"></i> Roster 1 Bln</button>
                         </div>
                     </div>
                 `).join('');
@@ -1182,12 +1417,6 @@
                 const unitSel = document.getElementById('adm-select-unit');
                 unitSel.innerHTML = officeLocations.map(o => `<option value="${o.unit_name}" ${p.unit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
 
-                // LOAD PILIHAN SHIFT UNTUK KARYAWAN
-                const shiftSel = document.getElementById('adm-select-shift');
-                let shiftOpts = `<option value="">-- Pilih Shift Kerja --</option>`;
-                shiftOpts += allShiftsList.map(s => `<option value="${s.id}" ${p.assigned_shift_id == s.id ? 'selected' : ''}>[${s.shift_code || 'SFT'}] ${s.shift_name} (${s.time_in}-${s.time_out})</option>`).join('');
-                shiftSel.innerHTML = shiftOpts;
-
                 document.getElementById('admin-user-edit-modal').classList.remove('hidden');
             } catch(e) { alert("Gagal memuat data user: " + e.message); }
         }
@@ -1198,7 +1427,6 @@
             const fullname = document.getElementById('adm-edit-fullname').value.trim();
             const role = document.getElementById('adm-select-role').value;
             const unit = document.getElementById('adm-select-unit').value;
-            const shiftId = document.getElementById('adm-select-shift').value || null;
             const nip = document.getElementById('adm-edit-nip').value.trim();
             const phone = document.getElementById('adm-edit-phone').value.trim();
             const gender = document.getElementById('adm-edit-gender').value;
@@ -1213,7 +1441,6 @@
                     full_name: fullname,
                     jabatan: role,
                     unit: unit,
-                    assigned_shift_id: shiftId,
                     nip: nip,
                     phone: phone,
                     gender: gender,
@@ -1224,7 +1451,7 @@
 
                 if (error) throw error;
 
-                alert('Data profil & shift user berhasil diperbarui!');
+                alert('Data profil user berhasil diperbarui!');
                 closeAdminUserEditModal();
                 fetchPendingUserRegistrations();
                 fetchAllEmployees();
@@ -1495,6 +1722,7 @@
                 await supabaseClient.from('attendance_logs').delete().eq('user_email', currentUserEmail);
                 await supabaseClient.from('messages').delete().or(`sender_email.eq.${currentUserEmail},receiver_email.eq.${currentUserEmail}`);
                 await supabaseClient.from('request_absensi').delete().eq('user_email', currentUserEmail);
+                await supabaseClient.from('user_schedules').delete().eq('user_email', currentUserEmail);
 
                 await supabaseClient.auth.signOut();
                 clearUserState();
