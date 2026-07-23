@@ -1015,6 +1015,37 @@
             } catch(e) { alert("Gagal export PDF: " + e.message); }
         }
 
+        function base64ToBlob(base64, mimeType) {
+            const bytes = atob(base64.split(',')[1]);
+            const ab = new ArrayBuffer(bytes.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < bytes.length; i++) ia[i] = bytes.charCodeAt(i);
+            return new Blob([ab], { type: mimeType });
+        }
+
+        async function uploadSelfieToStorage(userEmail, base64Data) {
+            try {
+                const blob = base64ToBlob(base64Data, 'image/jpeg');
+                const cleanEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '_');
+                const fileName = `${cleanEmail}/${Date.now()}.jpg`;
+                
+                const { data, error } = await supabaseClient.storage
+                    .from('selfies')
+                    .upload(fileName, blob, { contentType: 'image/jpeg', cacheControl: '3600' });
+                    
+                if (error) throw error;
+                
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('selfies')
+                    .getPublicUrl(fileName);
+                    
+                return publicUrlData.publicUrl;
+            } catch (err) {
+                console.error("Gagal mengunggah gambar ke storage bucket, gunakan fallback Base64:", err);
+                return base64Data;
+            }
+        }
+
         function compressImage(imageSource, maxDimension = 800, maxSizeBytes = 200 * 1024) {
             return new Promise((resolve) => {
                 const img = new Image();
@@ -1052,28 +1083,29 @@
                 return;
             }
 
-            const isSuper = isUserSuperAdmin();
             const todayStr = new Date().toISOString().split('T')[0];
 
-            if (!isSuper) {
-                try {
-                    const { data: logsToday } = await supabaseClient
-                        .from('attendance_logs').select('*')
-                        .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
+            try {
+                const { data: logsToday } = await supabaseClient
+                    .from('attendance_logs').select('*')
+                    .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
 
-                    if ((logsToday || []).some(l => l.action_type === 'Clock In')) {
-                        alert('Anda sudah melakukan Clock In hari ini!');
-                        return;
-                    }
-                } catch(e) {}
-            }
+                if ((logsToday || []).some(l => l.action_type === 'Clock In')) {
+                    alert('Anda sudah melakukan Clock In hari ini!');
+                    return;
+                }
+            } catch(e) {}
 
             document.getElementById('selfie-modal').classList.remove('hidden');
             const video = document.getElementById('selfie-video');
 
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "user" },
+                    video: { 
+                        facingMode: "user",
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    },
                     audio: false
                 });
                 video.srcObject = mediaStream;
@@ -1094,8 +1126,8 @@
         async function captureAndVerifyClockIn() {
             const video = document.getElementById('selfie-video');
             const canvas = document.getElementById('selfie-canvas');
-            canvas.width = video.videoWidth || 320;
-            canvas.height = video.videoHeight || 240;
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const rawSelfieBase64 = canvas.toDataURL('image/jpeg', 0.9);
@@ -1198,6 +1230,17 @@
             const todayStr = now.toISOString().split('T')[0];
             let statusAbsen = 'Tepat Waktu';
 
+            try {
+                const { data: logsToday } = await supabaseClient
+                    .from('attendance_logs').select('*')
+                    .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
+
+                if ((logsToday || []).some(l => l.action_type === actionType)) {
+                    alert(`Anda sudah melakukan ${actionType} hari ini!`);
+                    return;
+                }
+            } catch(e) {}
+
             if (actionType === 'Clock In' && !isSuper) {
                 if (userAssignedShift && userAssignedShift.time_in) {
                     const [sHour, sMinute] = userAssignedShift.time_in.split(':').map(Number);
@@ -1208,19 +1251,6 @@
                         statusAbsen = 'Terlambat';
                     }
                 }
-            }
-
-            if (actionType === 'Clock Out' && !isSuper) {
-                try {
-                    const { data: logsToday } = await supabaseClient
-                        .from('attendance_logs').select('*')
-                        .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
-
-                    if ((logsToday || []).some(l => l.action_type === 'Clock Out')) {
-                        alert('Anda sudah melakukan Clock Out hari ini!');
-                        return;
-                    }
-                } catch(e) {}
             }
 
             let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
@@ -1255,14 +1285,21 @@
             const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
             const btnElement = document.getElementById(btnId);
             const originalContent = btnElement.innerHTML;
-            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...';
             btnElement.disabled = true;
 
             try {
+                let finalFotoUrl = '';
+                if (selfieBase64) {
+                    finalFotoUrl = await uploadSelfieToStorage(currentUserEmail, selfieBase64);
+                }
+
+                btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+
                 const { error } = await supabaseClient.from('attendance_logs').insert([{ 
                     user_email: currentUserEmail, user_name: currentUser, action_type: actionType,
                     jabatan: userRole, unit: currentUserData.unit || 'Pusat', date_recorded: todayStr,
-                    foto_url: selfieBase64 || '', status_absen: statusAbsen
+                    foto_url: finalFotoUrl, status_absen: statusAbsen
                 }]);
                 if (error) throw error;
 
@@ -1277,7 +1314,6 @@
             finally { btnElement.innerHTML = originalContent; btnElement.disabled = false; }
         }
 
-        // FUNGSI TIM KAMI: HANYA MENAMPILKAN KARYAWAN DALAM 1 UNIT SAMA (KECUALI SUPER ADMIN)
         async function fetchAllEmployees() {
             const listEl = document.getElementById('employee-list-container');
             const unitLabel = document.getElementById('team-unit-label');
@@ -1354,6 +1390,7 @@
                 document.getElementById('user-detail-modal').classList.remove('hidden');
             } catch(e) {}
         }
+        
         function closeUserDetailModal() { document.getElementById('user-detail-modal').classList.add('hidden'); }
 
         async function fetchInboxMessages() {
@@ -1481,21 +1518,24 @@
 
             try {
                 await supabaseClient.from('messages').insert([{
-                    sender_email: currentUserEmail, sender_name: currentUser,
-                    receiver_email: activeChatUser.email, message_text: txt, is_read: false
+                    sender_name: currentUser,
+                    sender_email: currentUserEmail,
+                    receiver_email: activeChatUser.email,
+                    message_text: txt,
+                    is_read: false
                 }]);
                 input.value = '';
                 loadTwoWayMessages();
             } catch(e) { alert('Gagal mengirim: ' + e.message); }
         }
 
-        // ================= SUPER ADMIN & KEPALA UNIT SYSTEM SETTINGS =================
         function openSystemSettingsModal() {
             renderAdminOfficeList();
             fetchPendingUserRegistrations();
             fetchScheduleShifts();
             document.getElementById('sys-settings-modal').classList.remove('hidden');
         }
+        
         function closeSystemSettingsModal() { document.getElementById('sys-settings-modal').classList.add('hidden'); }
 
         function switchAdminSubTab(sub) {
@@ -1905,6 +1945,7 @@
 
             document.getElementById('edit-field-modal').classList.remove('hidden');
         }
+        
         function closeEditFieldModal() { document.getElementById('edit-field-modal').classList.add('hidden'); }
 
         async function saveProfileField() {
@@ -1932,9 +1973,11 @@
                 const rawImage = e.target.result;
                 try {
                     const compressedImage = await compressImage(rawImage, 800, 200 * 1024);
-                    await supabaseClient.auth.updateUser({ data: { foto_url: compressedImage } });
-                    await supabaseClient.from('profiles').update({ foto_url: compressedImage }).eq('user_email', currentUserEmail);
-                    currentUserData.foto_url = compressedImage;
+                    const finalPhotoUrl = await uploadSelfieToStorage(currentUserEmail, compressedImage);
+                    
+                    await supabaseClient.auth.updateUser({ data: { foto_url: finalPhotoUrl } });
+                    await supabaseClient.from('profiles').update({ foto_url: finalPhotoUrl }).eq('user_email', currentUserEmail);
+                    currentUserData.foto_url = finalPhotoUrl;
                     renderProfileData();
                     alert('Foto profil diperbarui!');
                 } catch (err) { alert('Gagal: ' + err.message); }
