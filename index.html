@@ -125,21 +125,29 @@
                 </div>
             </div>
 
-            <!-- 4. KARYAWAN TAB -->
+            <!-- 4. KARYAWAN / TIM KAMI TAB -->
             <div id="karyawan-section" class="hidden px-6 py-6 space-y-4">
-                <h2 class="text-xl font-bold text-gray-800 mb-2">Anggota Tim Operational</h2>
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-full bg-primary-dark text-gold flex items-center justify-center font-bold text-lg overflow-hidden" id="karyawan-avatar-card">
-                        <span id="karyawan-initial">T</span>
-                    </div>
-                    <div>
-                        <h4 id="karyawan-name-card" class="font-bold text-sm text-gray-800">Tamu</h4>
-                        <p id="karyawan-role-card" class="text-xs text-green-700 font-semibold">Teknisi / User</p>
-                    </div>
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-bold text-gray-800">Anggota Tim Operational</h2>
+                    <button onclick="fetchAllEmployees()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+                <div id="employee-list-container" class="space-y-3 pb-4">
+                    <p class="text-gray-400 text-sm text-center py-10">Memuat anggota tim...</p>
                 </div>
             </div>
 
-            <!-- 5. PROFIL SAYA TAB -->
+            <!-- 5. INBOX TAB -->
+            <div id="inbox-section" class="hidden px-6 py-6 space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-bold text-gray-800">Kotak Masuk (Inbox)</h2>
+                    <button onclick="fetchInboxMessages()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+                <div id="inbox-list-container" class="space-y-3 pb-4">
+                    <p class="text-gray-400 text-sm text-center py-10">Memuat pesan masuk...</p>
+                </div>
+            </div>
+
+            <!-- 6. PROFIL SAYA TAB -->
             <div id="profile-section" class="hidden px-6 py-6 space-y-4">
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Profil Saya</h2>
                 
@@ -251,10 +259,48 @@
             <div onclick="switchTab('log')" id="nav-log" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
                 <i class="fa-regular fa-calendar-check mb-1 text-base"></i><span class="text-[10px] font-medium">Absen Log</span>
             </div>
+            <div onclick="switchTab('inbox')" id="nav-inbox" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
+                <i class="fa-regular fa-envelope mb-1 text-base"></i><span class="text-[10px] font-medium">Inbox</span>
+            </div>
             <div onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
                 <i class="fa-regular fa-user mb-1 text-base"></i><span class="text-[10px] font-medium">Profil</span>
             </div>
         </nav>
+
+        <!-- ================= MODAL DETAIL PROFIL USER LAIN ================= -->
+        <div id="user-detail-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative space-y-4">
+                <button onclick="closeUserDetailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <div class="flex flex-col items-center border-b pb-4">
+                    <div class="w-20 h-20 rounded-full bg-primary-dark text-gold flex items-center justify-center text-3xl font-bold shadow mb-2 overflow-hidden border-2 border-gold" id="detail-user-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <h3 id="detail-user-name" class="font-bold text-lg text-gray-800 text-center">Nama User</h3>
+                    <p id="detail-user-role" class="text-xs text-green-700 font-semibold mt-0.5">Jabatan</p>
+                </div>
+                <div class="space-y-2 text-xs">
+                    <p class="flex justify-between"><strong>Unit Kantor:</strong> <span id="detail-user-unit">-</span></p>
+                    <p class="flex justify-between"><strong>NIP:</strong> <span id="detail-user-nip">-</span></p>
+                    <p class="flex justify-between"><strong>Phone:</strong> <span id="detail-user-phone">-</span></p>
+                    <p class="flex justify-between"><strong>Email:</strong> <span id="detail-user-email">-</span></p>
+                </div>
+                <button id="btn-open-send-msg" class="w-full bg-primary-dark hover:bg-green-900 text-white font-bold py-2.5 rounded-xl transition text-xs shadow flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-paper-plane"></i> Kirim Pesan Privat
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= MODAL KIRIM PESAN PRIVAT ================= -->
+        <div id="send-msg-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative space-y-3">
+                <button onclick="closeSendMsgModal()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <h3 class="text-base font-bold text-gray-800">Kirim Pesan Ke <span id="target-receiver-name" class="text-green-700">User</span></h3>
+                <textarea id="private-message-text" rows="4" placeholder="Tuliskan pesan Anda di sini..." class="w-full border rounded-xl p-3 text-xs outline-none focus:border-green-600"></textarea>
+                <button onclick="submitPrivateMessage()" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 rounded-xl transition text-xs">
+                    Kirim Pesan
+                </button>
+            </div>
+        </div>
 
         <!-- ================= MODAL EDIT FIELD PROFIL ================= -->
         <div id="edit-field-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
@@ -268,7 +314,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL PENGATURAN SISTEM (SUPER ADMIN) ================= -->
+        <!-- ================= MODAL PENGATURAN SISTEM ================= -->
         <div id="sys-settings-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-4">
                 <button onclick="closeSystemSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -277,13 +323,11 @@
                     <p class="text-gray-500 text-[11px] mt-0.5">Kelola Persetujuan Akun & Unit Kantor</p>
                 </div>
 
-                <!-- SUB TAB SUPER ADMIN -->
                 <div class="flex border-b text-xs font-semibold">
                     <button onclick="switchAdminSubTab('acc-approval')" id="adm-tab-acc-approval" class="flex-1 py-2 text-green-700 border-b-2 border-green-700">Persetujuan Akun</button>
                     <button onclick="switchAdminSubTab('lokasi')" id="adm-tab-lokasi" class="flex-1 py-2 text-gray-400">Unit Kantor</button>
                 </div>
 
-                <!-- TAB 1: PERSETUJUAN AKUN BARU -->
                 <div id="adm-sec-acc-approval" class="space-y-3 text-xs">
                     <div class="flex justify-between items-center">
                         <h4 class="font-bold text-gray-700">Daftar Pendaftar Pending</h4>
@@ -294,7 +338,6 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: LONGLAT KANTOR -->
                 <div id="adm-sec-lokasi" class="hidden space-y-3 text-xs">
                     <h4 class="font-bold text-gray-700">Tambah / Edit Unit Kantor</h4>
                     <div>
@@ -383,6 +426,7 @@
         let currentCoords = null;
         let officeLocations = [];
         let activeEditField = null;
+        let targetMsgReceiver = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
@@ -552,6 +596,133 @@
             }
         }
 
+        // AMBIL ANGGOTA TIM / KARYAWAN
+        async function fetchAllEmployees() {
+            const listEl = document.getElementById('employee-list-container');
+            listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat anggota tim...</p>';
+
+            try {
+                const { data, error } = await supabaseClient.from('profiles').select('*').eq('is_approved', true).order('full_name', { ascending: true });
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada anggota tim terdaftar.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.map(u => {
+                    const avatarHtml = u.foto_url ? `<img src="${u.foto_url}" class="w-full h-full object-cover" />` : `<span class="text-gold font-bold text-lg">${u.full_name.charAt(0).toUpperCase()}</span>`;
+                    return `
+                        <div onclick="openUserDetailModal('${u.user_email}')" class="bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-primary-dark text-gold flex items-center justify-center font-bold text-lg overflow-hidden shrink-0">
+                                    ${avatarHtml}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-800">${u.full_name}</h4>
+                                    <p class="text-xs text-green-700 font-semibold">${u.jabatan || 'Teknisi/User'}</p>
+                                    <p class="text-[10px] text-gray-400">${u.unit || 'Unit Pusat'}</p>
+                                </div>
+                            </div>
+                            <button class="bg-emerald-100 text-emerald-800 p-2 rounded-full text-xs hover:bg-emerald-200 transition">
+                                <i class="fa-solid fa-comment-dots text-base"></i>
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) {
+                listEl.innerHTML = '<p class="text-red-500 text-xs text-center py-10">Gagal memuat tim.</p>';
+            }
+        }
+
+        // DETAIL PROFIL USER LAIN & KIRIM PESAN
+        async function openUserDetailModal(targetEmail) {
+            if (!currentUser) { openAuthModal(); return; }
+
+            try {
+                const { data } = await supabaseClient.from('profiles').select('*').eq('user_email', targetEmail).single();
+                if (!data) return;
+
+                targetMsgReceiver = data;
+
+                document.getElementById('detail-user-name').innerText = data.full_name;
+                document.getElementById('detail-user-role').innerText = data.jabatan || 'Teknisi/User';
+                document.getElementById('detail-user-unit').innerText = data.unit || 'Belum dipilih';
+                document.getElementById('detail-user-nip').innerText = data.nip || '-';
+                document.getElementById('detail-user-phone').innerText = data.phone || '-';
+                document.getElementById('detail-user-email').innerText = data.user_email;
+
+                const av = document.getElementById('detail-user-avatar');
+                if (data.foto_url) av.innerHTML = `<img src="${data.foto_url}" class="w-full h-full object-cover" />`;
+                else av.innerHTML = `<span class="text-gold font-bold text-3xl">${data.full_name.charAt(0).toUpperCase()}</span>`;
+
+                document.getElementById('btn-open-send-msg').onclick = () => {
+                    closeUserDetailModal();
+                    openSendMsgModal(data.full_name);
+                };
+
+                document.getElementById('user-detail-modal').classList.remove('hidden');
+            } catch(e) {}
+        }
+        function closeUserDetailModal() { document.getElementById('user-detail-modal').classList.add('hidden'); }
+
+        function openSendMsgModal(name) {
+            document.getElementById('target-receiver-name').innerText = name;
+            document.getElementById('private-message-text').value = '';
+            document.getElementById('send-msg-modal').classList.remove('hidden');
+        }
+        function closeSendMsgModal() { document.getElementById('send-msg-modal').classList.add('hidden'); }
+
+        async function submitPrivateMessage() {
+            const txt = document.getElementById('private-message-text').value.trim();
+            if (!txt) return alert('Masukkan isi pesan!');
+            if (!targetMsgReceiver) return;
+
+            try {
+                await supabaseClient.from('messages').insert([{
+                    sender_email: currentUserEmail,
+                    sender_name: currentUser,
+                    receiver_email: targetMsgReceiver.user_email,
+                    message_text: txt
+                }]);
+                alert('Pesan privat berhasil terkirim!');
+                closeSendMsgModal();
+            } catch(e) { alert('Gagal mengirim pesan: ' + e.message); }
+        }
+
+        // LOAD INBOX MESSAGES
+        async function fetchInboxMessages() {
+            const listEl = document.getElementById('inbox-list-container');
+            listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat pesan...</p>';
+
+            try {
+                const { data, error } = await supabaseClient.from('messages').select('*').eq('receiver_email', currentUserEmail).order('created_at', { ascending: false });
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center py-12">
+                            <i class="fa-regular fa-envelope-open text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-500 text-xs font-medium">Belum ada pesan masuk saat ini.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = data.map(m => `
+                    <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 space-y-1.5">
+                        <div class="flex justify-between items-center border-b pb-1">
+                            <h4 class="font-bold text-xs text-gray-800"><i class="fa-solid fa-user-pen text-green-700 mr-1"></i> ${m.sender_name}</h4>
+                            <span class="text-[9px] text-gray-400">${new Date(m.created_at).toLocaleString()}</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed break-words">${m.message_text}</p>
+                    </div>
+                `).join('');
+            } catch(e) {
+                listEl.innerHTML = '<p class="text-red-500 text-xs text-center py-10">Gagal memuat pesan.</p>';
+            }
+        }
+
         async function fetchPendingRequests() {
             const listEl = document.getElementById('approval-list');
             listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat permohonan...</p>';
@@ -665,12 +836,8 @@
             updatePayload[activeEditField] = val;
 
             try {
-                const { error } = await supabaseClient.auth.updateUser({ data: updatePayload });
-                if (error) throw error;
-
-                if (activeEditField === 'jabatan' || activeEditField === 'unit') {
-                    await supabaseClient.from('profiles').update({ [activeEditField]: val }).eq('user_email', currentUserEmail);
-                }
+                await supabaseClient.auth.updateUser({ data: updatePayload });
+                await supabaseClient.from('profiles').update({ [activeEditField]: val }).eq('user_email', currentUserEmail);
 
                 currentUserData[activeEditField] = val;
                 renderProfileData();
@@ -679,21 +846,25 @@
             } catch(err) { alert('Gagal: ' + err.message); }
         }
 
+        // FOTO PROFIL PAKAI BASE64 STREAM AGAR 100% LANGSUNG TAMPIL
         async function uploadProfilePhoto(event) {
             if (!currentUser) { openAuthModal(); return; }
             const file = event.target.files[0];
             if (!file) return;
-            try {
-                alert('Mengunggah foto profil...');
-                const fileName = `profile_${currentUserEmail.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.jpg`;
-                await supabaseClient.storage.from('foto-absensi').upload(fileName, file, { upsert: true });
-                const { data: urlData } = supabaseClient.storage.from('foto-absensi').getPublicUrl(fileName);
-                
-                await supabaseClient.auth.updateUser({ data: { foto_url: urlData.publicUrl } });
-                currentUserData.foto_url = urlData.publicUrl;
-                renderProfileData();
-                alert('Foto profil diperbarui!');
-            } catch (err) { alert('Gagal upload: ' + err.message); }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Image = e.target.result;
+                try {
+                    await supabaseClient.auth.updateUser({ data: { foto_url: base64Image } });
+                    await supabaseClient.from('profiles').update({ foto_url: base64Image }).eq('user_email', currentUserEmail);
+                    
+                    currentUserData.foto_url = base64Image;
+                    renderProfileData();
+                    alert('Foto profil berhasil diperbarui!');
+                } catch (err) { alert('Gagal memperbarui foto: ' + err.message); }
+            };
+            reader.readAsDataURL(file);
         }
 
         function renderProfileData() {
@@ -759,7 +930,6 @@
             }
         }
 
-        // CONTROL PENGATURAN SUPER ADMIN
         function openSystemSettingsModal() {
             renderAdminOfficeList();
             fetchPendingUserRegistrations();
@@ -776,7 +946,6 @@
             document.getElementById('adm-tab-' + sub).className = "flex-1 py-2 text-green-700 border-b-2 border-green-700";
         }
 
-        // FUNGSI LOAD & APPROVE PENDAFTAR BARU
         async function fetchPendingUserRegistrations() {
             const listEl = document.getElementById('admin-pending-users-list');
             listEl.innerHTML = '<p class="text-gray-400 text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Memuat pendaftar...</p>';
@@ -843,7 +1012,6 @@
             `).join('');
         }
 
-        // LOG ABSENSI
         async function fetchAttendanceLogs() {
             const logList = document.getElementById('log-list');
             logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data...</p>';
@@ -869,7 +1037,6 @@
             } catch (err) { logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data.</p>`; }
         }
 
-        // AUTHENTICATION DENGAN PENGECEKAN PERSETUJUAN SUPER ADMIN
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
@@ -941,7 +1108,6 @@
                 }
             }
 
-            // PERIKSA STATUS PERSETUJUAN DARI SUPER ADMIN (KECUALI mastrisnocom@gmail.com)
             if (email !== 'mastrisnocom@gmail.com') {
                 const { data: prof } = await supabaseClient.from('profiles').select('is_approved').eq('user_email', email).single();
                 if (prof && !prof.is_approved) {
@@ -958,20 +1124,18 @@
             let roleDefault = isSuper ? 'Super Admin' : 'Teknisi/User';
 
             try {
-                const { data, error } = await supabaseClient.auth.signUp({
+                await supabaseClient.auth.signUp({
                     email, password,
                     options: { data: { full_name: fullName, jabatan: roleDefault } }
                 });
             } catch (err) {}
 
-            // PANGGILAN DIRECT REST FALLBACK
             await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                 method: 'POST',
                 headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, data: { full_name: fullName, jabatan: roleDefault } })
             });
 
-            // SIMPAN DATA PROFIL KE TABEL PROFILES (DENGAN STATUS IS_APPROVED)
             await supabaseClient.from('profiles').upsert([{
                 user_email: email,
                 full_name: fullName,
@@ -988,7 +1152,6 @@
                 const btnContainer = document.getElementById('auth-action-btn-container');
 
                 if (session) {
-                    // double check status approval
                     if (session.user.email !== 'mastrisnocom@gmail.com') {
                         const { data: prof } = await supabaseClient.from('profiles').select('is_approved').eq('user_email', session.user.email).single();
                         if (prof && !prof.is_approved) {
@@ -1004,8 +1167,11 @@
                     const userName = meta.full_name || session.user.email.split('@')[0];
                     currentUser = userName;
                     currentUserEmail = session.user.email;
-                    
-                    let roleUser = meta.jabatan || 'Teknisi/User';
+
+                    // Ambil detail data dari tabel profiles agar sinkron
+                    const { data: profDb } = await supabaseClient.from('profiles').select('*').eq('user_email', session.user.email).single();
+
+                    let roleUser = (profDb && profDb.jabatan) ? profDb.jabatan : (meta.jabatan || 'Teknisi/User');
                     if (session.user.email === 'mastrisnocom@gmail.com') {
                         roleUser = 'Super Admin';
                     }
@@ -1014,14 +1180,14 @@
                         full_name: userName, 
                         email: session.user.email, 
                         jabatan: roleUser,
-                        nip: meta.nip,
-                        unit: meta.unit,
-                        gender: meta.gender,
-                        phone: meta.phone,
-                        religion: meta.religion,
-                        status_karyawan: meta.status_karyawan,
-                        dob: meta.dob,
-                        foto_url: meta.foto_url
+                        nip: (profDb && profDb.nip) || meta.nip,
+                        unit: (profDb && profDb.unit) || meta.unit,
+                        gender: (profDb && profDb.gender) || meta.gender,
+                        phone: (profDb && profDb.phone) || meta.phone,
+                        religion: (profDb && profDb.religion) || meta.religion,
+                        status_karyawan: (profDb && profDb.status_karyawan) || meta.status_karyawan,
+                        dob: (profDb && profDb.dob) || meta.dob,
+                        foto_url: (profDb && profDb.foto_url) || meta.foto_url
                     };
 
                     document.getElementById('user-display-name').innerText = userName;
@@ -1055,12 +1221,12 @@
                 return;
             }
 
-            ['home-section', 'log-section', 'approval-section', 'karyawan-section', 'profile-section'].forEach(s => {
+            ['home-section', 'log-section', 'approval-section', 'karyawan-section', 'inbox-section', 'profile-section'].forEach(s => {
                 const el = document.getElementById(s);
                 if (el) el.classList.add('hidden');
             });
             
-            const navItems = ['nav-home', 'nav-karyawan', 'nav-log', 'nav-profile'];
+            const navItems = ['nav-home', 'nav-karyawan', 'nav-log', 'nav-inbox', 'nav-profile'];
             navItems.forEach(item => {
                 const el = document.getElementById(item);
                 if (el) {
@@ -1081,6 +1247,8 @@
             }
 
             if (tab === 'log') fetchAttendanceLogs();
+            if (tab === 'karyawan') fetchAllEmployees();
+            if (tab === 'inbox') fetchInboxMessages();
             if (tab === 'profile') renderProfileData();
             if (tab === 'approval') fetchPendingRequests();
         }
