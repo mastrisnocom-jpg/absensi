@@ -33,7 +33,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <!-- LOGO PERUSAHAAN BINAYASA DI ATAS SELAMAT BEKERJA -->
-                            <div class="bg-emerald green rounded-xl p-2.5 mb-3 inline-block shadow-lg border border-white/40 max-w-[80px]">
+                            <div class="bg-white/95 rounded-xl p-2.5 mb-3 inline-block shadow-lg border border-white/40 max-w-[180px]">
                                 <img src="8723.jpg" alt="Logo Binayasa" class="h-9 w-auto object-contain">
                             </div>
                             <p class="text-gold text-sm font-semibold mb-1 flex items-center gap-1.5">
@@ -50,11 +50,38 @@
                     </div>
                 </div>
 
-                <!-- Clock In / Out Card & Informasi Shift User -->
+                <!-- Clock In / Out Card & NOTIFIKASI GEMPA TERKINI -->
                 <div class="px-6 -mt-12 relative z-10 space-y-3">
-                    <div class="bg-white rounded-2xl shadow-md p-5 border border-gray-100">
-                        <div class="flex justify-between items-center mb-3">
-                            <h2 class="text-gray-700 font-bold text-sm flex items-center gap-1.5"><i class="fa-solid fa-clock text-emerald-700"></i> Status Shift Aktif</h2>
+                    
+                    <!-- CARD NOTIFIKASI GEMPA TERKINI BMKG -->
+                    <div class="bg-white rounded-2xl shadow-md p-4 border border-rose-100">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-2">
+                            <h2 class="text-gray-800 font-bold text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-house-tsunami text-rose-600 animate-pulse text-sm"></i> Notifikasi Gempa Terkini
+                            </h2>
+                            <span id="earthquake-mag-badge" class="text-[9px] bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded-full">
+                                BMKG
+                            </span>
+                        </div>
+                        
+                        <div id="earthquake-info-container" class="flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2.5 overflow-hidden">
+                                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-base shrink-0 border border-rose-100">
+                                    <i class="fa-solid fa-earth-asia"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p id="eq-location" class="font-bold text-gray-800 truncate text-[11px]"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> Mendeteksi data gempa...</p>
+                                    <p id="eq-depth" class="text-[10px] text-gray-500 font-medium mt-0.5"><i class="fa-solid fa-layer-group text-amber-600 mr-1"></i> Kedalaman: -</p>
+                                </div>
+                            </div>
+                            <span id="eq-time" class="text-[9px] text-gray-400 shrink-0 font-medium ml-1 text-right">-</span>
+                        </div>
+                    </div>
+
+                    <!-- TOMBOL CLOCK IN & OUT -->
+                    <div class="bg-white rounded-2xl shadow-md p-4 border border-gray-100 space-y-2.5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-gray-700"><i class="fa-solid fa-fingerprint text-emerald-700 mr-1"></i> Presensi Kehadiran</span>
                             <span id="gps-status-badge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold"><i class="fa-solid fa-location-crosshairs mr-1"></i> Mendeteksi GPS...</span>
                         </div>
                         <div class="flex gap-3">
@@ -331,10 +358,9 @@
             </div>
         </div>
 
-        <!-- ================= MODAL REQUEST FORM BARU (DENGAN TANGGAL DINAMIS) ================= -->
+        <!-- ================= MODAL REQUEST FORM BARU ================= -->
         <div id="request-submission-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden transition-all duration-300">
             <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden relative my-auto border border-emerald-100 transform transition-all">
-                <!-- Header Popup Modern -->
                 <div class="bg-gradient-to-r from-emerald-800 to-teal-900 p-5 text-white relative">
                     <button onclick="closeRequestModal()" class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm backdrop-blur-sm transition cursor-pointer">
                         <i class="fa-solid fa-xmark"></i>
@@ -353,7 +379,6 @@
                 <form id="submission-form" onsubmit="submitFormPengajuan(event)" class="p-5 space-y-3.5 text-xs">
                     <input type="hidden" id="submission-type" value="">
                     
-                    <!-- Drop-down Opsi Pilihan Otomatis Dinamis -->
                     <div>
                         <label id="request-option-label" class="font-bold text-gray-700 text-[11px] uppercase tracking-wider block mb-1">Pilih Opsi Kategori*</label>
                         <div class="relative">
@@ -361,7 +386,6 @@
                         </div>
                     </div>
 
-                    <!-- Input Tanggal Dinamis Bermutasi Otomatis -->
                     <div>
                         <label id="request-date-label" class="font-bold text-gray-700 text-[11px] uppercase tracking-wider block mb-1">Pilih Tanggal Pengajuan*</label>
                         <input type="date" id="submission-date" required class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50/80 outline-none focus:border-emerald-600 focus:bg-white font-medium text-gray-800 transition shadow-xs" />
@@ -405,7 +429,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL SETTING ROSTER PERIODE 25-24 (KEPALA UNIT & SUPER ADMIN) ================= -->
+        <!-- ================= MODAL SETTING ROSTER PERIODE 25-24 ================= -->
         <div id="monthly-roster-builder-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden transition-all duration-300 overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden relative my-auto border border-emerald-100">
                 <div class="bg-gradient-to-r from-emerald-800 to-teal-900 p-5 text-white relative">
@@ -478,7 +502,6 @@
                     <div class="relative w-full h-64 bg-slate-950 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center border-2 border-emerald-500/30">
                         <video id="selfie-video" autoplay playsinline class="w-full h-full object-cover"></video>
                         <canvas id="selfie-canvas" class="hidden"></canvas>
-                        <!-- Frame visual panduan selfie -->
                         <div class="absolute inset-8 border-2 border-dashed border-emerald-400/60 rounded-full pointer-events-none animate-pulse"></div>
                     </div>
 
@@ -680,9 +703,9 @@
 
                 <div class="p-5 space-y-4">
                     <div class="flex border-b border-gray-200 text-[11px] font-semibold">
-                        <button onclick="switchAdminSubTab('acc-approval')" id="adm-tab-acc-approval" class="flex-1 py-2 text-emerald-700 border-b-2 border-emerald-700 font-bold transition">Persetujuan & Profil</button>
-                        <button onclick="switchAdminSubTab('jadwal')" id="adm-tab-jadwal" class="flex-1 py-2 text-gray-400 transition">Jadwal Shift</button>
-                        <button onclick="switchAdminSubTab('lokasi')" id="adm-tab-lokasi" class="flex-1 py-2 text-gray-400 transition">Unit Kantor</button>
+                        <button onclick="switchAdminSubTab('acc-approval')" id="adm-tab-acc-approval" class="flex-1 py-2 text-emerald-700 border-b-2 border-emerald-700 font-bold transition cursor-pointer">Persetujuan & Profil</button>
+                        <button onclick="switchAdminSubTab('jadwal')" id="adm-tab-jadwal" class="flex-1 py-2 text-gray-400 transition cursor-pointer">Jadwal Shift</button>
+                        <button onclick="switchAdminSubTab('lokasi')" id="adm-tab-lokasi" class="flex-1 py-2 text-gray-400 transition cursor-pointer">Unit Kantor</button>
                     </div>
 
                     <div id="adm-sec-acc-approval" class="space-y-3 text-xs">
@@ -766,7 +789,6 @@
         <!-- ================= MODAL LOGIN & DAFTAR ================= -->
         <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden transition-all duration-300 overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden relative my-auto border border-emerald-100">
-                <!-- Header Popup Modern dengan Logo Binayasa -->
                 <div class="bg-gradient-to-r from-emerald-800 to-teal-900 p-6 text-white text-center relative">
                     <button onclick="closeAuthModal()" class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm backdrop-blur-sm transition cursor-pointer">
                         <i class="fa-solid fa-xmark"></i>
@@ -838,9 +860,31 @@
         let userAssignedShift = null;
         let selectedRosterTargetEmail = null;
 
+        // ================= FUNGSI MENGAMBIL DATA GEMPA BMKG REAL-TIME =================
+        async function fetchLatestEarthquakeBMKG() {
+            const locEl = document.getElementById('eq-location');
+            const depthEl = document.getElementById('eq-depth');
+            const timeEl = document.getElementById('eq-time');
+            const badgeEl = document.getElementById('earthquake-mag-badge');
+
+            try {
+                const res = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json');
+                const data = await res.json();
+                const g = data.Infogempa.gempa;
+
+                // Memisahkan nama Kota / Wilayah
+                locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> ${g.Wilayah}`;
+                depthEl.innerHTML = `<i class="fa-solid fa-layer-group text-amber-600 mr-1"></i> Kedalaman: <strong class="text-gray-800">${g.Kedalaman}</strong>`;
+                timeEl.innerText = `${g.Jam} WIB`;
+                badgeEl.innerText = `${g.Magnitude} M SR`;
+            } catch (err) {
+                locEl.innerText = "Gagal memuat data BMKG";
+                depthEl.innerText = "Kedalaman: Tidak diketahui";
+            }
+        }
+
         // ================= HELPER SIKLUS PERIODE CUT-OFF (25 - 24) =================
         function getCutoffPeriodDates(year, month) {
-            // Tanggal Mulai: 25 Bulan Lalu
             let prevYear = year;
             let prevMonth = month - 1;
             if (prevMonth === 0) { prevMonth = 12; prevYear--; }
@@ -849,6 +893,51 @@
             const endDateStr = `${year}-${String(month).padStart(2, '0')}-24`;
 
             return { startDateStr, endDateStr, prevYear, prevMonth };
+        }
+
+        // ================= PENGECEKAN H-7 ROSTER HABIS & NOTIFIKASI OTOMATIS =================
+        async function checkRosterExpirationH7() {
+            if (!currentUserEmail) return;
+
+            const now = new Date();
+            let currentYear = now.getFullYear();
+            let currentMonth = now.getMonth() + 1;
+
+            if (now.getDate() >= 25) {
+                currentMonth++;
+                if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+            }
+
+            // Batas Akhir Periode Roster Aktif adalah Tanggal 24 Bulan Ini/Depan
+            const currentPeriodEnd = new Date(currentYear, currentMonth - 1, 24);
+            const diffTime = currentPeriodEnd - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // Jika Sisa Hari <= 7 Hari (Menjelang habis H-7)
+            if (diffDays <= 7 && diffDays >= 0) {
+                const noticeMsg = `[PENGINGAT SISTEM ROSTER] Jadwal shift kerja periode ini akan berakhir dalam ${diffDays} hari (tanggal 24). Penyusunan roster jadwal periode berikutnya sudah dapat dibuat oleh Kepala Unit.`;
+
+                try {
+                    // Cek apakah pesan pengingat sudah pernah dikirim hari ini
+                    const todayStr = now.toISOString().split('T')[0];
+                    const { data: existingMsg } = await supabaseClient.from('messages')
+                        .select('*')
+                        .eq('receiver_email', currentUserEmail)
+                        .ilike('message_text', '%PENGINGAT SISTEM ROSTER%')
+                        .gte('created_at', `${todayStr}T00:00:00.000Z`);
+
+                    if (!existingMsg || existingMsg.length === 0) {
+                        await supabaseClient.from('messages').insert([{
+                            sender_name: 'Sistem Roster',
+                            sender_email: 'system@binayasa.co.id',
+                            receiver_email: currentUserEmail,
+                            message_text: noticeMsg,
+                            is_read: false
+                        }]);
+                        checkUnreadMessages();
+                    }
+                } catch(e) {}
+            }
         }
 
         // ================= HELPER UI DIALOG & NOTIFIKASI MODERN =================
@@ -978,13 +1067,14 @@
                 fetchShiftsListGlobal();
             }
             initGeolocation();
+            fetchLatestEarthquakeBMKG();
         });
 
         function isUserSuperAdmin() {
             return (currentUserEmail === 'mastrisnocom@gmail.com' || (currentUserData && currentUserData.jabatan === 'Super Admin'));
         }
 
-        // ================= LOGIKA FORM REQUEST DENGAN DROP-DOWN & TANGGAL DINAMIS =================
+        // ================= LOGIKA FORM REQUEST =================
         async function openRequestModal(type) {
             if (!currentUser) {
                 await customAlert('Akses Ditolak: Anda belum login!', 'Peringatan', 'fa-lock', 'bg-red-100 text-red-700');
@@ -1135,16 +1225,17 @@
                 shiftBadgeEl.innerText = "OFF";
                 userAssignedShift = null;
             }
+
+            // Pengecekan Pengingat H-7 Roster Habis
+            checkRosterExpirationH7();
         }
 
-        // ================= MODAL LIHAT JADWAL SHIFT PERIODE 25-24 (TEKNISI) =================
         async function openMonthlyRosterViewModal() {
             if (!currentUserEmail) { await customAlert('Silakan login terlebih dahulu!', 'Akses Ditolak', 'fa-lock', 'bg-red-100 text-red-700'); return; }
 
             const now = new Date();
             let year = now.getFullYear();
             let month = now.getMonth() + 1;
-            // Jika tanggal hari ini >= 25, maka otomatis masuk ke periode bulan berikutnya
             if (now.getDate() >= 25) {
                 month++;
                 if (month > 12) { month = 1; year++; }
@@ -1195,7 +1286,6 @@
             document.getElementById('user-monthly-schedule-modal').classList.add('hidden');
         }
 
-        // ================= MODAL BUILDER ROSTER PERIODE 25-24 (SUPER ADMIN & KEPALA UNIT) =================
         async function openMonthlyRosterBuilderModal(userEmail) {
             selectedRosterTargetEmail = userEmail;
             document.getElementById('roster-target-user-email').innerText = userEmail;
@@ -1244,7 +1334,6 @@
             let optionsHtml = `<option value="OFF">OFF (Libur)</option>`;
             optionsHtml += allShiftsList.map(s => `<option value="${s.id}">[${s.shift_code || 'SFT'}] ${s.shift_name} (${s.time_in}-${s.time_out})</option>`).join('');
 
-            // Generasi daftar tanggal dari 25 Bulan Lalu s/d 24 Bulan Pilihan
             let dateList = [];
             let curr = new Date(prevYear, prevMonth - 1, 25);
             let end = new Date(year, month - 1, 24);
@@ -1274,7 +1363,6 @@
 
             container.innerHTML = html;
 
-            // Set value dari database jika sudah pernah diisi
             dateList.forEach((dateStr, idx) => {
                 const el = document.getElementById(`roster-day-val-${idx}`);
                 if (el && existingScheduleMap[dateStr]) {
