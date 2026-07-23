@@ -148,7 +148,7 @@
                 </div>
             </div>
 
-            <!-- 2. ABSEN LOG TAB DENGAN EKSUM EXPORT CSV & PDF -->
+            <!-- 2. ABSEN LOG TAB DENGAN FILTER TANGGAL & CHECKBOX KARYAWAN UNTUK EXPORT -->
             <div id="log-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-1">
                     <h2 class="text-xl font-bold text-gray-800" id="log-section-title">Riwayat Absen Log</h2>
@@ -157,14 +157,47 @@
                     </button>
                 </div>
 
-                <!-- TOMBOL EXPORT REKAPITULASI KANTOR -->
-                <div class="flex gap-2 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl">
-                    <button onclick="exportUnitAttendanceCSV()" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white text-[10px] font-bold py-1.5 rounded-lg transition flex items-center justify-center gap-1 shadow-sm cursor-pointer">
-                        <i class="fa-solid fa-file-csv"></i> Export CSV Unit
-                    </button>
-                    <button onclick="exportUnitAttendancePDF()" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-1.5 rounded-lg transition flex items-center justify-center gap-1 shadow-sm cursor-pointer">
-                        <i class="fa-solid fa-file-pdf"></i> Export PDF Unit
-                    </button>
+                <!-- PANEL FILTER EXPORT LOG DENGAN PILIHAN RENTANG TANGGAL DAN CENTANG KARYAWAN -->
+                <div class="bg-white border border-emerald-200 p-3.5 rounded-2xl space-y-3 shadow-xs">
+                    <div class="flex justify-between items-center border-b pb-1.5">
+                        <h4 class="font-bold text-xs text-gray-800 flex items-center gap-1.5"><i class="fa-solid fa-filter text-emerald-700"></i> Filter Rekapitulasi Data</h4>
+                        <span class="text-[9px] text-gray-400">PDF & CSV</span>
+                    </div>
+
+                    <!-- Filter Tanggal -->
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <label class="font-bold text-gray-700 text-[10px] uppercase block mb-1">Dari Tanggal</label>
+                            <input type="date" id="export-date-from" class="w-full border border-gray-200 rounded-xl p-2 bg-gray-50/80 outline-none focus:border-emerald-600 font-medium" />
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-700 text-[10px] uppercase block mb-1">Sampai Tanggal</label>
+                            <input type="date" id="export-date-to" class="w-full border border-gray-200 rounded-xl p-2 bg-gray-50/80 outline-none focus:border-emerald-600 font-medium" />
+                        </div>
+                    </div>
+
+                    <!-- Filter Pilih Semua / Nama Tertentu Karyawan -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <label class="font-bold text-gray-700 text-[10px] uppercase">Pilih Karyawan:</label>
+                            <label class="text-[10px] text-emerald-700 font-bold flex items-center gap-1 cursor-pointer">
+                                <input type="checkbox" id="export-check-all-users" onchange="toggleSelectAllExportUsers(this)" checked class="rounded accent-emerald-700"> Pilih Semua
+                            </label>
+                        </div>
+                        <div id="export-users-checkbox-container" class="max-h-28 overflow-y-auto border border-gray-200 rounded-xl p-2 bg-gray-50/50 space-y-1 text-xs">
+                            <p class="text-gray-400 text-center py-2 text-[10px]">Memuat daftar karyawan...</p>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Export -->
+                    <div class="flex gap-2 pt-1">
+                        <button onclick="exportUnitAttendanceCSV()" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+                            <i class="fa-solid fa-file-csv text-sm"></i> Export CSV
+                        </button>
+                        <button onclick="exportUnitAttendancePDF()" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+                            <i class="fa-solid fa-file-pdf text-sm"></i> Export PDF
+                        </button>
+                    </div>
                 </div>
 
                 <div id="log-list" class="space-y-3 pb-4">
@@ -380,8 +413,8 @@
             </div>
         </div>
 
-        <!-- ================= MODAL REQUEST FORM BARU ================= -->
-        <div id="request-submission-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden transition-all duration-300">
+        <!-- ================= MODAL REQUEST FORM BARU (DENGAN TANGGAL SAMPAI & DOKUMEN FOTO CUTI) ================= -->
+        <div id="request-submission-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden transition-all duration-300 overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden relative my-auto border border-emerald-100 transform transition-all">
                 <div class="bg-gradient-to-r from-emerald-800 to-teal-900 p-5 text-white relative">
                     <button onclick="closeRequestModal()" class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm backdrop-blur-sm transition cursor-pointer">
@@ -398,27 +431,47 @@
                     </div>
                 </div>
                 
-                <form id="submission-form" onsubmit="submitFormPengajuan(event)" class="p-5 space-y-3.5 text-xs">
+                <form id="submission-form" onsubmit="submitFormPengajuan(event)" class="p-5 space-y-3 text-xs">
                     <input type="hidden" id="submission-type" value="">
                     
                     <div>
                         <label id="request-option-label" class="font-bold text-gray-700 text-[11px] uppercase tracking-wider block mb-1">Pilih Opsi Kategori*</label>
-                        <div class="relative">
-                            <select id="submission-option-select" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50/80 outline-none focus:border-emerald-600 focus:bg-white font-medium text-gray-800 transition shadow-xs"></select>
+                        <select id="submission-option-select" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50/80 outline-none focus:border-emerald-600 focus:bg-white font-medium text-gray-800 transition shadow-xs"></select>
+                    </div>
+
+                    <!-- Input Tanggal & Rentang Cuti -->
+                    <div id="request-date-container" class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label id="request-date-label" class="font-bold text-gray-700 text-[10px] uppercase tracking-wider block mb-1">Mulai Tanggal*</label>
+                            <input type="date" id="submission-date" onchange="calculateLeaveDuration()" required class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50/80 outline-none focus:border-emerald-600 focus:bg-white font-medium text-gray-800 transition shadow-xs" />
+                        </div>
+                        <div id="request-date-end-container" class="hidden">
+                            <label class="font-bold text-gray-700 text-[10px] uppercase tracking-wider block mb-1">Sampai Tanggal*</label>
+                            <input type="date" id="submission-date-end" onchange="calculateLeaveDuration()" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50/80 outline-none focus:border-emerald-600 focus:bg-white font-medium text-gray-800 transition shadow-xs" />
                         </div>
                     </div>
 
-                    <div>
-                        <label id="request-date-label" class="font-bold text-gray-700 text-[11px] uppercase tracking-wider block mb-1">Pilih Tanggal Pengajuan*</label>
-                        <input type="date" id="submission-date" required class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50/80 outline-none focus:border-emerald-600 focus:bg-white font-medium text-gray-800 transition shadow-xs" />
+                    <div id="leave-duration-badge" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-800 p-2 rounded-xl text-center font-bold text-[11px]">
+                        Total Cuti: <span id="leave-days-count">1</span> Hari
                     </div>
 
                     <div>
                         <label class="font-bold text-gray-700 text-[11px] uppercase tracking-wider block mb-1">Alasan / Keterangan Tambahan*</label>
-                        <textarea id="submission-reason" required placeholder="Tulis alasan detail atau keterangan pelengkap di sini..." rows="3" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50/80 outline-none focus:border-emerald-600 focus:bg-white text-gray-800 transition shadow-xs"></textarea>
+                        <textarea id="submission-reason" required placeholder="Tulis alasan detail atau keterangan pelengkap di sini..." rows="2" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50/80 outline-none focus:border-emerald-600 focus:bg-white text-gray-800 transition shadow-xs"></textarea>
+                    </div>
+
+                    <!-- Input Photo Dokumen Lampiran khusus Cuti/Izin -->
+                    <div id="request-document-container" class="space-y-1">
+                        <label class="font-bold text-gray-700 text-[11px] uppercase tracking-wider block">Foto Dokumen Pendukung (Surat Dokter / Lampiran)</label>
+                        <label class="border-2 border-dashed border-emerald-300 bg-emerald-50/50 hover:bg-emerald-100/50 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer transition text-center space-y-1">
+                            <i class="fa-solid fa-cloud-arrow-up text-emerald-700 text-xl"></i>
+                            <span id="file-doc-name-label" class="text-[10px] font-bold text-emerald-900">Pilih / Ambil Foto Dokumen</span>
+                            <span class="text-[9px] text-gray-400">(Opsional/Format Gambar)</span>
+                            <input type="file" id="submission-doc-file" accept="image/*" class="hidden" onchange="previewDocumentFile(event)" />
+                        </label>
                     </div>
                     
-                    <button type="submit" id="btn-submit-request" class="w-full bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-800 hover:to-teal-900 text-white font-bold py-3 rounded-xl transition shadow-lg text-xs mt-3 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2">
+                    <button type="submit" id="btn-submit-request" class="w-full bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-800 hover:to-teal-900 text-white font-bold py-3 rounded-xl transition shadow-lg text-xs mt-2 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2">
                         <i class="fa-solid fa-paper-plane"></i> Kirim Permohonan
                     </button>
                 </form>
@@ -960,6 +1013,8 @@
         let allShiftsList = [];
         let userAssignedShift = null;
         let selectedRosterTargetEmail = null;
+        let allEmployeesListForExport = [];
+        let selectedDocBase64 = null;
 
         function isUserSuperAdmin() {
             return (currentUserEmail === 'mastrisnocom@gmail.com' || (currentUserData && currentUserData.jabatan === 'Super Admin'));
@@ -1174,9 +1229,16 @@
             }
             initGeolocation();
             fetchLatestEarthquakeBMKG();
+            
+            // Set Default Tanggal Filter Export (Awal Bulan s/d Hari Ini)
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            const today = now.toISOString().split('T')[0];
+            document.getElementById('export-date-from').value = firstDay;
+            document.getElementById('export-date-to').value = today;
         });
 
-        // ================= LOGIKA SLIP GAJI (MEMBER & ADMIN) =================
+        // ================= LOGIKA SLIP GAJI =================
         function formatRupiah(number) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number || 0);
         }
@@ -1440,7 +1502,7 @@
             } catch(e) { await customAlert('Gagal menghapus: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
-        // ================= LOGIKA FORM REQUEST =================
+        // ================= LOGIKA FORM REQUEST CUTI & DOKUMEN FOTO =================
         async function openRequestModal(type) {
             if (!currentUser) {
                 await customAlert('Akses Ditolak: Anda belum login!', 'Peringatan', 'fa-lock', 'bg-red-100 text-red-700');
@@ -1452,41 +1514,55 @@
             document.getElementById('request-modal-title').innerText = `Pengajuan ${type}`;
             document.getElementById('request-modal-subtitle').innerText = `Oleh: ${currentUser} (${currentUserEmail})`;
             document.getElementById('submission-reason').value = '';
+            document.getElementById('file-doc-name-label').innerText = "Pilih / Ambil Foto Dokumen";
+            selectedDocBase64 = null;
             
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('submission-date').value = todayStr;
+            document.getElementById('submission-date-end').value = todayStr;
             
             const labelEl = document.getElementById('request-option-label');
             const selectEl = document.getElementById('submission-option-select');
             const dateLabelEl = document.getElementById('request-date-label');
+            const dateEndContainer = document.getElementById('request-date-end-container');
+            const leaveBadge = document.getElementById('leave-duration-badge');
             
             if (type === 'Request Cuti') {
                 labelEl.innerText = "Pilih Jenis Cuti*";
-                dateLabelEl.innerText = "Pilih Tanggal Mulai Cuti*";
+                dateLabelEl.innerText = "Mulai Tanggal*";
+                dateEndContainer.classList.remove('hidden');
+                leaveBadge.classList.remove('hidden');
+                calculateLeaveDuration();
+
                 selectEl.innerHTML = `
                     <option value="Cuti Tahunan">Cuti Tahunan</option>
-                    <option value="Cuti Sakit">Cuti Sakit (Perlu Bukti/Surat Dokter)</option>
+                    <option value="Cuti Sakit">Cuti Sakit (Perlu Surat Dokter)</option>
                     <option value="Cuti Melahirkan / Bersalin">Cuti Melahirkan / Bersalin</option>
                     <option value="Cuti Izin Khusus (Pernikahan / Kedukaan)">Cuti Izin Khusus (Nikah / Duka)</option>
                     <option value="Cuti Keagamaan (Umroh / Haji)">Cuti Keagamaan (Umroh / Haji)</option>
                 `;
-            } else if (type === 'Request Lembur') {
-                labelEl.innerText = "Pilih Kategori Lembur*";
-                dateLabelEl.innerText = "Pilih Tanggal Lembur*";
-                selectEl.innerHTML = `
-                    <option value="Lembur Hari Kerja (Setelah Jam Kantor)">Lembur Hari Kerja (Hari Biasa)</option>
-                    <option value="Lembur Hari Libur / Akhir Pekan">Lembur Hari Libur / Weekend</option>
-                    <option value="Lembur Panggilan Darurat (On-Call Tugas)">Lembur Panggilan Darurat (On-Call)</option>
-                `;
-            } else if (type === 'Request Absensi') {
-                labelEl.innerText = "Pilih Jenis Kendala Absen*";
-                dateLabelEl.innerText = "Pilih Tanggal Absen Bermasalah*";
-                selectEl.innerHTML = `
-                    <option value="Lupa Melakukan Clock In / Clock Out">Lupa Melakukan Clock In / Out</option>
-                    <option value="Kendala Aplikasi / Error Kamera / GPS HP">Kendala Aplikasi / Kamera / GPS HP</option>
-                    <option value="Dinas Luar Kota / Tugas Lapangan Remote">Dinas Luar Kota / Lapangan Remote</option>
-                    <option value="Izin Datang Terlambat (Ada Keperluan Mendesak)">Izin Datang Terlambat (Mendesak)</option>
-                `;
+            } else {
+                dateEndContainer.classList.add('hidden');
+                leaveBadge.classList.add('hidden');
+
+                if (type === 'Request Lembur') {
+                    labelEl.innerText = "Pilih Kategori Lembur*";
+                    dateLabelEl.innerText = "Pilih Tanggal Lembur*";
+                    selectEl.innerHTML = `
+                        <option value="Lembur Hari Kerja (Setelah Jam Kantor)">Lembur Hari Kerja (Hari Biasa)</option>
+                        <option value="Lembur Hari Libur / Akhir Pekan">Lembur Hari Libur / Weekend</option>
+                        <option value="Lembur Panggilan Darurat (On-Call Tugas)">Lembur Panggilan Darurat (On-Call)</option>
+                    `;
+                } else if (type === 'Request Absensi') {
+                    labelEl.innerText = "Pilih Jenis Kendala Absen*";
+                    dateLabelEl.innerText = "Pilih Tanggal Absen Bermasalah*";
+                    selectEl.innerHTML = `
+                        <option value="Lupa Melakukan Clock In / Clock Out">Lupa Melakukan Clock In / Out</option>
+                        <option value="Kendala Aplikasi / Error Kamera / GPS HP">Kendala Aplikasi / Kamera / GPS HP</option>
+                        <option value="Dinas Luar Kota / Tugas Lapangan Remote">Dinas Luar Kota / Lapangan Remote</option>
+                        <option value="Izin Datang Terlambat (Ada Keperluan Mendesak)">Izin Datang Terlambat (Mendesak)</option>
+                    `;
+                }
             }
             
             document.getElementById('request-submission-modal').classList.remove('hidden');
@@ -1496,28 +1572,75 @@
             document.getElementById('request-submission-modal').classList.add('hidden');
         }
 
+        function calculateLeaveDuration() {
+            const startDateVal = document.getElementById('submission-date').value;
+            const endDateVal = document.getElementById('submission-date-end').value;
+
+            if (startDateVal && endDateVal) {
+                const start = new Date(startDateVal);
+                const end = new Date(endDateVal);
+                const diffTime = end - start;
+                let days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+                if (days < 1) days = 1;
+                document.getElementById('leave-days-count').innerText = days;
+            }
+        }
+
+        async function previewDocumentFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('file-doc-name-label').innerText = `📄 ${file.name}`;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const compressed = await compressImage(e.target.result, 1000, 300 * 1024);
+                selectedDocBase64 = compressed;
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function submitFormPengajuan(event) {
             event.preventDefault();
             const type = document.getElementById('submission-type').value;
             const selectedOption = document.getElementById('submission-option-select').value;
             const selectedDate = document.getElementById('submission-date').value;
+            const selectedDateEnd = document.getElementById('submission-date-end').value;
             const textReason = document.getElementById('submission-reason').value.trim();
             const btn = document.getElementById('btn-submit-request');
 
             if (!selectedDate) return await customAlert('Silakan tentukan tanggal pengajuan Anda!', 'Informasi', 'fa-calendar');
             if (!textReason) return await customAlert('Silakan isi keterangan alasan detail pengajuan Anda!', 'Informasi', 'fa-pen');
 
-            const finalReason = `[Kategori: ${selectedOption}] [Tanggal: ${selectedDate}] - Ket: ${textReason}`;
+            let leaveDays = 1;
+            let finalReason = `[Kategori: ${selectedOption}] [Tanggal: ${selectedDate}] - Ket: ${textReason}`;
+
+            if (type === 'Request Cuti') {
+                if (!selectedDateEnd) return await customAlert('Silakan tentukan tanggal akhir cuti!', 'Informasi', 'fa-calendar');
+                
+                const start = new Date(selectedDate);
+                const end = new Date(selectedDateEnd);
+                if (end < start) return await customAlert('Tanggal cuti sampai tidak boleh sebelum tanggal mulai!', 'Informasi', 'fa-triangle-exclamation');
+
+                leaveDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                finalReason = `[${selectedOption}] [${selectedDate} s/d ${selectedDateEnd}] (${leaveDays} Hari) - Ket: ${textReason}`;
+            }
 
             const userRole = currentUserData.jabatan || 'Teknisi/User';
             let targetApprover = 'Kepala Unit';
             if (userRole === 'Kepala Unit') targetApprover = 'Kepala Kanwil';
             else if (userRole === 'Kepala Kanwil') targetApprover = 'Kepala Divisi';
 
-            btn.innerText = 'Mengirim...';
+            btn.innerText = 'Mengirim & Mengunggah...';
             btn.disabled = true;
 
             try {
+                let uploadedDocUrl = '';
+                if (selectedDocBase64) {
+                    uploadedDocUrl = await uploadSelfieToStorage(currentUserEmail, selectedDocBase64);
+                }
+
                 const { error } = await supabaseClient.from('request_absensi').insert([{
                     user_email: currentUserEmail,
                     nama: currentUser,
@@ -1525,12 +1648,15 @@
                     jenis_request: type,
                     alasan: finalReason,
                     target_approver: targetApprover,
-                    status: 'Pending'
+                    status: 'Pending',
+                    cuti_sampai: (type === 'Request Cuti') ? selectedDateEnd : null,
+                    durasi_hari: leaveDays,
+                    foto_dokumen: uploadedDocUrl
                 }]);
 
                 if (error) throw error;
 
-                await customAlert(`Permohonan ${type} untuk tanggal ${selectedDate} berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`, 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
+                await customAlert(`Permohonan ${type} berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`, 'Berhasil', 'fa-circle-check', 'bg-emerald-100 text-emerald-700');
                 closeRequestModal();
             } catch(e) {
                 await customAlert('Gagal mengirim permohonan: ' + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700');
@@ -1776,24 +1902,70 @@
             } catch(e) { await customAlert("Gagal menyimpan roster periode: " + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
-        // FUNGSI EXPORT DATA ABSENSI UNIT KE CSV (EXCEL)
-        async function exportUnitAttendanceCSV() {
-            if (!currentUserData.unit || currentUserData.unit === 'Belum dipilih') {
-                await customAlert('Unit Kantor Anda belum ditentukan. Pilih/isi Unit Kantor di Profil Saya terlebih dahulu!', 'Informasi', 'fa-building');
-                return;
-            }
+        // ================= LOGIKA EXPORT LOG TERFILTER TANGGAL & CHECKBOX KARYAWAN =================
+        async function populateUsersCheckboxForExport() {
+            const container = document.getElementById('export-users-checkbox-container');
+            const isSuper = isUserSuperAdmin();
+            const myUnit = currentUserData.unit || 'Belum dipilih';
 
             try {
-                let query = supabaseClient.from('attendance_logs').select('*');
-                if (!isUserSuperAdmin()) {
-                    query = query.eq('unit', currentUserData.unit);
+                let query = supabaseClient.from('profiles').select('*');
+                if (!isSuper) query = query.eq('unit', myUnit);
+
+                const { data } = await query.order('full_name', { ascending: true });
+                allEmployeesListForExport = data || [];
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<p class="text-gray-400 text-center py-2 text-[10px]">Tidak ada data karyawan</p>`;
+                    return;
                 }
+
+                container.innerHTML = data.map((u, idx) => `
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                        <input type="checkbox" class="export-user-chk rounded accent-emerald-700" value="${u.user_email}" checked onchange="checkExportUsersState()" />
+                        <span class="font-medium text-gray-800 text-[11px] truncate">${u.full_name} (${u.jabatan || 'Teknisi'})</span>
+                    </label>
+                `).join('');
+            } catch(e) { container.innerHTML = `<p class="text-rose-500 text-center py-2 text-[10px]">Gagal memuat list karyawan</p>`; }
+        }
+
+        function toggleSelectAllExportUsers(mainChk) {
+            const checkboxes = document.querySelectorAll('.export-user-chk');
+            checkboxes.forEach(chk => chk.checked = mainChk.checked);
+        }
+
+        function checkExportUsersState() {
+            const checkboxes = document.querySelectorAll('.export-user-chk');
+            const mainChk = document.getElementById('export-check-all-users');
+            const allChecked = Array.from(checkboxes).every(c => c.checked);
+            mainChk.checked = allChecked;
+        }
+
+        function getSelectedExportUserEmails() {
+            const checkboxes = document.querySelectorAll('.export-user-chk:checked');
+            return Array.from(checkboxes).map(c => c.value);
+        }
+
+        // FUNGSI EXPORT DATA ABSENSI KE CSV (EXCEL) TERFILTER
+        async function exportUnitAttendanceCSV() {
+            const dateFrom = document.getElementById('export-date-from').value;
+            const dateTo = document.getElementById('export-date-to').value;
+            const selectedEmails = getSelectedExportUserEmails();
+
+            if (!dateFrom || !dateTo) return await customAlert('Silakan pilih rentang tanggal mulai dan tanggal selesai!', 'Informasi', 'fa-calendar');
+            if (selectedEmails.length === 0) return await customAlert('Pilih minimal satu nama karyawan untuk diexport!', 'Informasi', 'fa-user-check');
+
+            try {
+                let query = supabaseClient.from('attendance_logs').select('*')
+                    .gte('date_recorded', dateFrom)
+                    .lte('date_recorded', dateTo)
+                    .in('user_email', selectedEmails);
 
                 const { data, error } = await query.order('timestamp', { ascending: false });
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    await customAlert('Belum ada data absensi untuk unit ' + currentUserData.unit, 'Kosong', 'fa-folder-open');
+                    await customAlert('Tidak ada riwayat absensi pada rentang tanggal dan nama karyawan yang dipilih.', 'Data Kosong', 'fa-folder-open');
                     return;
                 }
 
@@ -1808,31 +1980,33 @@
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
                 link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `Rekap_Absensi_${currentUserData.unit.replace(/\s+/g, '_')}_${Date.now()}.csv`);
+                link.setAttribute("download", `Rekap_Absensi_${dateFrom}_s/d_${dateTo}.csv`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
             } catch(e) { await customAlert("Gagal export CSV: " + e.message, 'Gagal', 'fa-circle-xmark', 'bg-red-100 text-red-700'); }
         }
 
-        // FUNGSI EXPORT DATA ABSENSI UNIT KE PDF
+        // FUNGSI EXPORT DATA ABSENSI KE PDF TERFILTER
         async function exportUnitAttendancePDF() {
-            if (!currentUserData.unit || currentUserData.unit === 'Belum dipilih') {
-                await customAlert('Unit Kantor Anda belum ditentukan. Pilih/isi Unit Kantor di Profil Saya terlebih dahulu!', 'Informasi', 'fa-building');
-                return;
-            }
+            const dateFrom = document.getElementById('export-date-from').value;
+            const dateTo = document.getElementById('export-date-to').value;
+            const selectedEmails = getSelectedExportUserEmails();
+
+            if (!dateFrom || !dateTo) return await customAlert('Silakan pilih rentang tanggal mulai dan tanggal selesai!', 'Informasi', 'fa-calendar');
+            if (selectedEmails.length === 0) return await customAlert('Pilih minimal satu nama karyawan untuk diexport!', 'Informasi', 'fa-user-check');
 
             try {
-                let query = supabaseClient.from('attendance_logs').select('*');
-                if (!isUserSuperAdmin()) {
-                    query = query.eq('unit', currentUserData.unit);
-                }
+                let query = supabaseClient.from('attendance_logs').select('*')
+                    .gte('date_recorded', dateFrom)
+                    .lte('date_recorded', dateTo)
+                    .in('user_email', selectedEmails);
 
                 const { data, error } = await query.order('timestamp', { ascending: false });
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    await customAlert('Belum ada data absensi untuk unit ' + currentUserData.unit, 'Kosong', 'fa-folder-open');
+                    await customAlert('Tidak ada riwayat absensi pada rentang tanggal dan nama karyawan yang dipilih.', 'Data Kosong', 'fa-folder-open');
                     return;
                 }
 
@@ -1851,7 +2025,7 @@
                 printWindow.document.write(`
                     <html>
                     <head>
-                        <title>Rekap Absensi - ${currentUserData.unit}</title>
+                        <title>Rekap Absensi (${dateFrom} - ${dateTo})</title>
                         <style>
                             body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
                             h2 { text-align: center; margin-bottom: 5px; color: #0A4D3C; }
@@ -1862,7 +2036,7 @@
                     </head>
                     <body>
                         <h2>REKAPITULASI ABSENSI KARYAWAN</h2>
-                        <p>Unit Kantor: <strong>${currentUserData.unit}</strong> | Dicetak Tanggal: ${new Date().toLocaleDateString()}</p>
+                        <p>Periode: <strong>${dateFrom}</strong> s/d <strong>${dateTo}</strong> | Total Record: ${data.length} | Dicetak: ${new Date().toLocaleDateString()}</p>
                         <table>
                             <thead>
                                 <tr>
@@ -2732,14 +2906,22 @@
                 }
 
                 listEl.innerHTML = data.map(req => `
-                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 space-y-2">
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 space-y-2.5">
                         <div class="flex justify-between items-start">
                             <div>
                                 <h4 class="font-bold text-xs text-gray-800">${req.nama} (${req.jabatan})</h4>
                                 <p class="text-[10px] text-amber-700 font-semibold">${req.jenis_request} - ${req.alasan}</p>
+                                ${req.cuti_sampai ? `<p class="text-[9px] text-emerald-800 font-bold mt-0.5"><i class="fa-regular fa-calendar-days mr-1"></i> Durasi Cuti: ${req.durasi_hari || 1} Hari (s/d ${req.cuti_sampai})</p>` : ''}
                             </div>
-                            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[9px] font-bold">Pending (${req.target_approver})</span>
+                            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[9px] font-bold shrink-0">Pending (${req.target_approver})</span>
                         </div>
+
+                        ${req.foto_dokumen ? `
+                            <a href="${req.foto_dokumen}" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] bg-emerald-50 text-emerald-800 font-bold px-2.5 py-1 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition">
+                                <i class="fa-solid fa-paperclip"></i> Lihat Foto Lampiran Dokumen
+                            </a>
+                        ` : ''}
+
                         <div class="flex gap-2 pt-1 border-t">
                             <button onclick="approveRequest(${req.id}, '${req.user_email}', '${req.nama}', '${req.jenis_request}', '${req.jabatan}')" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-1.5 rounded-lg text-xs transition cursor-pointer">Setujui (Approve)</button>
                             <button onclick="rejectRequest(${req.id})" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-xs transition cursor-pointer">Tolak</button>
@@ -3092,6 +3274,7 @@
                     renderProfileData();
                     loadUserShiftCardInfo();
                     checkUnreadMessages();
+                    populateUsersCheckboxForExport();
 
                     btnContainer.innerHTML = `
                         <button onclick="logout()" class="bg-red-500/30 hover:bg-red-600/50 text-red-100 text-xs font-semibold py-2 px-3.5 rounded-full border border-red-400/40 transition flex items-center gap-1.5 cursor-pointer shadow-sm backdrop-blur-md">
@@ -3143,7 +3326,10 @@
                 activeNav.querySelector('span:not(#inbox-badge)').className = "text-[10px] font-bold";
             }
 
-            if (tab === 'log') fetchAttendanceLogs();
+            if (tab === 'log') {
+                fetchAttendanceLogs();
+                populateUsersCheckboxForExport();
+            }
             if (tab === 'karyawan') fetchAllEmployees();
             if (tab === 'inbox') fetchInboxMessages();
             if (tab === 'profile') renderProfileData();
