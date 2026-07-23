@@ -102,7 +102,7 @@
             <!-- 2. ABSEN LOG TAB -->
             <div id="log-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xl font-bold text-gray-800">Riwayat Absen Log</h2>
+                    <h2 class="text-xl font-bold text-gray-800">Riwayat Absen Saya</h2>
                     <button onclick="fetchAttendanceLogs()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-800 transition active:scale-95">
                         <i class="fa-solid fa-rotate mr-1"></i> Refresh
                     </button>
@@ -125,7 +125,7 @@
                 </div>
             </div>
 
-            <!-- 4. KARYAWAN / TIM KAMI TAB -->
+            <!-- 4. KARYAWAN TAB -->
             <div id="karyawan-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xl font-bold text-gray-800">Anggota Tim Operational</h2>
@@ -611,13 +611,11 @@
             }
         }
 
-        // AMBIL SEMUA ANGGOTA TIM TERDAFTAR (TAMPILKAN SEMUA REGISTRASI)
         async function fetchAllEmployees() {
             const listEl = document.getElementById('employee-list-container');
             listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat anggota tim...</p>';
 
             try {
-                // TAMPILKAN SEMUA AKUN YANG DIDAFTARKAN KE PROFILES
                 const { data, error } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
 
@@ -1025,13 +1023,30 @@
             `).join('');
         }
 
+        // FUNGSI ABSEN LOG DENGAN FILTER KHUSUS USER LOGIN
         async function fetchAttendanceLogs() {
             const logList = document.getElementById('log-list');
             logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data...</p>';
 
+            if (!currentUserEmail) {
+                logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Silakan login terlebih dahulu.</p>';
+                return;
+            }
+
             try {
-                const { data } = await supabaseClient.from('attendance_logs').select('*').order('timestamp', { ascending: false });
-                if (!data || data.length === 0) { logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi.</p>'; return; }
+                // FILTER HANYA LOG MILIK USER YANG LOGIN (EQ user_email)
+                const { data, error } = await supabaseClient
+                    .from('attendance_logs')
+                    .select('*')
+                    .eq('user_email', currentUserEmail)
+                    .order('timestamp', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) { 
+                    logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi Anda.</p>'; 
+                    return; 
+                }
 
                 logList.innerHTML = data.map(item => `
                     <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
@@ -1090,7 +1105,7 @@
                     await doSignUp(email, password, fullName);
                     alert('Registrasi berhasil! Akun Anda membutuhkan persetujuan Super Admin sebelum dapat digunakan untuk login.');
                     toggleAuthMode();
-                    fetchAllEmployees(); // OTOMATIS TAMPILKAN USER DIDAFTARKAN
+                    fetchAllEmployees();
                 }
             } catch (error) {
                 alert("Gagal: " + (error.message || "Email/Password salah!"));
@@ -1150,7 +1165,6 @@
                 body: JSON.stringify({ email, password, data: { full_name: fullName, jabatan: roleDefault } })
             });
 
-            // PASTI SIMPAN KE TABEL PROFILES AGAR LANGSUNG MASUK MENU TIM KAMI
             await supabaseClient.from('profiles').upsert([{
                 user_email: email,
                 full_name: fullName,
