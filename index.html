@@ -102,7 +102,7 @@
             <!-- 2. ABSEN LOG TAB -->
             <div id="log-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xl font-bold text-gray-800">Riwayat Absen Saya</h2>
+                    <h2 class="text-xl font-bold text-gray-800" id="log-section-title">Riwayat Absen Log</h2>
                     <button onclick="fetchAttendanceLogs()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-800 transition active:scale-95">
                         <i class="fa-solid fa-rotate mr-1"></i> Refresh
                     </button>
@@ -249,7 +249,7 @@
                         </div>
                     </div>
 
-                    <!-- SUPER ADMIN & KEPALA UNIT SYSTEM SETTINGS CONTAINER -->
+                    <!-- SUPER ADMIN CONTAINER -->
                     <div id="superadmin-menu-container" class="hidden pt-2 border-t space-y-2">
                         <button onclick="openSystemSettingsModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold py-2.5 rounded-xl transition text-xs border border-amber-300 cursor-pointer flex items-center justify-center gap-2">
                             <i class="fa-solid fa-gears text-amber-700"></i> Pengaturan Sistem & Shift
@@ -402,7 +402,6 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: MENGATUR JADWAL SHIFT DENGAN KODE MAKSIMAL 3 HURUF -->
                 <div id="adm-sec-jadwal" class="hidden space-y-3 text-xs">
                     <h4 class="font-bold text-gray-700" id="schedule-form-title">Tambah Shift Kerja Baru</h4>
                     <input type="hidden" id="sch-edit-id" value="" />
@@ -536,16 +535,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
                 checkSession();
-                
                 supabaseClient.auth.onAuthStateChange((event, session) => {
                     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') checkSession();
                     else if (event === 'SIGNED_OUT') clearUserState();
                 });
-
                 fetchOfficeLocations();
             }
             initGeolocation();
         });
+
+        // PEMERIKSAAN PERAN SUPER ADMIN UNTUK BEBAS TANPA BATAS
+        function isUserSuperAdmin() {
+            return (currentUserEmail === 'mastrisnocom@gmail.com' || (currentUserData && currentUserData.jabatan === 'Super Admin'));
+        }
 
         // ================= FUNGSI UNTUK KOMPRESI GAMBAR (DI BAWAH 200 KB) =================
         function compressImage(imageSource, maxDimension = 800, maxSizeBytes = 200 * 1024) {
@@ -553,24 +555,15 @@
                 const img = new Image();
                 img.crossOrigin = "Anonymous";
                 img.onload = function() {
-                    let width = img.width;
-                    let height = img.height;
-
+                    let width = img.width, height = img.height;
                     if (width > height) {
-                        if (width > maxDimension) {
-                            height = Math.round((height * maxDimension) / width);
-                            width = maxDimension;
-                        }
+                        if (width > maxDimension) { height = Math.round((height * maxDimension) / width); width = maxDimension; }
                     } else {
-                        if (height > maxDimension) {
-                            width = Math.round((width * maxDimension) / height);
-                            height = maxDimension;
-                        }
+                        if (height > maxDimension) { width = Math.round((width * maxDimension) / height); height = maxDimension; }
                     }
 
                     const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
+                    canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
@@ -581,14 +574,13 @@
                         quality -= 0.1;
                         dataUrl = canvas.toDataURL('image/jpeg', quality);
                     }
-
                     resolve(dataUrl);
                 };
                 img.src = imageSource;
             });
         }
 
-        // ================= KAMERA & SELFIE VERIFIKASI CLOCK IN =================
+        // ================= KAMERA & SELFIE CLOCK IN =================
         async function prepareClockIn() {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
@@ -596,17 +588,22 @@
                 return;
             }
 
+            const isSuper = isUserSuperAdmin();
             const todayStr = new Date().toISOString().split('T')[0];
-            try {
-                const { data: logsToday } = await supabaseClient
-                    .from('attendance_logs').select('*')
-                    .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
 
-                if ((logsToday || []).some(l => l.action_type === 'Clock In')) {
-                    alert('Anda sudah melakukan Clock In hari ini!');
-                    return;
-                }
-            } catch(e) {}
+            // Pengecekan Absensi Ganda (Diabaikan Khusus Super Admin)
+            if (!isSuper) {
+                try {
+                    const { data: logsToday } = await supabaseClient
+                        .from('attendance_logs').select('*')
+                        .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
+
+                    if ((logsToday || []).some(l => l.action_type === 'Clock In')) {
+                        alert('Anda sudah melakukan Clock In hari ini!');
+                        return;
+                    }
+                } catch(e) {}
+            }
 
             document.getElementById('selfie-modal').classList.remove('hidden');
             const video = document.getElementById('selfie-video');
@@ -726,6 +723,7 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
+        // AKSI ABSENSI (SUPER ADMIN BEBAS LOKASI GPS & DUA KALI ABSEN)
         async function recordAttendance(actionType, selfieBase64 = null) {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
@@ -733,9 +731,10 @@
                 return;
             }
 
+            const isSuper = isUserSuperAdmin();
             const todayStr = new Date().toISOString().split('T')[0];
 
-            if (actionType === 'Clock Out') {
+            if (actionType === 'Clock Out' && !isSuper) {
                 try {
                     const { data: logsToday } = await supabaseClient
                         .from('attendance_logs').select('*')
@@ -758,7 +757,8 @@
 
             const userRole = currentUserData.jabatan || 'Teknisi/User';
 
-            if (isOutOfRange) {
+            // ATURAN LUAR JANGKAUAN DIBABAS / DIABAIKAN KHUSUS SUPER ADMIN
+            if (isOutOfRange && !isSuper) {
                 let targetApprover = 'Kepala Unit';
                 if (userRole === 'Kepala Unit') targetApprover = 'Kepala Kanwil';
                 else if (userRole === 'Kepala Kanwil') targetApprover = 'Kepala Divisi';
@@ -968,7 +968,6 @@
             } catch(e) {}
         }
 
-        // FUNGSI HAPUS SATU PESAN
         async function deleteSingleMessage(msgId) {
             if (!confirm("Hapus pesan ini secara permanen?")) return;
             try {
@@ -993,7 +992,7 @@
             } catch(e) { alert('Gagal mengirim: ' + e.message); }
         }
 
-        // ================= SUPER ADMIN & KEPALA UNIT SYSTEM SETTINGS =================
+        // ================= SUPER ADMIN & KEPALA UNIT =================
         function openSystemSettingsModal() {
             renderAdminOfficeList();
             fetchPendingUserRegistrations();
@@ -1070,7 +1069,6 @@
             } catch(e) { alert('Gagal: ' + e.message); }
         }
 
-        // ================= KELOLA SHIFT WORK SCHEDULE (MAX KODE 3 HURUF, EDIT & DELETE) =================
         async function saveScheduleShift() {
             const editId = document.getElementById('sch-edit-id').value;
             const code = document.getElementById('sch-code').value.trim().toUpperCase();
@@ -1083,14 +1081,12 @@
 
             try {
                 if (editId) {
-                    // Update Shift
                     const { error } = await supabaseClient.from('schedules').update({
                         shift_code: code, shift_name: name, time_in: timeIn, time_out: timeOut
                     }).eq('id', editId);
                     if (error) throw error;
                     alert('Jadwal shift berhasil diperbarui!');
                 } else {
-                    // Insert Shift Baru
                     const { error } = await supabaseClient.from('schedules').insert([{
                         shift_code: code, shift_name: name, time_in: timeIn, time_out: timeOut
                     }]);
@@ -1160,7 +1156,6 @@
             } catch(e) {}
         }
 
-        // ================= KELOLA LOKASI UNIT KANTOR & HAPUS KANTOR =================
         async function addNewOfficeUnit() {
             const name = document.getElementById('admin-unit-name').value.trim();
             const lat = parseFloat(document.getElementById('admin-unit-lat').value);
@@ -1203,8 +1198,10 @@
             `).join('');
         }
 
+        // AMBIL ABSEN LOG (SUPER ADMIN BISA DIBUATKAN LIHAT GLOBAL)
         async function fetchAttendanceLogs() {
             const logList = document.getElementById('log-list');
+            const logTitle = document.getElementById('log-section-title');
             logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data...</p>';
 
             if (!currentUserEmail) {
@@ -1212,12 +1209,22 @@
                 return;
             }
 
+            const isSuper = isUserSuperAdmin();
+
             try {
-                const { data, error } = await supabaseClient.from('attendance_logs').select('*')
-                    .eq('user_email', currentUserEmail).order('timestamp', { ascending: false });
+                let query = supabaseClient.from('attendance_logs').select('*');
+                
+                if (isSuper) {
+                    logTitle.innerText = "Riwayat Absen Global (Super Admin)";
+                } else {
+                    logTitle.innerText = "Riwayat Absen Saya";
+                    query = query.eq('user_email', currentUserEmail);
+                }
+
+                const { data, error } = await query.order('timestamp', { ascending: false });
 
                 if (error) throw error;
-                if (!data || data.length === 0) { logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi Anda.</p>'; return; }
+                if (!data || data.length === 0) { logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi.</p>'; return; }
 
                 logList.innerHTML = data.map(item => `
                     <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
@@ -1245,7 +1252,7 @@
             try {
                 let query = supabaseClient.from('request_absensi').select('*').eq('status', 'Pending');
                 
-                if (currentUserEmail !== 'mastrisnocom@gmail.com' && userRole !== 'Kepala Divisi' && userRole !== 'Super Admin') {
+                if (!isUserSuperAdmin() && userRole !== 'Kepala Divisi') {
                     query = query.eq('target_approver', userRole);
                 }
 
@@ -1318,9 +1325,9 @@
         function openEditFieldModal(fieldKey, title) {
             if (!currentUser) { openAuthModal(); return; }
 
-            const isSuperAdmin = (currentUserEmail === 'mastrisnocom@gmail.com' || currentUserData.jabatan === 'Super Admin');
+            const isSuper = isUserSuperAdmin();
 
-            if ((fieldKey === 'jabatan' || fieldKey === 'unit') && !isSuperAdmin) {
+            if ((fieldKey === 'jabatan' || fieldKey === 'unit') && !isSuper) {
                 alert('Akses Ditolak: Hanya Super Admin yang dapat mengubah Jabatan atau Unit Kantor!');
                 return;
             }
@@ -1398,7 +1405,7 @@
                 role = 'Super Admin'; currentUserData.jabatan = 'Super Admin';
             }
 
-            const isSuperAdmin = (currentUserEmail === 'mastrisnocom@gmail.com' || role === 'Super Admin');
+            const isSuper = isUserSuperAdmin();
             const isKepalaUnit = (role === 'Kepala Unit');
 
             document.getElementById('prof-nama').innerText = name;
@@ -1415,16 +1422,15 @@
 
             const btnEditRole = document.getElementById('btn-edit-role');
             const btnEditUnit = document.getElementById('btn-edit-unit');
-            if (btnEditRole) isSuperAdmin ? btnEditRole.classList.remove('hidden') : btnEditRole.classList.add('hidden');
-            if (btnEditUnit) isSuperAdmin ? btnEditUnit.classList.remove('hidden') : btnEditUnit.classList.add('hidden');
+            if (btnEditRole) isSuper ? btnEditRole.classList.remove('hidden') : btnEditRole.classList.add('hidden');
+            if (btnEditUnit) isSuper ? btnEditUnit.classList.remove('hidden') : btnEditUnit.classList.add('hidden');
 
-            // AKSES PENGATURAN SISTEM DAN SHIFT UNTUK SUPER ADMIN DAN KEPALA UNIT
             const superAdminContainer = document.getElementById('superadmin-menu-container');
-            if (isSuperAdmin || isKepalaUnit) superAdminContainer.classList.remove('hidden');
+            if (isSuper || isKepalaUnit) superAdminContainer.classList.remove('hidden');
             else superAdminContainer.classList.add('hidden');
 
             const approvalMenu = document.getElementById('menu-approval-container');
-            if (isSuperAdmin || ['Kepala Divisi', 'Kepala Kanwil', 'Kepala Unit'].includes(role)) {
+            if (isSuper || ['Kepala Divisi', 'Kepala Kanwil', 'Kepala Unit'].includes(role)) {
                 approvalMenu.classList.remove('hidden');
             } else { approvalMenu.classList.add('hidden'); }
 
