@@ -336,7 +336,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL EDIT FIELD PROFIL ================= -->
+        <!-- ================= MODAL EDIT FIELD PROFIL SAYA ================= -->
         <div id="edit-field-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative space-y-4">
                 <button onclick="closeEditFieldModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -348,32 +348,83 @@
             </div>
         </div>
 
-        <!-- ================= MODAL EDIT JABATAN & UNIT USER KHUSUS SUPER ADMIN ================= -->
-        <div id="admin-user-edit-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
-            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative space-y-4">
+        <!-- ================= MODAL EDIT PROFIL LENGKAP USER (KHUSUS SUPER ADMIN) ================= -->
+        <div id="admin-user-edit-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
                 <button onclick="closeAdminUserEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                <h3 class="text-base font-bold text-gray-800">Kelola Role & Unit User</h3>
-                <p id="adm-edit-user-email" class="text-xs text-green-700 font-bold truncate">-</p>
+                <h3 class="text-base font-bold text-gray-800">Kelola Profil User (Super Admin)</h3>
+                <p id="adm-edit-user-email" class="text-xs text-green-700 font-bold truncate border-b pb-2">-</p>
                 
-                <div class="space-y-3 text-xs">
+                <div class="space-y-2.5 text-xs max-h-[60vh] overflow-y-auto pr-1">
                     <div>
-                        <label class="font-semibold text-gray-600">Jabatan Role</label>
-                        <select id="adm-select-role" class="w-full border rounded-lg p-2 mt-1 bg-white outline-none">
-                            <option value="Teknisi/User">Teknisi/User</option>
-                            <option value="Kepala Unit">Kepala Unit</option>
-                            <option value="Kepala Kanwil">Kepala Kanwil</option>
-                            <option value="Kepala Divisi">Kepala Divisi</option>
-                            <option value="Super Admin">Super Admin</option>
-                        </select>
+                        <label class="font-semibold text-gray-600">Nama Lengkap</label>
+                        <input type="text" id="adm-edit-fullname" class="w-full border rounded-lg p-2 mt-0.5 outline-none" />
                     </div>
-                    <div>
-                        <label class="font-semibold text-gray-600">Unit Kantor</label>
-                        <select id="adm-select-unit" class="w-full border rounded-lg p-2 mt-1 bg-white outline-none"></select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold text-gray-600">Jabatan Role</label>
+                            <select id="adm-select-role" class="w-full border rounded-lg p-2 mt-0.5 bg-white outline-none">
+                                <option value="Teknisi/User">Teknisi/User</option>
+                                <option value="Kepala Unit">Kepala Unit</option>
+                                <option value="Kepala Kanwil">Kepala Kanwil</option>
+                                <option value="Kepala Divisi">Kepala Divisi</option>
+                                <option value="Super Admin">Super Admin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-gray-600">Unit Kantor</label>
+                            <select id="adm-select-unit" class="w-full border rounded-lg p-2 mt-0.5 bg-white outline-none"></select>
+                        </div>
                     </div>
-                    <button onclick="saveAdminUserEdit()" class="w-full bg-green-700 text-white font-bold py-2.5 rounded-xl transition shadow">
-                        Simpan Perubahan User
-                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold text-gray-600">NIP</label>
+                            <input type="text" id="adm-edit-nip" class="w-full border rounded-lg p-2 mt-0.5 outline-none" />
+                        </div>
+                        <div>
+                            <label class="font-semibold text-gray-600">No. Handphone</label>
+                            <input type="text" id="adm-edit-phone" class="w-full border rounded-lg p-2 mt-0.5 outline-none" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold text-gray-600">Jenis Kelamin</label>
+                            <select id="adm-edit-gender" class="w-full border rounded-lg p-2 mt-0.5 bg-white outline-none">
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-gray-600">Agama</label>
+                            <select id="adm-edit-religion" class="w-full border rounded-lg p-2 mt-0.5 bg-white outline-none">
+                                <option value="Islam">Islam</option>
+                                <option value="Kristen">Kristen</option>
+                                <option value="Katolik">Katolik</option>
+                                <option value="Hindu">Hindu</option>
+                                <option value="Buddha">Buddha</option>
+                                <option value="Konghucu">Konghucu</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold text-gray-600">Status Karyawan</label>
+                            <select id="adm-edit-status" class="w-full border rounded-lg p-2 mt-0.5 bg-white outline-none">
+                                <option value="Tetap">Tetap</option>
+                                <option value="Kontrak">Kontrak</option>
+                                <option value="Magang">Magang</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-gray-600">Tanggal Lahir</label>
+                            <input type="date" id="adm-edit-dob" class="w-full border rounded-lg p-2 mt-0.5 outline-none" />
+                        </div>
+                    </div>
                 </div>
+
+                <button onclick="saveAdminUserEdit()" class="w-full bg-green-700 text-white font-bold py-2.5 rounded-xl transition shadow text-xs mt-2">
+                    Simpan Perubahan Profil
+                </button>
             </div>
         </div>
 
@@ -383,11 +434,11 @@
                 <button onclick="closeSystemSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                 <div class="text-center">
                     <h3 class="text-lg font-bold text-gray-800">Pengaturan Sistem</h3>
-                    <p class="text-gray-500 text-[11px] mt-0.5">Persetujuan Akun, Jadwal Kerja, & Lokasi Unit</p>
+                    <p class="text-gray-500 text-[11px] mt-0.5">Persetujuan Akun, Kelola Profil, Shift & Kantor</p>
                 </div>
 
                 <div class="flex border-b text-[11px] font-semibold">
-                    <button onclick="switchAdminSubTab('acc-approval')" id="adm-tab-acc-approval" class="flex-1 py-2 text-green-700 border-b-2 border-green-700">Persetujuan & Role</button>
+                    <button onclick="switchAdminSubTab('acc-approval')" id="adm-tab-acc-approval" class="flex-1 py-2 text-green-700 border-b-2 border-green-700">Persetujuan & Profil</button>
                     <button onclick="switchAdminSubTab('jadwal')" id="adm-tab-jadwal" class="flex-1 py-2 text-gray-400">Jadwal Shift</button>
                     <button onclick="switchAdminSubTab('lokasi')" id="adm-tab-lokasi" class="flex-1 py-2 text-gray-400">Unit Kantor</button>
                 </div>
@@ -544,12 +595,10 @@
             initGeolocation();
         });
 
-        // PEMERIKSAAN PERAN SUPER ADMIN UNTUK BEBAS TANPA BATAS
         function isUserSuperAdmin() {
             return (currentUserEmail === 'mastrisnocom@gmail.com' || (currentUserData && currentUserData.jabatan === 'Super Admin'));
         }
 
-        // ================= FUNGSI UNTUK KOMPRESI GAMBAR (DI BAWAH 200 KB) =================
         function compressImage(imageSource, maxDimension = 800, maxSizeBytes = 200 * 1024) {
             return new Promise((resolve) => {
                 const img = new Image();
@@ -580,7 +629,6 @@
             });
         }
 
-        // ================= KAMERA & SELFIE CLOCK IN =================
         async function prepareClockIn() {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
@@ -591,7 +639,6 @@
             const isSuper = isUserSuperAdmin();
             const todayStr = new Date().toISOString().split('T')[0];
 
-            // Pengecekan Absensi Ganda (Diabaikan Khusus Super Admin)
             if (!isSuper) {
                 try {
                     const { data: logsToday } = await supabaseClient
@@ -723,7 +770,6 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
-        // AKSI ABSENSI (SUPER ADMIN BEBAS LOKASI GPS & DUA KALI ABSEN)
         async function recordAttendance(actionType, selfieBase64 = null) {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
@@ -757,7 +803,6 @@
 
             const userRole = currentUserData.jabatan || 'Teknisi/User';
 
-            // ATURAN LUAR JANGKAUAN DIBABAS / DIABAIKAN KHUSUS SUPER ADMIN
             if (isOutOfRange && !isSuper) {
                 let targetApprover = 'Kepala Unit';
                 if (userRole === 'Kepala Unit') targetApprover = 'Kepala Kanwil';
@@ -992,7 +1037,7 @@
             } catch(e) { alert('Gagal mengirim: ' + e.message); }
         }
 
-        // ================= SUPER ADMIN & KEPALA UNIT =================
+        // ================= SUPER ADMIN & KEPALA UNIT SYSTEM SETTINGS =================
         function openSystemSettingsModal() {
             renderAdminOfficeList();
             fetchPendingUserRegistrations();
@@ -1026,7 +1071,7 @@
                         </div>
                         <div class="flex gap-1">
                             ${!p.is_approved ? `<button onclick="approveUserAccount('${p.user_email}')" class="bg-green-700 text-white font-bold text-[9px] px-2 py-1 rounded">Approve</button>` : ''}
-                            <button onclick="openAdminUserEditModal('${p.user_email}', '${p.jabatan}', '${p.unit}')" class="bg-amber-600 text-white font-bold text-[9px] px-2 py-1 rounded"><i class="fa-solid fa-pen"></i> Role</button>
+                            <button onclick="openAdminUserEditModal('${p.user_email}')" class="bg-amber-600 text-white font-bold text-[9px] px-2 py-1 rounded"><i class="fa-solid fa-pen"></i> Kelola Profil</button>
                         </div>
                     </div>
                 `).join('');
@@ -1034,31 +1079,66 @@
         }
 
         let currentEditingAdminEmail = null;
-        function openAdminUserEditModal(email, currentRole, currentUnit) {
+        async function openAdminUserEditModal(email) {
             currentEditingAdminEmail = email;
             document.getElementById('adm-edit-user-email').innerText = email;
-            
-            const roleSel = document.getElementById('adm-select-role');
-            roleSel.value = currentRole || 'Teknisi/User';
-
-            const unitSel = document.getElementById('adm-select-unit');
-            unitSel.innerHTML = officeLocations.map(o => `<option value="${o.unit_name}" ${currentUnit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
-
-            document.getElementById('admin-user-edit-modal').classList.remove('hidden');
-        }
-        function closeAdminUserEditModal() { document.getElementById('admin-user-edit-modal').classList.add('hidden'); }
-
-        async function saveAdminUserEdit() {
-            const newRole = document.getElementById('adm-select-role').value;
-            const newUnit = document.getElementById('adm-select-unit').value;
 
             try {
-                await supabaseClient.from('profiles').update({ jabatan: newRole, unit: newUnit }).eq('user_email', currentEditingAdminEmail);
-                alert('Jabatan & Unit User berhasil diperbarui!');
+                const { data: p } = await supabaseClient.from('profiles').select('*').eq('user_email', email).single();
+                if (!p) return;
+
+                document.getElementById('adm-edit-fullname').value = p.full_name || '';
+                document.getElementById('adm-select-role').value = p.jabatan || 'Teknisi/User';
+                document.getElementById('adm-edit-nip').value = p.nip || '';
+                document.getElementById('adm-edit-phone').value = p.phone || '';
+                document.getElementById('adm-edit-gender').value = p.gender || 'Laki-laki';
+                document.getElementById('adm-edit-religion').value = p.religion || 'Islam';
+                document.getElementById('adm-edit-status').value = p.status_karyawan || 'Tetap';
+                document.getElementById('adm-edit-dob').value = p.dob || '';
+
+                const unitSel = document.getElementById('adm-select-unit');
+                unitSel.innerHTML = officeLocations.map(o => `<option value="${o.unit_name}" ${p.unit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
+
+                document.getElementById('admin-user-edit-modal').classList.remove('hidden');
+            } catch(e) { alert("Gagal memuat data user: " + e.message); }
+        }
+
+        function closeAdminUserEditModal() { document.getElementById('admin-user-edit-modal').classList.add('hidden'); }
+
+        // MENGEDIT PROFIL LENGKAP USER (BARU/LAMA) OLEH SUPER ADMIN
+        async function saveAdminUserEdit() {
+            const fullname = document.getElementById('adm-edit-fullname').value.trim();
+            const role = document.getElementById('adm-select-role').value;
+            const unit = document.getElementById('adm-select-unit').value;
+            const nip = document.getElementById('adm-edit-nip').value.trim();
+            const phone = document.getElementById('adm-edit-phone').value.trim();
+            const gender = document.getElementById('adm-edit-gender').value;
+            const religion = document.getElementById('adm-edit-religion').value;
+            const status = document.getElementById('adm-edit-status').value;
+            const dob = document.getElementById('adm-edit-dob').value;
+
+            if (!fullname) return alert("Nama Lengkap wajib diisi!");
+
+            try {
+                const { error } = await supabaseClient.from('profiles').update({
+                    full_name: fullname,
+                    jabatan: role,
+                    unit: unit,
+                    nip: nip,
+                    phone: phone,
+                    gender: gender,
+                    religion: religion,
+                    status_karyawan: status,
+                    dob: dob
+                }).eq('user_email', currentEditingAdminEmail);
+
+                if (error) throw error;
+
+                alert('Data profil user berhasil diperbarui oleh Super Admin!');
                 closeAdminUserEditModal();
                 fetchPendingUserRegistrations();
                 fetchAllEmployees();
-            } catch(e) { alert('Gagal: ' + e.message); }
+            } catch(e) { alert('Gagal memperbarui profil: ' + e.message); }
         }
 
         async function approveUserAccount(targetEmail) {
@@ -1198,7 +1278,6 @@
             `).join('');
         }
 
-        // AMBIL ABSEN LOG (SUPER ADMIN BISA DIBUATKAN LIHAT GLOBAL)
         async function fetchAttendanceLogs() {
             const logList = document.getElementById('log-list');
             const logTitle = document.getElementById('log-section-title');
@@ -1584,14 +1663,20 @@
                     if (session.user.email === 'mastrisnocom@gmail.com') roleUser = 'Super Admin';
 
                     currentUserData = { 
-                        full_name: userName, email: session.user.email, jabatan: roleUser,
-                        nip: (profDb && profDb.nip) || meta.nip, unit: (profDb && profDb.unit) || meta.unit,
-                        gender: (profDb && profDb.gender) || meta.gender, phone: (profDb && profDb.phone) || meta.phone,
-                        religion: (profDb && profDb.religion) || meta.religion, status_karyawan: (profDb && profDb.status_karyawan) || meta.status_karyawan,
-                        dob: (profDb && profDb.dob) || meta.dob, foto_url: (profDb && profDb.foto_url) || meta.foto_url
+                        full_name: (profDb && profDb.full_name) || userName, 
+                        email: session.user.email, 
+                        jabatan: roleUser,
+                        nip: (profDb && profDb.nip) || meta.nip, 
+                        unit: (profDb && profDb.unit) || meta.unit,
+                        gender: (profDb && profDb.gender) || meta.gender, 
+                        phone: (profDb && profDb.phone) || meta.phone,
+                        religion: (profDb && profDb.religion) || meta.religion, 
+                        status_karyawan: (profDb && profDb.status_karyawan) || meta.status_karyawan,
+                        dob: (profDb && profDb.dob) || meta.dob, 
+                        foto_url: (profDb && profDb.foto_url) || meta.foto_url
                     };
 
-                    document.getElementById('user-display-name').innerText = userName;
+                    document.getElementById('user-display-name').innerText = currentUserData.full_name;
                     renderProfileData();
                     checkUnreadMessages();
 
