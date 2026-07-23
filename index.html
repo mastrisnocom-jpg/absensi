@@ -143,12 +143,10 @@
                     <button onclick="fetchInboxMessages()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold"><i class="fa-solid fa-rotate"></i> Refresh</button>
                 </div>
                 
-                <!-- Daftar Kontak Chat -->
                 <div id="inbox-threads-container" class="space-y-2.5 pb-4">
                     <p class="text-gray-400 text-sm text-center py-10">Memuat obrolan...</p>
                 </div>
 
-                <!-- Tampilan Percakapan 2 Arah (Aktif jika kontak dipilih) -->
                 <div id="active-chat-container" class="hidden bg-white rounded-2xl shadow-sm border p-4 space-y-3 flex flex-col h-[65vh]">
                     <div class="flex justify-between items-center border-b pb-2">
                         <div class="flex items-center gap-2">
@@ -158,10 +156,8 @@
                         <span id="active-chat-user-email" class="text-[10px] text-gray-400">email@user.com</span>
                     </div>
 
-                    <!-- Area Pesan 2 Arah -->
                     <div id="chat-messages-body" class="flex-1 overflow-y-auto space-y-2 p-1"></div>
 
-                    <!-- Input Balas Pesan -->
                     <div class="flex gap-2 pt-2 border-t">
                         <input type="text" id="chat-reply-input" placeholder="Tulis balasan..." class="flex-1 border rounded-xl px-3 py-2 text-xs outline-none focus:border-green-600" />
                         <button onclick="sendChatReply()" class="bg-green-700 text-white font-bold px-4 py-2 rounded-xl text-xs hover:bg-green-800 transition">Kirim</button>
@@ -270,7 +266,7 @@
 
         </div>
 
-        <!-- ================= BOTTOM NAVIGATION ================= -->
+        <!-- ================= BOTTOM NAVIGATION DENGAN BADGE BADGE NOTIFIKASI ================= -->
         <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-gray-200 flex justify-between px-6 py-3 z-50 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             <div onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-green-700 cursor-pointer transition select-none">
                 <i class="fa-solid fa-house mb-1 text-base"></i><span class="text-[10px] font-bold">Home</span>
@@ -281,9 +277,17 @@
             <div onclick="switchTab('log')" id="nav-log" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
                 <i class="fa-regular fa-calendar-check mb-1 text-base"></i><span class="text-[10px] font-medium">Absen Log</span>
             </div>
-            <div onclick="switchTab('inbox')" id="nav-inbox" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
-                <i class="fa-regular fa-envelope mb-1 text-base"></i><span class="text-[10px] font-medium">Inbox</span>
+            
+            <!-- NAV INBOX DENGAN BADGE ANGKA NOTIFIKASI -->
+            <div onclick="switchTab('inbox')" id="nav-inbox" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none relative">
+                <div class="relative">
+                    <i class="fa-regular fa-envelope mb-1 text-base"></i>
+                    <!-- BADGE NUMBER NOTIFIKASI -->
+                    <span id="inbox-badge" class="hidden absolute -top-1.5 -right-2 bg-red-600 text-white text-[9px] font-bold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center border-2 border-white shadow animate-pulse">0</span>
+                </div>
+                <span class="text-[10px] font-medium">Inbox</span>
             </div>
+
             <div onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
                 <i class="fa-regular fa-user mb-1 text-base"></i><span class="text-[10px] font-medium">Profil</span>
             </div>
@@ -353,7 +357,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL PENGATURAN SISTEM (SUPER ADMIN) ================= -->
+        <!-- ================= MODAL PENGATURAN SISTEM ================= -->
         <div id="sys-settings-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-4">
                 <button onclick="closeSystemSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -368,7 +372,6 @@
                     <button onclick="switchAdminSubTab('lokasi')" id="adm-tab-lokasi" class="flex-1 py-2 text-gray-400">Unit Kantor</button>
                 </div>
 
-                <!-- TAB 1: PERSETUJUAN & KELOLA ROLE USER -->
                 <div id="adm-sec-acc-approval" class="space-y-3 text-xs">
                     <div class="flex justify-between items-center">
                         <h4 class="font-bold text-gray-700">Daftar Pendaftar & User</h4>
@@ -379,7 +382,6 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: MENGATUR JADWAL SHIFT -->
                 <div id="adm-sec-jadwal" class="hidden space-y-3 text-xs">
                     <h4 class="font-bold text-gray-700">Tambah Shift Kerja Baru</h4>
                     <div>
@@ -404,7 +406,6 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: LONGLAT KANTOR -->
                 <div id="adm-sec-lokasi" class="hidden space-y-3 text-xs">
                     <h4 class="font-bold text-gray-700">Tambah / Edit Unit Kantor</h4>
                     <div>
@@ -495,21 +496,43 @@
         let currentCoords = null;
         let officeLocations = [];
         let activeEditField = null;
-
-        // VARIABLE PENGATURAN CHAT 2 ARAH
         let activeChatUser = null; 
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
                 checkSession();
+                
                 supabaseClient.auth.onAuthStateChange((event, session) => {
                     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') checkSession();
                     else if (event === 'SIGNED_OUT') clearUserState();
                 });
+
                 fetchOfficeLocations();
             }
             initGeolocation();
         });
+
+        // ================= PENGECEKAN PESAN UNREAD (ANGKA BADGE NOTIFIKASI) =================
+        async function checkUnreadMessages() {
+            if (!currentUserEmail) return;
+            try {
+                const { count, error } = await supabaseClient
+                    .from('messages')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('receiver_email', currentUserEmail)
+                    .eq('is_read', false);
+
+                const badge = document.getElementById('inbox-badge');
+                if (badge) {
+                    if (count && count > 0) {
+                        badge.innerText = count > 99 ? '99+' : count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            } catch(e) {}
+        }
 
         function handleMenuClick(menuName) {
             if (!currentUser) {
@@ -709,9 +732,11 @@
         }
         function closeUserDetailModal() { document.getElementById('user-detail-modal').classList.add('hidden'); }
 
-        // ================= LOGIKA PERCAKAPAN 2 ARAH (INBOX CHAT) =================
+        // ================= LOGIKA PERCAKAPAN 2 ARAH & BACA PESAN =================
         async function fetchInboxMessages() {
             if (!currentUserEmail) return;
+
+            checkUnreadMessages();
 
             const threadsContainer = document.getElementById('inbox-threads-container');
             threadsContainer.classList.remove('hidden');
@@ -732,24 +757,30 @@
                     return;
                 }
 
-                // Dapatkan daftar kontak obrolan unik
                 let contacts = {};
                 data.forEach(m => {
                     let otherEmail = m.sender_email === currentUserEmail ? m.receiver_email : m.sender_email;
                     let otherName = m.sender_email === currentUserEmail ? otherEmail : m.sender_name;
+                    let isUnread = (m.receiver_email === currentUserEmail && !m.is_read);
+
                     if (!contacts[otherEmail]) {
-                        contacts[otherEmail] = { email: otherEmail, name: otherName, lastMsg: m.message_text, time: m.created_at };
+                        contacts[otherEmail] = { 
+                            email: otherEmail, name: otherName, lastMsg: m.message_text, time: m.created_at, hasUnread: isUnread 
+                        };
+                    } else if (isUnread) {
+                        contacts[otherEmail].hasUnread = true;
                     }
                 });
 
                 threadsContainer.innerHTML = Object.values(contacts).map(c => `
                     <div onclick="startTwoWayChat('${c.email}', '${c.name}')" class="bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <div class="w-10 h-10 rounded-full bg-primary-dark text-gold flex items-center justify-center font-bold text-base shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-primary-dark text-gold flex items-center justify-center font-bold text-base shrink-0 relative">
                                 ${(c.name || 'U').charAt(0).toUpperCase()}
+                                ${c.hasUnread ? '<span class="absolute top-0 right-0 w-3 h-3 bg-red-600 rounded-full border-2 border-white"></span>' : ''}
                             </div>
                             <div class="overflow-hidden">
-                                <h4 class="font-bold text-xs text-gray-800 truncate">${c.name}</h4>
+                                <h4 class="font-bold text-xs text-gray-800 truncate flex items-center gap-1">${c.name} ${c.hasUnread ? '<span class="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.2 rounded font-bold">Baru</span>' : ''}</h4>
                                 <p class="text-[11px] text-gray-500 truncate">${c.lastMsg}</p>
                             </div>
                         </div>
@@ -767,6 +798,14 @@
             
             document.getElementById('active-chat-user-name').innerText = targetName;
             document.getElementById('active-chat-user-email').innerText = targetEmail;
+
+            // OTOMATIS TANDAI PESAN TELAH DIBACA (IS_READ = TRUE)
+            try {
+                await supabaseClient.from('messages').update({ is_read: true })
+                    .eq('receiver_email', currentUserEmail)
+                    .eq('sender_email', targetEmail);
+                checkUnreadMessages();
+            } catch(e) {}
 
             loadTwoWayMessages();
         }
@@ -809,14 +848,14 @@
             try {
                 await supabaseClient.from('messages').insert([{
                     sender_email: currentUserEmail, sender_name: currentUser,
-                    receiver_email: activeChatUser.email, message_text: txt
+                    receiver_email: activeChatUser.email, message_text: txt, is_read: false
                 }]);
                 input.value = '';
                 loadTwoWayMessages();
             } catch(e) { alert('Gagal mengirim: ' + e.message); }
         }
 
-        // ================= SUPER ADMIN: PERSUJUAN, ROLE, JADWAL, & LOKASI =================
+        // ================= SUPER ADMIN =================
         function openSystemSettingsModal() {
             renderAdminOfficeList();
             fetchPendingUserRegistrations();
@@ -878,7 +917,7 @@
 
             try {
                 await supabaseClient.from('profiles').update({ jabatan: newRole, unit: newUnit }).eq('user_email', currentEditingAdminEmail);
-                alert('Jabatan & Unit User berhasil diperbarui oleh Super Admin!');
+                alert('Jabatan & Unit User berhasil diperbarui!');
                 closeAdminUserEditModal();
                 fetchPendingUserRegistrations();
                 fetchAllEmployees();
@@ -893,7 +932,6 @@
             } catch(e) { alert('Gagal: ' + e.message); }
         }
 
-        // TAMBAH JADWAL SHIFT BERHASIL DILENGKAPI
         async function addNewScheduleShift() {
             const name = document.getElementById('sch-name').value.trim();
             const timeIn = document.getElementById('sch-in').value;
@@ -906,7 +944,7 @@
                 alert('Shift kerja baru disimpan!');
                 document.getElementById('sch-name').value = '';
                 fetchScheduleShifts();
-            } catch(e) { alert('Gagal menyimpan shift: ' + e.message); }
+            } catch(e) { alert('Gagal: ' + e.message); }
         }
 
         async function fetchScheduleShifts() {
@@ -1306,6 +1344,7 @@
 
                     document.getElementById('user-display-name').innerText = userName;
                     renderProfileData();
+                    checkUnreadMessages();
 
                     btnContainer.innerHTML = `
                         <button onclick="logout()" class="bg-red-500/30 hover:bg-red-600/50 text-red-100 text-xs font-semibold py-2 px-3.5 rounded-full border border-red-400/40 transition flex items-center gap-1.5 cursor-pointer shadow-sm">
@@ -1340,9 +1379,9 @@
             navItems.forEach(item => {
                 const el = document.getElementById(item);
                 if (el) {
-                    el.className = "flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none";
+                    el.className = "flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none relative";
                     const span = el.querySelector('span');
-                    if (span) span.className = "text-[10px] font-medium";
+                    if (span && !span.id.includes('badge')) span.className = "text-[10px] font-medium";
                 }
             });
 
@@ -1351,9 +1390,9 @@
 
             const activeNav = document.getElementById('nav-' + tab);
             if (activeNav) {
-                activeNav.className = "flex flex-col items-center text-green-700 cursor-pointer transition select-none";
+                activeNav.className = "flex flex-col items-center text-green-700 cursor-pointer transition select-none relative";
                 const activeSpan = activeNav.querySelector('span');
-                if (activeSpan) activeSpan.className = "text-[10px] font-bold";
+                if (activeSpan && !activeSpan.id.includes('badge')) activeSpan.className = "text-[10px] font-bold";
             }
 
             if (tab === 'log') fetchAttendanceLogs();
