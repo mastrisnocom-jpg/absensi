@@ -304,7 +304,7 @@
 
         </div>
 
-        <!-- ================= MODAL REQUEST FORM BARU (DENGAN DROP-DOWN DINAMIS OTOMATIS) ================= -->
+        <!-- ================= MODAL REQUEST FORM BARU (DENGAN TANGGAL DINAMIS) ================= -->
         <div id="request-submission-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
                 <button onclick="closeRequestModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -318,6 +318,12 @@
                     <div>
                         <label id="request-option-label" class="font-semibold text-gray-600">Pilih Opsi Kategori*</label>
                         <select id="submission-option-select" class="w-full mt-1 border rounded-lg p-2 bg-white outline-none focus:border-green-600 font-medium"></select>
+                    </div>
+
+                    <!-- Input Tanggal Dinamis Bermutasi Otomatis -->
+                    <div>
+                        <label id="request-date-label" class="font-semibold text-gray-600">Pilih Tanggal Pengajuan*</label>
+                        <input type="date" id="submission-date" required class="w-full mt-1 border rounded-lg p-2 bg-white outline-none focus:border-green-600 font-medium" />
                     </div>
 
                     <div>
@@ -714,7 +720,7 @@
             return (currentUserEmail === 'mastrisnocom@gmail.com' || (currentUserData && currentUserData.jabatan === 'Super Admin'));
         }
 
-        // ================= LOGIKA FORM REQUEST ABSENSI, LEMBUR, CUTI DENGAN DROP-DOWN DINAMIS =================
+        // ================= LOGIKA FORM REQUEST DENGAN DROP-DOWN & TANGGAL DINAMIS =================
         function openRequestModal(type) {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
@@ -727,12 +733,18 @@
             document.getElementById('request-modal-subtitle').innerText = `Oleh: ${currentUser} (${currentUserEmail})`;
             document.getElementById('submission-reason').value = '';
             
+            // Set Tanggal Hari Ini Sebagai Nilai Default Form
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('submission-date').value = todayStr;
+            
             const labelEl = document.getElementById('request-option-label');
             const selectEl = document.getElementById('submission-option-select');
+            const dateLabelEl = document.getElementById('request-date-label');
             
-            // Konfigurasi Pilihan Drop-down Berdasarkan Menu yang Di-klik
+            // Mutasi Teks Label & Kategori Sesuai Tombol Yang Dipilih
             if (type === 'Request Cuti') {
                 labelEl.innerText = "Pilih Jenis Cuti*";
+                dateLabelEl.innerText = "Pilih Tanggal Mulai Cuti*";
                 selectEl.innerHTML = `
                     <option value="Cuti Tahunan">Cuti Tahunan</option>
                     <option value="Cuti Sakit">Cuti Sakit (Perlu Bukti/Surat Dokter)</option>
@@ -742,6 +754,7 @@
                 `;
             } else if (type === 'Request Lembur') {
                 labelEl.innerText = "Pilih Kategori Lembur*";
+                dateLabelEl.innerText = "Pilih Tanggal Lembur*";
                 selectEl.innerHTML = `
                     <option value="Lembur Hari Kerja (Setelah Jam Kantor)">Lembur Hari Kerja (Hari Biasa)</option>
                     <option value="Lembur Hari Libur / Akhir Pekan">Lembur Hari Libur / Weekend</option>
@@ -749,6 +762,7 @@
                 `;
             } else if (type === 'Request Absensi') {
                 labelEl.innerText = "Pilih Jenis Kendala Absen*";
+                dateLabelEl.innerText = "Pilih Tanggal Absen Bermasalah*";
                 selectEl.innerHTML = `
                     <option value="Lupa Melakukan Clock In / Clock Out">Lupa Melakukan Clock In / Out</option>
                     <option value="Kendala Aplikasi / Error Kamera / GPS HP">Kendala Aplikasi / Kamera / GPS HP</option>
@@ -768,13 +782,15 @@
             event.preventDefault();
             const type = document.getElementById('submission-type').value;
             const selectedOption = document.getElementById('submission-option-select').value;
+            const selectedDate = document.getElementById('submission-date').value;
             const textReason = document.getElementById('submission-reason').value.trim();
             const btn = document.getElementById('btn-submit-request');
 
+            if (!selectedDate) return alert('Silakan tentukan tanggal pengajuan Anda!');
             if (!textReason) return alert('Silakan isi keterangan alasan detail pengajuan Anda!');
 
-            // Format Penggabungan Opsi Kategori dengan Keterangan Alasan
-            const finalReason = `[${selectedOption}] - Ket: ${textReason}`;
+            // Menggabungkan Kategori Pilihan + Tanggal Terpilih ke dalam Kolom Alasan/Keterangan Supabase
+            const finalReason = `[Kategori: ${selectedOption}] [Tanggal: ${selectedDate}] - Ket: ${textReason}`;
 
             const userRole = currentUserData.jabatan || 'Teknisi/User';
             let targetApprover = 'Kepala Unit';
@@ -797,10 +813,10 @@
 
                 if (error) throw error;
 
-                alert(`Permohonan ${type} Anda berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`);
+                alert(`Permohonan ${type} untuk tanggal ${selectedDate} berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`);
                 closeRequestModal();
             } catch(e) {
-                alert('Gagal mengirim permohonan: ' + e.message);
+                alert('Gagal mengirim permohonan: ' + e.message + '\n\nTips: Jika menggunakan Opera Mini, matikan Data Saving atau buka via Google Chrome.');
             } finally {
                 btn.innerText = 'Kirim Permohonan';
                 btn.disabled = false;
