@@ -32,9 +32,6 @@
                 <div class="bg-primary-dark rounded-b-[40px] pt-8 pb-20 px-6 relative">
                     <div class="flex justify-between items-start">
                         <div>
-                            <!-- LOGO PERUSAHAAN BINAYASA DI ATAS SELAMAT BEKERJA -->
-                            <img src="8723.jpg" alt="Logo Binayasa" class="h-9 w-auto object-contain">
-                            </div>
                             <p class="text-gold text-sm font-semibold mb-1 flex items-center gap-1.5">
                                 <i class="fa-solid fa-briefcase text-xs"></i> Selamat bekerja,
                             </p>
@@ -58,7 +55,7 @@
                             <h2 class="text-gray-800 font-bold text-xs flex items-center gap-1.5">
                                 <i class="fa-solid fa-house-tsunami text-rose-600 animate-pulse text-sm"></i> Notifikasi Gempa Terkini
                             </h2>
-                            <span id="earthquake-mag-badge" class="text-[4px] bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded-full">
+                            <span id="earthquake-mag-badge" class="text-[7px] bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded-full">
                                 BMKG
                             </span>
                         </div>
@@ -69,11 +66,11 @@
                                     <i class="fa-solid fa-earth-asia"></i>
                                 </div>
                                 <div class="overflow-hidden">
-                                    <p id="eq-location" class="font-bold text-gray-800 truncate text-[6px]"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> Mendeteksi data gempa...</p>
-                                    <p id="eq-depth" class="text-[6px] text-gray-500 font-medium mt-0.5"><i class="fa-solid fa-layer-group text-amber-600 mr-1"></i> Kedalaman: -</p>
+                                    <p id="eq-location" class="font-bold text-gray-800 truncate text-[9px]"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> Mendeteksi data gempa...</p>
+                                    <p id="eq-depth" class="text-[8px] text-gray-500 font-medium mt-0.5"><i class="fa-solid fa-layer-group text-amber-600 mr-1"></i> Kedalaman: -</p>
                                 </div>
                             </div>
-                            <span id="eq-time" class="text-[6px] text-gray-400 shrink-0 font-medium ml-1 text-right">-</span>
+                            <span id="eq-time" class="text-[7px] text-gray-400 shrink-0 font-medium ml-1 text-right">-</span>
                         </div>
                     </div>
 
@@ -793,10 +790,6 @@
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                     
-                    <div class="bg-white rounded-xl p-2.5 mb-3 inline-block shadow-md max-w-[160px] mx-auto">
-                        <img src="8723.jpg" alt="Logo Binayasa" class="h-8 w-auto object-contain mx-auto">
-                    </div>
-                    
                     <h2 id="auth-title" class="text-2xl font-bold text-white tracking-wide">Masuk Akun</h2>
                     <p class="text-emerald-100/80 text-xs mt-1">Silakan masuk untuk mencatat absensi kerja</p>
                 </div>
@@ -871,7 +864,6 @@
                 const data = await res.json();
                 const g = data.Infogempa.gempa;
 
-                // Memisahkan nama Kota / Wilayah
                 locEl.innerHTML = `<i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> ${g.Wilayah}`;
                 depthEl.innerHTML = `<i class="fa-solid fa-layer-group text-amber-600 mr-1"></i> Kedalaman: <strong class="text-gray-800">${g.Kedalaman}</strong>`;
                 timeEl.innerText = `${g.Jam} WIB`;
@@ -907,17 +899,14 @@
                 if (currentMonth > 12) { currentMonth = 1; currentYear++; }
             }
 
-            // Batas Akhir Periode Roster Aktif adalah Tanggal 24 Bulan Ini/Depan
             const currentPeriodEnd = new Date(currentYear, currentMonth - 1, 24);
             const diffTime = currentPeriodEnd - now;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            // Jika Sisa Hari <= 7 Hari (Menjelang habis H-7)
             if (diffDays <= 7 && diffDays >= 0) {
                 const noticeMsg = `[PENGINGAT SISTEM ROSTER] Jadwal shift kerja periode ini akan berakhir dalam ${diffDays} hari (tanggal 24). Penyusunan roster jadwal periode berikutnya sudah dapat dibuat oleh Kepala Unit.`;
 
                 try {
-                    // Cek apakah pesan pengingat sudah pernah dikirim hari ini
                     const todayStr = now.toISOString().split('T')[0];
                     const { data: existingMsg } = await supabaseClient.from('messages')
                         .select('*')
@@ -928,7 +917,7 @@
                     if (!existingMsg || existingMsg.length === 0) {
                         await supabaseClient.from('messages').insert([{
                             sender_name: 'Sistem Roster',
-                            sender_email: 'system@binayasa.co.id',
+                            sender_email: 'system@absensi.co.id',
                             receiver_email: currentUserEmail,
                             message_text: noticeMsg,
                             is_read: false
@@ -1225,7 +1214,6 @@
                 userAssignedShift = null;
             }
 
-            // Pengecekan Pengingat H-7 Roster Habis
             checkRosterExpirationH7();
         }
 
