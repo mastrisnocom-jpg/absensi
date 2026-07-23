@@ -304,7 +304,7 @@
 
         </div>
 
-        <!-- ================= MODAL REQUEST FORM BARU (DENGAN TANGGAL DINAMIS) ================= -->
+        <!-- ================= MODAL REQUEST FORM ================= -->
         <div id="request-submission-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
                 <button onclick="closeRequestModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -314,16 +314,34 @@
                 <form id="submission-form" onsubmit="submitFormPengajuan(event)" class="space-y-3 text-xs">
                     <input type="hidden" id="submission-type" value="">
                     
-                    <!-- Drop-down Opsi Pilihan Otomatis Dinamis -->
+                    <!-- Drop-down Opsi Kategori -->
                     <div>
                         <label id="request-option-label" class="font-semibold text-gray-600">Pilih Opsi Kategori*</label>
                         <select id="submission-option-select" class="w-full mt-1 border rounded-lg p-2 bg-white outline-none focus:border-green-600 font-medium"></select>
                     </div>
 
-                    <!-- Input Tanggal Dinamis Bermutasi Otomatis -->
-                    <div>
-                        <label id="request-date-label" class="font-semibold text-gray-600">Pilih Tanggal Pengajuan*</label>
-                        <input type="date" id="submission-date" required class="w-full mt-1 border rounded-lg p-2 bg-white outline-none focus:border-green-600 font-medium" />
+                    <!-- Blok Input Tanggal Dinamis -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label id="request-date-label" class="font-semibold text-gray-600">Tanggal Mulai*</label>
+                            <input type="date" id="submission-date" required class="w-full mt-1 border rounded-lg p-2 bg-white outline-none focus:border-green-600 font-medium" />
+                        </div>
+                        <div id="end-date-container" class="hidden">
+                            <label class="font-semibold text-gray-600">Tanggal Berakhir*</label>
+                            <input type="date" id="submission-end-date" class="w-full mt-1 border rounded-lg p-2 bg-white outline-none focus:border-green-600 font-medium" />
+                        </div>
+                    </div>
+
+                    <!-- Blok Fitur Unggah Foto Dokumen Pendukung -->
+                    <div id="attachment-container" class="hidden">
+                        <label class="font-semibold text-gray-600">Upload Foto Surat Keterangan / Dokumen Pendukung</label>
+                        <div class="mt-1 flex items-center gap-2">
+                            <label class="bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 font-bold py-1.5 px-3 rounded-lg cursor-pointer transition text-[11px] flex items-center gap-1">
+                                <i class="fa-solid fa-paperclip text-green-700"></i> Pilih File Foto
+                                <input type="file" id="submission-file-input" accept="image/*" class="hidden" onchange="previewAttachedFile(event)" />
+                            </label>
+                            <span id="file-preview-name" class="text-gray-400 italic text-[10px] truncate max-w-[150px]">Belum ada file</span>
+                        </div>
                     </div>
 
                     <div>
@@ -338,7 +356,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL JADWAL SHIFT 1 BULAN (VIEW TEKNISI) ================= -->
+        <!-- ================= MODAL JADWAL SHIFT BULANAN ================= -->
         <div id="user-monthly-schedule-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
                 <button onclick="closeMonthlyRosterViewModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -353,7 +371,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL SETTING ROSTER BULANAN USER (KEPALA UNIT & SUPER ADMIN) ================= -->
+        <!-- ================= MODAL SETTING ROSTER BULANAN USER ================= -->
         <div id="monthly-roster-builder-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
                 <button onclick="closeMonthlyRosterBuilderModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -465,7 +483,7 @@
             </div>
         </div>
 
-        <!-- ================= MODAL EDIT PROFIL LENGKAP USER (KHUSUS SUPER ADMIN) ================= -->
+        <!-- ================= MODAL EDIT PROFIL LENGKAP USER (SUPER ADMIN) ================= -->
         <div id="admin-user-edit-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
                 <button onclick="closeAdminUserEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -702,6 +720,7 @@
         let allShiftsList = [];
         let userAssignedShift = null;
         let selectedRosterTargetEmail = null;
+        let attachedFileBase64 = null; 
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
@@ -720,7 +739,31 @@
             return (currentUserEmail === 'mastrisnocom@gmail.com' || (currentUserData && currentUserData.jabatan === 'Super Admin'));
         }
 
-        // ================= LOGIKA FORM REQUEST DENGAN DROP-DOWN & TANGGAL DINAMIS =================
+        // ================= PERBAIKAN: SEKARANG MENGGUNAKAN LOGIKA ASYNC AGAR PERMISSION BERJALAN NORMAL =================
+        async function previewAttachedFile(event) {
+            const file = event.target.files[0];
+            const labelSpan = document.getElementById('file-preview-name');
+            if (!file) {
+                labelSpan.innerText = "Belum ada file";
+                attachedFileBase64 = null;
+                return;
+            }
+            labelSpan.innerText = "Mengolah file...";
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    attachedFileBase64 = await compressImage(e.target.result, 1000, 300 * 1024);
+                    labelSpan.innerText = file.name;
+                } catch(err) {
+                    labelSpan.innerText = "Gagal mengolah foto";
+                    attachedFileBase64 = null;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ================= FORM REQUEST DENGAN DINAMIS TANGGAL BERAKHIR & ATTACHMENT =================
         function openRequestModal(type) {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
@@ -732,19 +775,27 @@
             document.getElementById('request-modal-title').innerText = `Pengajuan ${type}`;
             document.getElementById('request-modal-subtitle').innerText = `Oleh: ${currentUser} (${currentUserEmail})`;
             document.getElementById('submission-reason').value = '';
+            document.getElementById('file-preview-name').innerText = "Belum ada file";
+            document.getElementById('submission-file-input').value = "";
+            attachedFileBase64 = null;
             
-            // Set Tanggal Hari Ini Sebagai Nilai Default Form
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('submission-date').value = todayStr;
+            document.getElementById('submission-end-date').value = todayStr;
             
             const labelEl = document.getElementById('request-option-label');
             const selectEl = document.getElementById('submission-option-select');
             const dateLabelEl = document.getElementById('request-date-label');
+            const endDateContainer = document.getElementById('end-date-container');
+            const attachmentContainer = document.getElementById('attachment-container');
             
-            // Mutasi Teks Label & Kategori Sesuai Tombol Yang Dipilih
             if (type === 'Request Cuti') {
                 labelEl.innerText = "Pilih Jenis Cuti*";
-                dateLabelEl.innerText = "Pilih Tanggal Mulai Cuti*";
+                dateLabelEl.innerText = "Tanggal Mulai*";
+                endDateContainer.classList.remove('hidden'); 
+                attachmentContainer.classList.remove('hidden'); 
+                document.getElementById('submission-end-date').setAttribute('required', 'true');
+                
                 selectEl.innerHTML = `
                     <option value="Cuti Tahunan">Cuti Tahunan</option>
                     <option value="Cuti Sakit">Cuti Sakit (Perlu Bukti/Surat Dokter)</option>
@@ -752,23 +803,29 @@
                     <option value="Cuti Izin Khusus (Pernikahan / Kedukaan)">Cuti Izin Khusus (Nikah / Duka)</option>
                     <option value="Cuti Keagamaan (Umroh / Haji)">Cuti Keagamaan (Umroh / Haji)</option>
                 `;
-            } else if (type === 'Request Lembur') {
-                labelEl.innerText = "Pilih Kategori Lembur*";
-                dateLabelEl.innerText = "Pilih Tanggal Lembur*";
-                selectEl.innerHTML = `
-                    <option value="Lembur Hari Kerja (Setelah Jam Kantor)">Lembur Hari Kerja (Hari Biasa)</option>
-                    <option value="Lembur Hari Libur / Akhir Pekan">Lembur Hari Libur / Weekend</option>
-                    <option value="Lembur Panggilan Darurat (On-Call Tugas)">Lembur Panggilan Darurat (On-Call)</option>
-                `;
-            } else if (type === 'Request Absensi') {
-                labelEl.innerText = "Pilih Jenis Kendala Absen*";
-                dateLabelEl.innerText = "Pilih Tanggal Absen Bermasalah*";
-                selectEl.innerHTML = `
-                    <option value="Lupa Melakukan Clock In / Clock Out">Lupa Melakukan Clock In / Out</option>
-                    <option value="Kendala Aplikasi / Error Kamera / GPS HP">Kendala Aplikasi / Kamera / GPS HP</option>
-                    <option value="Dinas Luar Kota / Tugas Lapangan Remote">Dinas Luar Kota / Lapangan Remote</option>
-                    <option value="Izin Datang Terlambat (Ada Keperluan Mendesak)">Izin Datang Terlambat (Mendesak)</option>
-                `;
+            } else {
+                endDateContainer.classList.add('hidden');
+                attachmentContainer.classList.add('hidden');
+                document.getElementById('submission-end-date').removeAttribute('required');
+                
+                if (type === 'Request Lembur') {
+                    labelEl.innerText = "Pilih Kategori Lembur*";
+                    dateLabelEl.innerText = "Pilih Tanggal Lembur*";
+                    selectEl.innerHTML = `
+                        <option value="Lembur Hari Kerja (Setelah Jam Kantor)">Lembur Hari Kerja (Hari Biasa)</option>
+                        <option value="Lembur Hari Libur / Akhir Pekan">Lembur Hari Libur / Weekend</option>
+                        <option value="Lembur Panggilan Darurat (On-Call Tugas)">Lembur Panggilan Darurat (On-Call)</option>
+                    `;
+                } else if (type === 'Request Absensi') {
+                    labelEl.innerText = "Pilih Jenis Kendala Absen*";
+                    dateLabelEl.innerText = "Pilih Tanggal Absen Bermasalah*";
+                    selectEl.innerHTML = `
+                        <option value="Lupa Melakukan Clock In / Clock Out">Lupa Melakukan Clock In / Out</option>
+                        <option value="Kendala Aplikasi / Error Kamera / GPS HP">Kendala Aplikasi / Kamera / GPS HP</option>
+                        <option value="Dinas Luar Kota / Tugas Lapangan Remote">Dinas Luar Kota / Lapangan Remote</option>
+                        <option value="Izin Datang Terlambat (Ada Keperluan Mendesak)">Izin Datang Terlambat (Mendesak)</option>
+                    `;
+                }
             }
             
             document.getElementById('request-submission-modal').classList.remove('hidden');
@@ -783,24 +840,41 @@
             const type = document.getElementById('submission-type').value;
             const selectedOption = document.getElementById('submission-option-select').value;
             const selectedDate = document.getElementById('submission-date').value;
+            const selectedEndDate = document.getElementById('submission-end-date').value;
             const textReason = document.getElementById('submission-reason').value.trim();
             const btn = document.getElementById('btn-submit-request');
 
             if (!selectedDate) return alert('Silakan tentukan tanggal pengajuan Anda!');
             if (!textReason) return alert('Silakan isi keterangan alasan detail pengajuan Anda!');
 
-            // Menggabungkan Kategori Pilihan + Tanggal Terpilih ke dalam Kolom Alasan/Keterangan Supabase
-            const finalReason = `[Kategori: ${selectedOption}] [Tanggal: ${selectedDate}] - Ket: ${textReason}`;
+            let finalReason = "";
+            
+            if (type === 'Request Cuti') {
+                if (!selectedEndDate) return alert('Silakan tentukan tanggal berakhir cuti Anda!');
+                if (new Date(selectedEndDate) < new Date(selectedDate)) {
+                    return alert('Tanggal berakhir cuti tidak boleh mendahului tanggal mulai cuti!');
+                }
+                finalReason = `[Kategori: ${selectedOption}] [Periode Cuti: ${selectedDate} s/d ${selectedEndDate}] - Ket: ${textReason}`;
+            } else {
+                finalReason = `[Kategori: ${selectedOption}] [Tanggal: ${selectedDate}] - Ket: ${textReason}`;
+            }
 
             const userRole = currentUserData.jabatan || 'Teknisi/User';
             let targetApprover = 'Kepala Unit';
             if (userRole === 'Kepala Unit') targetApprover = 'Kepala Kanwil';
             else if (userRole === 'Kepala Kanwil') targetApprover = 'Kepala Divisi';
 
-            btn.innerText = 'Mengirim...';
+            btn.innerText = 'Mengunggah Berkas...';
             btn.disabled = true;
 
             try {
+                if (attachedFileBase64) {
+                    const uploadedUrl = await uploadSelfieToStorage(currentUserEmail, attachedFileBase64);
+                    finalReason += ` | Lampiran Dokumen: ${uploadedUrl}`;
+                }
+
+                btn.innerText = 'Mengirim Permohonan...';
+
                 const { error } = await supabaseClient.from('request_absensi').insert([{
                     user_email: currentUserEmail,
                     nama: currentUser,
@@ -813,10 +887,10 @@
 
                 if (error) throw error;
 
-                alert(`Permohonan ${type} untuk tanggal ${selectedDate} berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`);
+                alert(`Permohonan ${type} Anda berhasil dikirimkan ke ${targetApprover} dan berstatus Pending.`);
                 closeRequestModal();
             } catch(e) {
-                alert('Gagal mengirim permohonan: ' + e.message + '\n\nTips: Jika menggunakan Opera Mini, matikan Data Saving atau buka via Google Chrome.');
+                alert('Gagal memproses pengajuan: ' + e.message + '\n\nTips: Jika bermasalah di Opera Mini, beralihlah ke Google Chrome.');
             } finally {
                 btn.innerText = 'Kirim Permohonan';
                 btn.disabled = false;
@@ -1152,210 +1226,7 @@
             } catch(e) { alert("Gagal export PDF: " + e.message); }
         }
 
-        function base64ToBlob(base64, mimeType) {
-            const bytes = atob(base64.split(',')[1]);
-            const ab = new ArrayBuffer(bytes.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < bytes.length; i++) ia[i] = bytes.charCodeAt(i);
-            return new Blob([ab], { type: mimeType });
-        }
-
-        async function uploadSelfieToStorage(userEmail, base64Data) {
-            try {
-                const blob = base64ToBlob(base64Data, 'image/jpeg');
-                const cleanEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '_');
-                const fileName = `${cleanEmail}/${Date.now()}.jpg`;
-                
-                const { data, error } = await supabaseClient.storage
-                    .from('selfies')
-                    .upload(fileName, blob, { contentType: 'image/jpeg', cacheControl: '3600' });
-                    
-                if (error) throw error;
-                
-                const { data: publicUrlData } = supabaseClient.storage
-                    .from('selfies')
-                    .getPublicUrl(fileName);
-                    
-                return publicUrlData.publicUrl;
-            } catch (err) {
-                console.error("Gagal mengunggah gambar ke storage bucket, gunakan fallback Base64:", err);
-                return base64Data;
-            }
-        }
-
-        function compressImage(imageSource, maxDimension = 800, maxSizeBytes = 200 * 1024) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.crossOrigin = "Anonymous";
-                img.onload = function() {
-                    let width = img.width, height = img.height;
-                    if (width > height) {
-                        if (width > maxDimension) { height = Math.round((height * maxDimension) / width); width = maxDimension; }
-                    } else {
-                        if (height > maxDimension) { width = Math.round((width * maxDimension) / height); height = maxDimension; }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    let quality = 0.85;
-                    let dataUrl = canvas.toDataURL('image/jpeg', quality);
-
-                    while (dataUrl.length * 0.75 > maxSizeBytes && quality > 0.2) {
-                        quality -= 0.1;
-                        dataUrl = canvas.toDataURL('image/jpeg', quality);
-                    }
-                    resolve(dataUrl);
-                };
-                img.src = imageSource;
-            });
-        }
-
-        async function prepareClockIn() {
-            if (!currentUser) {
-                alert('Akses Ditolak: Anda belum login!');
-                openAuthModal();
-                return;
-            }
-
-            const todayStr = new Date().toISOString().split('T')[0];
-
-            try {
-                const { data: logsToday } = await supabaseClient
-                    .from('attendance_logs').select('*')
-                    .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
-
-                if ((logsToday || []).some(l => l.action_type === 'Clock In')) {
-                    alert('Anda sudah melakukan Clock In hari ini!');
-                    return;
-                }
-            } catch(e) {}
-
-            document.getElementById('selfie-modal').classList.remove('hidden');
-            const video = document.getElementById('selfie-video');
-
-            try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({
-                    video: { 
-                        facingMode: "user",
-                        width: { ideal: 640 },
-                        height: { ideal: 480 }
-                    },
-                    audio: false
-                });
-                video.srcObject = mediaStream;
-            } catch (err) {
-                alert("Gagal mengakses kamera: Pastikan izin kamera diaktifkan di browser Anda.");
-                closeSelfieModal();
-            }
-        }
-
-        function closeSelfieModal() {
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-                mediaStream = null;
-            }
-            document.getElementById('selfie-modal').classList.add('hidden');
-        }
-
-        async function captureAndVerifyClockIn() {
-            const video = document.getElementById('selfie-video');
-            const canvas = document.getElementById('selfie-canvas');
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 480;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const rawSelfieBase64 = canvas.toDataURL('image/jpeg', 0.9);
-
-            closeSelfieModal();
-
-            const compressedSelfie = await compressImage(rawSelfieBase64, 800, 200 * 1024);
-            await recordAttendance('Clock In', compressedSelfie);
-        }
-
-        async function checkUnreadMessages() {
-            if (!currentUserEmail) return;
-            try {
-                const { count } = await supabaseClient
-                    .from('messages').select('*', { count: 'exact', head: true })
-                    .eq('receiver_email', currentUserEmail).eq('is_read', false);
-
-                const badge = document.getElementById('inbox-badge');
-                if (badge) {
-                    if (count && count > 0) {
-                        badge.innerText = count > 99 ? '99+' : count;
-                        badge.classList.remove('hidden');
-                    } else { badge.classList.add('hidden'); }
-                }
-            } catch(e) {}
-        }
-
-        function handleMenuClick(menuName) {
-            if (!currentUser) {
-                alert('Akses Ditolak: Anda belum login!');
-                openAuthModal();
-                return;
-            }
-            alert(`Fitur "${menuName}" sedang dalam pengembangan.`);
-        }
-
-        function initGeolocation() {
-            const gpsBadge = document.getElementById('gps-status-badge');
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        currentCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
-                        evaluateGPSWithUserOffice();
-                    },
-                    (error) => {
-                        gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
-                        gpsBadge.innerHTML = `<i class="fa-solid fa-ban mr-1"></i> GPS Tidak Aktif`;
-                    },
-                    { enableHighAccuracy: true }
-                );
-            } else { gpsBadge.innerHTML = "GPS Tidak Didukung"; }
-        }
-
-        async function fetchOfficeLocations() {
-            try {
-                const { data } = await supabaseClient.from('offices').select('*');
-                officeLocations = data || [];
-                evaluateGPSWithUserOffice();
-            } catch(e) {}
-        }
-
-        function evaluateGPSWithUserOffice() {
-            if (!currentCoords) return;
-            const gpsBadge = document.getElementById('gps-status-badge');
-            let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
-            
-            if (!targetOffice) {
-                gpsBadge.className = "text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold";
-                gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> GPS Aktif`;
-                return;
-            }
-
-            const dist = calculateDistance(currentCoords.lat, currentCoords.lng, targetOffice.lat, targetOffice.lng);
-            if (dist <= targetOffice.radius) {
-                gpsBadge.className = "text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold";
-                gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> Area ${targetOffice.unit_name} (${Math.round(dist)}m)`;
-            } else {
-                gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
-                gpsBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Luar Jangkauan (${Math.round(dist)}m)`;
-            }
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3;
-            const φ1 = lat1 * Math.PI/180, φ2 = lat2 * Math.PI/180;
-            const Δφ = (lat2-lat1) * Math.PI/180, Δλ = (lon2-lon1) * Math.PI/180;
-            const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-        }
-
-        async function recordAttendance(actionType, selfieBase64 = null) {
+        function recordAttendance(actionType, selfieBase64 = null) {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
                 openAuthModal();
@@ -1366,17 +1237,6 @@
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
             let statusAbsen = 'Tepat Waktu';
-
-            try {
-                const { data: logsToday } = await supabaseClient
-                    .from('attendance_logs').select('*')
-                    .eq('user_email', currentUserEmail).eq('date_recorded', todayStr);
-
-                if ((logsToday || []).some(l => l.action_type === actionType)) {
-                    alert(`Anda sudah melakukan ${actionType} hari ini!`);
-                    return;
-                }
-            } catch(e) {}
 
             if (actionType === 'Clock In' && !isSuper) {
                 if (userAssignedShift && userAssignedShift.time_in) {
@@ -1408,7 +1268,7 @@
                 alert(`PEMBERITAHUAN:\nAnda berada di luar jangkauan titik lokasi kantor (${Math.round(distance)} meter).\n\nAbsensi dikirimkan dan menunggu persetujuan dari ${targetApprover}.`);
 
                 try {
-                    await supabaseClient.from('request_absensi').insert([{
+                    supabaseClient.from('request_absensi').insert([{
                         user_email: currentUserEmail, nama: currentUser, jabatan: userRole,
                         jenis_request: actionType,
                         alasan: `Diluar jangkauan radius ${targetOffice ? targetOffice.unit_name : 'Kantor'} (${Math.round(distance)}m)`,
@@ -1427,28 +1287,33 @@
 
             try {
                 let finalFotoUrl = '';
-                if (selfieBase64) {
-                    finalFotoUrl = await uploadSelfieToStorage(currentUserEmail, selfieBase64);
-                }
+                (async () => {
+                    if (selfieBase64) {
+                        finalFotoUrl = await uploadSelfieToStorage(currentUserEmail, selfieBase64);
+                    }
 
-                btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+                    btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
 
-                const { error } = await supabaseClient.from('attendance_logs').insert([{ 
-                    user_email: currentUserEmail, user_name: currentUser, action_type: actionType,
-                    jabatan: userRole, unit: currentUserData.unit || 'Pusat', date_recorded: todayStr,
-                    foto_url: finalFotoUrl, status_absen: statusAbsen
-                }]);
-                if (error) throw error;
+                    const { error } = await supabaseClient.from('attendance_logs').insert([{ 
+                        user_email: currentUserEmail, user_name: currentUser, action_type: actionType,
+                        jabatan: userRole, unit: currentUserData.unit || 'Pusat', date_recorded: todayStr,
+                        foto_url: finalFotoUrl, status_absen: statusAbsen
+                    }]);
+                    if (error) throw error;
 
-                if (statusAbsen === 'Terlambat') {
-                    alert(`Clock In Berhasil. Catatan: Anda dicatat Terlambat hari ini.`);
-                } else {
-                    alert(`Berhasil ${actionType}! Data absensi dicatat.`);
-                }
+                    if (statusAbsen === 'Terlambat') {
+                        alert(`Clock In Berhasil. Catatan: Anda dicatat Terlambat hari ini.`);
+                    } else {
+                        alert(`Berhasil ${actionType}! Data absensi dicatat.`);
+                    }
 
-                fetchAttendanceLogs();
-            } catch (error) { alert(`Gagal absensi: ` + error.message); } 
-            finally { btnElement.innerHTML = originalContent; btnElement.disabled = false; }
+                    fetchAttendanceLogs();
+                    btnElement.innerHTML = originalContent; btnElement.disabled = false;
+                })();
+            } catch (error) { 
+                alert(`Gagal absensi: ` + error.message); 
+                btnElement.innerHTML = originalContent; btnElement.disabled = false;
+            } 
         }
 
         async function fetchAllEmployees() {
@@ -1984,21 +1849,40 @@
                     return;
                 }
 
-                listEl.innerHTML = data.map(req => `
-                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 space-y-2">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-bold text-xs text-gray-800">${req.nama} (${req.jabatan})</h4>
-                                <p class="text-[10px] text-amber-700 font-semibold">${req.jenis_request} - ${req.alasan}</p>
+                listEl.innerHTML = data.map(req => {
+                    // SINKRONISASI PEMBACAAN DAN PARSING URL LAMPIRAN DOKUMEN FOTO SURAT
+                    let attachmentButtonHtml = "";
+                    if (req.alasan && req.alasan.includes(" | Lampiran Dokumen: ")) {
+                        const parts = req.alasan.split(" | Lampiran Dokumen: ");
+                        const urlPart = parts[1];
+                        if (urlPart && urlPart.startsWith("http")) {
+                            attachmentButtonHtml = `
+                                <div class="mt-2">
+                                    <a href="${urlPart.trim()}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-blue-700 hover:text-blue-800 bg-blue-50 border border-blue-200 px-2 py-1 rounded-lg font-bold transition">
+                                        <i class="fa-solid fa-file-image"></i> Buka Foto Surat Lampiran
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    return `
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 space-y-2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-xs text-gray-800">${req.nama} (${req.jabatan})</h4>
+                                    <p class="text-[10px] text-amber-700 font-semibold">${req.jenis_request} - ${req.alasan}</p>
+                                    ${attachmentButtonHtml}
+                                </div>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[9px] font-bold">Pending (${req.target_approver})</span>
                             </div>
-                            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[9px] font-bold">Pending (${req.target_approver})</span>
+                            <div class="flex gap-2 pt-1 border-t">
+                                <button onclick="approveRequest(${req.id}, '${req.user_email}', '${req.nama}', '${req.jenis_request}', '${req.jabatan}')" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-1.5 rounded-lg text-xs transition">Setujui (Approve)</button>
+                                <button onclick="rejectRequest(${req.id})" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-xs transition">Tolak</button>
+                            </div>
                         </div>
-                        <div class="flex gap-2 pt-1 border-t">
-                            <button onclick="approveRequest(${req.id}, '${req.user_email}', '${req.nama}', '${req.jenis_request}', '${req.jabatan}')" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-1.5 rounded-lg text-xs transition">Setujui (Approve)</button>
-                            <button onclick="rejectRequest(${req.id})" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-xs transition">Tolak</button>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             } catch(e) { listEl.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat persetujuan.</p>`; }
         }
 
