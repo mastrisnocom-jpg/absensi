@@ -34,7 +34,7 @@
                         <div>
                             <p class="text-gold text-sm font-semibold mb-1">Selamat bekerja,</p>
                             <h1 id="user-display-name" class="text-white text-3xl font-bold mb-1">Tamu</h1>
-                            <p id="user-display-role" class="text-gray-300 text-sm">Staff Operational</p>
+                            <p id="user-display-role" class="text-gray-300 text-sm">Teknisi / User</p>
                         </div>
                         <div id="auth-action-btn-container">
                             <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1 cursor-pointer">
@@ -64,6 +64,10 @@
 
                 <!-- Menu Grid -->
                 <div class="grid grid-cols-4 gap-y-6 gap-x-2 p-6 mt-2">
+                    <div onclick="switchTab('approval')" id="menu-approval-container" class="hidden flex flex-col items-center cursor-pointer group">
+                        <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition bg-amber-600"><i class="fa-solid fa-user-check"></i></div>
+                        <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Persetujuan<br>Absensi</span>
+                    </div>
                     <div class="flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-clipboard-list"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Daftar<br>Pengajuan</span>
@@ -88,10 +92,6 @@
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-regular fa-user"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Profil<br>Saya</span>
                     </div>
-                    <div class="flex flex-col items-center cursor-pointer group">
-                        <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition"><i class="fa-solid fa-money-check-dollar"></i></div>
-                        <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Slip<br>Gaji</span>
-                    </div>
                 </div>
             </div>
 
@@ -108,7 +108,20 @@
                 </div>
             </div>
 
-            <!-- 3. KARYAWAN TAB -->
+            <!-- 3. APPROVAL REQUEST TAB (KHUSUS ATASAN & SUPER ADMIN) -->
+            <div id="approval-section" class="hidden px-6 py-6 space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-bold text-gray-800">Persetujuan Absensi</h2>
+                    <button onclick="fetchPendingRequests()" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-800 transition active:scale-95">
+                        <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                    </button>
+                </div>
+                <div id="approval-list" class="space-y-3 pb-4">
+                    <p class="text-gray-400 text-sm text-center py-10">Memuat permohonan pending...</p>
+                </div>
+            </div>
+
+            <!-- 4. KARYAWAN TAB -->
             <div id="karyawan-section" class="hidden px-6 py-6 space-y-4">
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Anggota Tim Operational</h2>
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
@@ -117,17 +130,8 @@
                     </div>
                     <div>
                         <h4 id="karyawan-name-card" class="font-bold text-sm text-gray-800">Tamu</h4>
-                        <p id="karyawan-role-card" class="text-xs text-green-700 font-semibold">Staff Operational</p>
+                        <p id="karyawan-role-card" class="text-xs text-green-700 font-semibold">Teknisi / User</p>
                     </div>
-                </div>
-            </div>
-
-            <!-- 4. INBOX TAB -->
-            <div id="inbox-section" class="hidden px-6 py-6 space-y-4">
-                <h2 class="text-xl font-bold text-gray-800 mb-2">Kotak Masuk (Inbox)</h2>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center py-12">
-                    <i class="fa-regular fa-envelope-open text-4xl text-gray-300 mb-3"></i>
-                    <p class="text-gray-500 text-xs font-medium">Belum ada pesan atau pengumuman baru untuk saat ini.</p>
                 </div>
             </div>
 
@@ -147,8 +151,8 @@
 
                         <h3 id="prof-nama" class="font-bold text-lg text-gray-800 text-center px-2">Tamu</h3>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <p id="prof-role" class="text-xs text-green-700 font-semibold">Staff Operational</p>
-                            <button onclick="openEditFieldModal('jabatan', 'Ubah Jabatan')" class="text-gray-400 hover:text-green-700 text-xs cursor-pointer"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <p id="prof-role" class="text-xs text-green-700 font-semibold">Teknisi / User</p>
+                            <button onclick="openEditFieldModal('jabatan', 'Pilih Role Jabatan')" class="text-gray-400 hover:text-green-700 text-xs cursor-pointer"><i class="fa-solid fa-pen-to-square"></i></button>
                         </div>
                     </div>
 
@@ -215,7 +219,7 @@
                         </div>
                     </div>
 
-                    <!-- TOMBOL PENGATURAN SISTEM SUPER ADMIN (KHUSUS mastrisnocom@gmail.com) -->
+                    <!-- SUPER ADMIN CONTAINER -->
                     <div id="superadmin-menu-container" class="hidden pt-2 border-t space-y-2">
                         <button onclick="openSystemSettingsModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold py-2.5 rounded-xl transition text-xs border border-amber-300 cursor-pointer flex items-center justify-center gap-2">
                             <i class="fa-solid fa-gears text-amber-700"></i> Pengaturan Sistem (Super Admin)
@@ -243,9 +247,6 @@
             <div onclick="switchTab('log')" id="nav-log" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
                 <i class="fa-regular fa-calendar-check mb-1 text-base"></i><span class="text-[10px] font-medium">Absen Log</span>
             </div>
-            <div onclick="switchTab('inbox')" id="nav-inbox" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
-                <i class="fa-regular fa-envelope mb-1 text-base"></i><span class="text-[10px] font-medium">Inbox</span>
-            </div>
             <div onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none">
                 <i class="fa-regular fa-user mb-1 text-base"></i><span class="text-[10px] font-medium">Profil</span>
             </div>
@@ -263,48 +264,20 @@
             </div>
         </div>
 
-        <!-- ================= MODAL PENGATURAN SISTEM SUPER ADMIN ================= -->
+        <!-- ================= MODAL PENGATURAN SISTEM ================= -->
         <div id="sys-settings-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-4">
                 <button onclick="closeSystemSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                 <div class="text-center">
                     <h3 class="text-lg font-bold text-gray-800">Pengaturan Sistem</h3>
-                    <p class="text-gray-500 text-[11px] mt-0.5">Kelola Jadwal, LongLat Kantor, & Gaji</p>
+                    <p class="text-gray-500 text-[11px] mt-0.5">Atur LongLat Unit Kantor</p>
                 </div>
 
-                <!-- Navigasi Tab Admin -->
-                <div class="flex border-b text-xs font-semibold">
-                    <button onclick="switchAdminSubTab('jadwal')" id="adm-tab-jadwal" class="flex-1 py-2 text-green-700 border-b-2 border-green-700">Jadwal</button>
-                    <button onclick="switchAdminSubTab('lokasi')" id="adm-tab-lokasi" class="flex-1 py-2 text-gray-400">LongLat Kantor</button>
-                    <button onclick="switchAdminSubTab('gaji')" id="adm-tab-gaji" class="flex-1 py-2 text-gray-400">Gaji</button>
-                </div>
-
-                <!-- 1. TAB MENGATUR JADWAL -->
-                <div id="adm-sec-jadwal" class="space-y-3 text-xs">
-                    <h4 class="font-bold text-gray-700">Atur Shift Kerja</h4>
-                    <div>
-                        <label class="font-semibold text-gray-600">Nama Shift</label>
-                        <input type="text" id="sch-name" placeholder="Contoh: Shift Reguler / Pagi" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="font-semibold text-gray-600">Jam Masuk</label>
-                            <input type="time" id="sch-in" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
-                        </div>
-                        <div>
-                            <label class="font-semibold text-gray-600">Jam Pulang</label>
-                            <input type="time" id="sch-out" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
-                        </div>
-                    </div>
-                    <button onclick="saveScheduleSetting()" class="w-full bg-green-700 text-white font-bold py-2 rounded-xl transition">Simpan Jadwal</button>
-                </div>
-
-                <!-- 2. TAB MENGATUR LONGLAT UNIT KANTOR -->
-                <div id="adm-sec-lokasi" class="hidden space-y-3 text-xs">
+                <div class="space-y-3 text-xs">
                     <h4 class="font-bold text-gray-700">Tambah / Edit Unit Kantor</h4>
                     <div>
-                        <label class="font-semibold text-gray-600">Nama Unit / Cabang</label>
-                        <input type="text" id="admin-unit-name" placeholder="Contoh: Unit Pusat / Cabang A" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
+                        <label class="font-semibold text-gray-600">Nama Unit Kantor</label>
+                        <input type="text" id="admin-unit-name" placeholder="Contoh: Unit Kantor Surabaya" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -317,39 +290,15 @@
                         </div>
                     </div>
                     <div>
-                        <label class="font-semibold text-gray-600">Radius Absensi (Meter)</label>
+                        <label class="font-semibold text-gray-600">Radius Jangkauan (Meter)</label>
                         <input type="number" id="admin-unit-radius" value="100" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
                     </div>
                     <button onclick="addNewOfficeUnit()" class="w-full bg-green-700 text-white font-bold py-2 rounded-xl transition">Simpan Lokasi Unit</button>
                     
                     <div class="pt-2 border-t">
-                        <h5 class="font-bold text-gray-600 mb-1">Daftar Unit</h5>
+                        <h5 class="font-bold text-gray-600 mb-1">Daftar Unit Terdaftar</h5>
                         <div id="admin-office-list" class="space-y-1.5 max-h-28 overflow-y-auto"></div>
                     </div>
-                </div>
-
-                <!-- 3. TAB MENGATUR GAJI KARYAWAN -->
-                <div id="adm-sec-gaji" class="hidden space-y-3 text-xs">
-                    <h4 class="font-bold text-gray-700">Atur Gaji Per Karyawan</h4>
-                    <div>
-                        <label class="font-semibold text-gray-600">Email Karyawan</label>
-                        <input type="email" id="sal-email" placeholder="karyawan@email.com" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
-                    </div>
-                    <div>
-                        <label class="font-semibold text-gray-600">Gaji Pokok (Rp)</label>
-                        <input type="number" id="sal-basic" placeholder="5000000" class="w-full mt-1 border rounded-lg px-3 py-1.5 outline-none" />
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="font-semibold text-gray-600">Tunjangan/Hari (Rp)</label>
-                            <input type="number" id="sal-allowance" placeholder="50000" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
-                        </div>
-                        <div>
-                            <label class="font-semibold text-gray-600">Denda Telat (Rp)</label>
-                            <input type="number" id="sal-penalty" placeholder="20000" class="w-full mt-1 border rounded-lg px-2 py-1.5 outline-none" />
-                        </div>
-                    </div>
-                    <button onclick="saveSalarySetting()" class="w-full bg-green-700 text-white font-bold py-2 rounded-xl transition">Simpan Setting Gaji</button>
                 </div>
             </div>
         </div>
@@ -421,7 +370,6 @@
             initGeolocation();
         });
 
-        // Deteksi Lokasi GPS
         function initGeolocation() {
             const gpsBadge = document.getElementById('gps-status-badge');
             if ("geolocation" in navigator) {
@@ -466,7 +414,7 @@
                 gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> Area ${targetOffice.unit_name} (${Math.round(dist)}m)`;
             } else {
                 gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
-                gpsBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Luar Area (${Math.round(dist)}m)`;
+                gpsBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Luar Jangkauan (${Math.round(dist)}m)`;
             }
         }
 
@@ -478,7 +426,7 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
-        // FUNGSI UTAMA CLOCK IN / CLOCK OUT
+        // FUNGSI ABSENSI DENGAN VALIDASI HARI INI & ATURAN JANGKAUAN
         async function recordAttendance(actionType) {
             if (!currentUser) {
                 alert('Silakan Login terlebih dahulu!');
@@ -486,6 +434,69 @@
                 return;
             }
 
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            // 1. CEK ABSENSI HARI INI AGAR TIDAK BISA CLOCK IN / CLOCK OUT GANDA
+            try {
+                const { data: logsToday } = await supabaseClient
+                    .from('attendance_logs')
+                    .select('*')
+                    .eq('user_email', currentUserEmail)
+                    .eq('date_recorded', todayStr);
+
+                const existingClockIn = (logsToday || []).some(l => l.action_type === 'Clock In');
+                const existingClockOut = (logsToday || []).some(l => l.action_type === 'Clock Out');
+
+                if (actionType === 'Clock In' && existingClockIn) {
+                    alert('Anda sudah melakukan Clock In hari ini! Clock In kedua tidak dapat diproses.');
+                    return;
+                }
+
+                if (actionType === 'Clock Out' && existingClockOut) {
+                    alert('Anda sudah melakukan Clock Out hari ini! Clock Out kedua tidak dapat diproses.');
+                    return;
+                }
+            } catch(e) {}
+
+            // 2. CEK AREA JANGKAUAN KANTOR & ATURAN PERSETUJUAN (APPROVAL)
+            let targetOffice = officeLocations.find(o => o.unit_name === currentUserData.unit) || officeLocations[0];
+            let isOutOfRange = false;
+            let distance = 0;
+
+            if (currentCoords && targetOffice) {
+                distance = calculateDistance(currentCoords.lat, currentCoords.lng, targetOffice.lat, targetOffice.lng);
+                if (distance > targetOffice.radius) {
+                    isOutOfRange = true;
+                }
+            }
+
+            const userRole = currentUserData.jabatan || 'Teknisi/User';
+
+            // JIKA ABSENSI DI LUAR JANGKAUAN
+            if (isOutOfRange) {
+                let targetApprover = 'Kepala Unit';
+                if (userRole === 'Kepala Unit') targetApprover = 'Kepala Kanwil';
+                else if (userRole === 'Kepala Kanwil') targetApprover = 'Kepala Divisi';
+
+                alert(`PEMBERITAHUAN:\nAnda berada di luar jangkauan titik lokasi kantor (${Math.round(distance)} meter).\n\nAbsensi tetap dikirimkan dan menunggu persetujuan (Approve) dari ${targetApprover}.`);
+
+                // SIMPAN KE TABEL REQUEST APPROVAL
+                try {
+                    await supabaseClient.from('request_absensi').insert([{
+                        user_email: currentUserEmail,
+                        nama: currentUser,
+                        jabatan: userRole,
+                        jenis_request: actionType,
+                        alasan: `Diluar jangkauan radius ${targetOffice ? targetOffice.unit_name : 'Kantor'} (${Math.round(distance)}m)`,
+                        target_approver: targetApprover,
+                        status: 'Pending'
+                    }]);
+                    alert('Permohonan absensi luar jangkauan berhasil dikirim!');
+                } catch (err) { alert('Gagal mengirim permohonan: ' + err.message); }
+                return;
+            }
+
+            // JIKA DALAM JANGKAUAN -> LANGSUNG SIMPAN KE LOG ABSENSI
             const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
             const btnElement = document.getElementById(btnId);
             const originalContent = btnElement.innerHTML;
@@ -496,15 +507,17 @@
                 const { error } = await supabaseClient
                     .from('attendance_logs')
                     .insert([{ 
+                        user_email: currentUserEmail,
                         user_name: currentUser, 
                         action_type: actionType,
-                        jabatan: currentUserData.jabatan || 'Staff Operational',
-                        foto_url: currentUserData.foto_url || ''
+                        jabatan: userRole,
+                        unit: currentUserData.unit || 'Pusat',
+                        date_recorded: todayStr
                     }]);
 
                 if (error) throw error;
 
-                alert(`Berhasil ${actionType}! Data absensi dicatat.`);
+                alert(`Berhasil ${actionType}! Data absensi hari ini telah dicatat.`);
                 fetchAttendanceLogs();
             } catch (error) {
                 alert(`Gagal absensi: ` + error.message);
@@ -514,13 +527,87 @@
             }
         }
 
+        // FUNGSI LOAD PENDING REQUESTS UNTUK APPROVER
+        async function fetchPendingRequests() {
+            const listEl = document.getElementById('approval-list');
+            listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat permohonan...</p>';
+
+            const userRole = currentUserData.jabatan || 'Teknisi/User';
+
+            try {
+                let query = supabaseClient.from('request_absensi').select('*').eq('status', 'Pending');
+                
+                // Filter berdasarkan hirarki approver
+                if (currentUserEmail !== 'mastrisnocom@gmail.com' && userRole !== 'Kepala Divisi') {
+                    query = query.eq('target_approver', userRole);
+                }
+
+                const { data, error } = await query.order('created_at', { ascending: false });
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Tidak ada permohonan persetujuan pending saat ini.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.map(req => `
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-xs text-gray-800">${req.nama} (${req.jabatan})</h4>
+                                <p class="text-[10px] text-amber-700 font-semibold">${req.jenis_request} - ${req.alasan}</p>
+                            </div>
+                            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[9px] font-bold">Pending (${req.target_approver})</span>
+                        </div>
+                        <div class="flex gap-2 pt-1 border-t">
+                            <button onclick="approveRequest(${req.id}, '${req.user_email}', '${req.nama}', '${req.jenis_request}', '${req.jabatan}')" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-1.5 rounded-lg text-xs transition">Setujui (Approve)</button>
+                            <button onclick="rejectRequest(${req.id})" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-xs transition">Tolak</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { listEl.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat persetujuan.</p>`; }
+        }
+
+        async function approveRequest(reqId, userEmail, userName, actionType, userRole) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            try {
+                // Update status request menjadi Approved
+                await supabaseClient.from('request_absensi').update({ status: 'Approved', approved_by: currentUser }).eq('id', reqId);
+
+                // Masukkan ke log absensi resmi
+                await supabaseClient.from('attendance_logs').insert([{
+                    user_email: userEmail,
+                    user_name: userName,
+                    action_type: actionType,
+                    jabatan: userRole,
+                    date_recorded: todayStr
+                }]);
+
+                alert('Permohonan absensi berhasil disetujui!');
+                fetchPendingRequests();
+            } catch(e) { alert('Gagal menyetujui: ' + e.message); }
+        }
+
+        async function rejectRequest(reqId) {
+            if (!confirm('Yakin ingin menolak permohonan absensi ini?')) return;
+            try {
+                await supabaseClient.from('request_absensi').update({ status: 'Rejected', approved_by: currentUser }).eq('id', reqId);
+                alert('Permohonan ditolak.');
+                fetchPendingRequests();
+            } catch(e) { alert('Gagal: ' + e.message); }
+        }
+
         // EDIT PROFIL FIELD DYNAMIK
         function openEditFieldModal(fieldKey, title) {
             activeEditField = fieldKey;
             document.getElementById('edit-modal-title').innerText = title;
             const container = document.getElementById('edit-input-container');
             
-            if (fieldKey === 'unit') {
+            if (fieldKey === 'jabatan') {
+                let roles = ['Teknisi/User', 'Kepala Unit', 'Kepala Kanwil', 'Kepala Divisi', 'Super Admin'];
+                let options = roles.map(r => `<option value="${r}" ${currentUserData.jabatan === r ? 'selected' : ''}>${r}</option>`).join('');
+                container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white">${options}</select>`;
+            } else if (fieldKey === 'unit') {
                 let options = officeLocations.map(o => `<option value="${o.unit_name}" ${currentUserData.unit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
                 container.innerHTML = `<select id="modal-dynamic-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white"><option value="">-- Pilih Unit Kantor --</option>${options}</select>`;
             } else if (fieldKey === 'religion') {
@@ -577,7 +664,7 @@
         // TAMPILAN DATA PROFIL SAYA
         function renderProfileData() {
             const name = currentUserData.full_name || currentUser || 'Tamu';
-            const role = currentUserData.jabatan || 'Staff Operational';
+            const role = currentUserData.jabatan || 'Teknisi/User';
             
             document.getElementById('prof-nama').innerText = name;
             document.getElementById('prof-role').innerText = role;
@@ -591,12 +678,20 @@
             document.getElementById('prof-status').innerText = currentUserData.status_karyawan || '-';
             document.getElementById('prof-dob').innerText = currentUserData.dob || '-';
 
-            // KHUSUS SUPER ADMIN (mastrisnocom@gmail.com)
+            // HAK AKSES CONTAINER MENU
             const superAdminContainer = document.getElementById('superadmin-menu-container');
             if (currentUserEmail === 'mastrisnocom@gmail.com') {
                 superAdminContainer.classList.remove('hidden');
             } else {
                 superAdminContainer.classList.add('hidden');
+            }
+
+            // MENU PERSETUJUAN (APPROVAL) TAMPIL KHUSUS UNTUK ATASAN DAN SUPER ADMIN
+            const approvalMenu = document.getElementById('menu-approval-container');
+            if (currentUserEmail === 'mastrisnocom@gmail.com' || ['Kepala Divisi', 'Kepala Kanwil', 'Kepala Unit', 'Super Admin'].includes(role)) {
+                approvalMenu.classList.remove('hidden');
+            } else {
+                approvalMenu.classList.add('hidden');
             }
 
             const avatarContainer = document.getElementById('profile-avatar-container');
@@ -612,32 +707,11 @@
             }
         }
 
-        // SUPER ADMIN - PENGATURAN SISTEM
         function openSystemSettingsModal() {
             renderAdminOfficeList();
             document.getElementById('sys-settings-modal').classList.remove('hidden');
         }
         function closeSystemSettingsModal() { document.getElementById('sys-settings-modal').classList.add('hidden'); }
-
-        function switchAdminSubTab(sub) {
-            ['jadwal', 'lokasi', 'gaji'].forEach(s => {
-                document.getElementById('adm-sec-' + s).classList.add('hidden');
-                document.getElementById('adm-tab-' + s).className = "flex-1 py-2 text-gray-400";
-            });
-            document.getElementById('adm-sec-' + sub).classList.remove('hidden');
-            document.getElementById('adm-tab-' + sub).className = "flex-1 py-2 text-green-700 border-b-2 border-green-700";
-        }
-
-        async function saveScheduleSetting() {
-            const name = document.getElementById('sch-name').value;
-            const timeIn = document.getElementById('sch-in').value;
-            const timeOut = document.getElementById('sch-out').value;
-            if (!name || !timeIn || !timeOut) return alert('Lengkapi jam shift!');
-
-            const { error } = await supabaseClient.from('schedules').insert([{ shift_name: name, time_in: timeIn, time_out: timeOut }]);
-            if (error) alert('Gagal: ' + error.message);
-            else alert('Jadwal shift berhasil disimpan!');
-        }
 
         async function addNewOfficeUnit() {
             const name = document.getElementById('admin-unit-name').value.trim();
@@ -665,19 +739,6 @@
             `).join('');
         }
 
-        async function saveSalarySetting() {
-            const email = document.getElementById('sal-email').value;
-            const basic = parseFloat(document.getElementById('sal-basic').value) || 0;
-            const allowance = parseFloat(document.getElementById('sal-allowance').value) || 0;
-            const penalty = parseFloat(document.getElementById('sal-penalty').value) || 0;
-
-            if (!email) return alert('Masukkan email karyawan!');
-
-            const { error } = await supabaseClient.from('salaries').upsert([{ user_email: email, basic_salary: basic, allowance, penalty }], { onConflict: 'user_email' });
-            if (error) alert('Gagal: ' + error.message);
-            else alert('Pengaturan gaji karyawan berhasil disimpan!');
-        }
-
         // LOG ABSENSI
         async function fetchAttendanceLogs() {
             const logList = document.getElementById('log-list');
@@ -694,7 +755,7 @@
                                 <i class="fa-solid ${item.action_type==='Clock In'?'fa-arrow-right-to-bracket text-green-700':'fa-arrow-right-from-bracket text-red-700'}"></i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-xs text-gray-800">${item.user_name}</h4>
+                                <h4 class="font-bold text-xs text-gray-800">${item.user_name} (${item.jabatan || 'Teknisi/User'})</h4>
                                 <p class="text-[11px] text-gray-400">${new Date(item.timestamp || Date.now()).toLocaleString()}</p>
                             </div>
                         </div>
@@ -779,7 +840,7 @@
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
                     email, password,
-                    options: { data: { full_name: fullName, jabatan: 'Staff Operational' } }
+                    options: { data: { full_name: fullName, jabatan: 'Teknisi/User' } }
                 });
                 if (!error && data && data.user) return data;
             } catch (err) {}
@@ -787,7 +848,7 @@
             const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                 method: 'POST',
                 headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, data: { full_name: fullName, jabatan: 'Staff Operational' } })
+                body: JSON.stringify({ email, password, data: { full_name: fullName, jabatan: 'Teknisi/User' } })
             });
 
             const result = await res.json();
@@ -808,7 +869,7 @@
                     currentUserData = { 
                         full_name: userName, 
                         email: session.user.email, 
-                        jabatan: meta.jabatan || 'Staff Operational',
+                        jabatan: meta.jabatan || 'Teknisi/User',
                         nip: meta.nip,
                         unit: meta.unit,
                         gender: meta.gender,
@@ -844,9 +905,12 @@
         }
 
         function switchTab(tab) {
-            ['home-section', 'log-section', 'karyawan-section', 'inbox-section', 'profile-section'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            ['home-section', 'log-section', 'approval-section', 'karyawan-section', 'profile-section'].forEach(s => {
+                const el = document.getElementById(s);
+                if (el) el.classList.add('hidden');
+            });
             
-            const navItems = ['nav-home', 'nav-karyawan', 'nav-log', 'nav-inbox', 'nav-profile'];
+            const navItems = ['nav-home', 'nav-karyawan', 'nav-log', 'nav-profile'];
             navItems.forEach(item => {
                 const el = document.getElementById(item);
                 if (el) {
@@ -856,7 +920,9 @@
                 }
             });
 
-            document.getElementById(tab + '-section').classList.remove('hidden');
+            const targetSec = document.getElementById(tab + '-section');
+            if (targetSec) targetSec.classList.remove('hidden');
+
             const activeNav = document.getElementById('nav-' + tab);
             if (activeNav) {
                 activeNav.className = "flex flex-col items-center text-green-700 cursor-pointer transition select-none";
@@ -866,6 +932,7 @@
 
             if (tab === 'log') fetchAttendanceLogs();
             if (tab === 'profile') renderProfileData();
+            if (tab === 'approval') fetchPendingRequests();
         }
     </script>
 </body>
