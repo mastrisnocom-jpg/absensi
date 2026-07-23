@@ -125,7 +125,7 @@
                 </div>
             </div>
 
-            <!-- 4. KARYAWAN / TIM KAMI TAB -->
+            <!-- 4. KARYAWAN TAB -->
             <div id="karyawan-section" class="hidden px-6 py-6 space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xl font-bold text-gray-800">Anggota Tim Operational</h2>
@@ -416,7 +416,14 @@
         
         let supabaseClient = null;
         try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            // KONFIGURASI SUPABASE AGAR SESI LOGIN DIPERSISTENKAN DI LOCALSTORAGE
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    storage: window.localStorage
+                }
+            });
         } catch (err) { console.error(err); }
 
         let isLoginMode = true;
@@ -431,6 +438,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
                 checkSession();
+                
+                // LISTENER REALTIME AGAR STATUS PERUBAHAN AUTH SELALU TERDETEKSI
+                supabaseClient.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                        checkSession();
+                    } else if (event === 'SIGNED_OUT') {
+                        clearUserState();
+                    }
+                });
+
                 fetchOfficeLocations();
             }
             initGeolocation();
@@ -596,7 +613,6 @@
             }
         }
 
-        // AMBIL ANGGOTA TIM / KARYAWAN
         async function fetchAllEmployees() {
             const listEl = document.getElementById('employee-list-container');
             listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat anggota tim...</p>';
@@ -635,7 +651,6 @@
             }
         }
 
-        // DETAIL PROFIL USER LAIN & KIRIM PESAN
         async function openUserDetailModal(targetEmail) {
             if (!currentUser) { openAuthModal(); return; }
 
@@ -690,7 +705,6 @@
             } catch(e) { alert('Gagal mengirim pesan: ' + e.message); }
         }
 
-        // LOAD INBOX MESSAGES
         async function fetchInboxMessages() {
             const listEl = document.getElementById('inbox-list-container');
             listEl.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat pesan...</p>';
@@ -846,7 +860,6 @@
             } catch(err) { alert('Gagal: ' + err.message); }
         }
 
-        // FOTO PROFIL PAKAI BASE64 STREAM AGAR 100% LANGSUNG TAMPIL
         async function uploadProfilePhoto(event) {
             if (!currentUser) { openAuthModal(); return; }
             const file = event.target.files[0];
@@ -918,15 +931,12 @@
             }
 
             const avatarContainer = document.getElementById('profile-avatar-container');
-            const kAvatar = document.getElementById('karyawan-avatar-card');
             
             if (currentUserData.foto_url) {
                 avatarContainer.innerHTML = `<img src="${currentUserData.foto_url}" class="w-full h-full object-cover" />`;
-                kAvatar.innerHTML = `<img src="${currentUserData.foto_url}" class="w-full h-full object-cover" />`;
             } else {
                 const initial = name.charAt(0).toUpperCase();
                 avatarContainer.innerHTML = `<span class="text-gold font-bold text-3xl">${initial}</span>`;
-                kAvatar.innerHTML = `<span class="text-gold font-bold text-lg">${initial}</span>`;
             }
         }
 
@@ -1146,19 +1156,41 @@
             return true;
         }
 
+        // FUNGSI UNTUK MERESET TAMPILAN USER SAAT LOGOUT
+        function clearUserState() {
+            currentUser = null; 
+            currentUserEmail = null; 
+            currentUserData = {};
+
+            document.getElementById('user-display-name').innerText = 'Tamu';
+            document.getElementById('user-display-role').innerText = 'Teknisi / User';
+            document.getElementById('prof-nama').innerText = 'Tamu';
+            document.getElementById('prof-email').innerText = 'Belum Login';
+            
+            // TOMBOL BERUBAH MENJADI LOGIN / DAFTAR
+            const btnContainer = document.getElementById('auth-action-btn-container');
+            btnContainer.innerHTML = `
+                <button onclick="openAuthModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 transition flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar
+                </button>
+            `;
+
+            renderProfileData();
+        }
+
+        // PENGECEKAN SESI TERIMPAN LOKAL (TAHAN REFRESH)
         async function checkSession() {
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 const btnContainer = document.getElementById('auth-action-btn-container');
 
-                if (session) {
+                if (session && session.user) {
+                    // Double check status persetujuan akun
                     if (session.user.email !== 'mastrisnocom@gmail.com') {
                         const { data: prof } = await supabaseClient.from('profiles').select('is_approved').eq('user_email', session.user.email).single();
                         if (prof && !prof.is_approved) {
                             await supabaseClient.auth.signOut();
-                            currentUser = null; currentUserEmail = null; currentUserData = {};
-                            document.getElementById('user-display-name').innerText = 'Tamu';
-                            btnContainer.innerHTML = `<button onclick="openAuthModal()" class="bg-white/25 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 cursor-pointer"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar</button>`;
+                            clearUserState();
                             return;
                         }
                     }
@@ -1168,7 +1200,7 @@
                     currentUser = userName;
                     currentUserEmail = session.user.email;
 
-                    // Ambil detail data dari tabel profiles agar sinkron
+                    // Ambil detail data profil resmi
                     const { data: profDb } = await supabaseClient.from('profiles').select('*').eq('user_email', session.user.email).single();
 
                     let roleUser = (profDb && profDb.jabatan) ? profDb.jabatan : (meta.jabatan || 'Teknisi/User');
@@ -1191,27 +1223,29 @@
                     };
 
                     document.getElementById('user-display-name').innerText = userName;
-                    document.getElementById('karyawan-name-card').innerText = userName;
-                    document.getElementById('karyawan-initial').innerText = userName.charAt(0).toUpperCase();
 
                     renderProfileData();
 
-                    btnContainer.innerHTML = `<button onclick="logout()" class="bg-red-500/25 text-red-100 text-xs font-semibold py-2 px-3 rounded-full border border-red-400/35 cursor-pointer"><i class="fa-solid fa-power-off"></i> Keluar</button>`;
+                    // TOMBOL OTOMATIS BERUBAH MENJADI LOGOUT / KELUAR
+                    btnContainer.innerHTML = `
+                        <button onclick="logout()" class="bg-red-500/30 hover:bg-red-600/50 text-red-100 text-xs font-semibold py-2 px-3.5 rounded-full border border-red-400/40 transition flex items-center gap-1.5 cursor-pointer shadow-sm">
+                            <i class="fa-solid fa-power-off"></i> Keluar
+                        </button>
+                    `;
                 } else {
-                    currentUser = null; currentUserEmail = null; currentUserData = {};
-                    document.getElementById('user-display-name').innerText = 'Tamu';
-                    document.getElementById('prof-nama').innerText = 'Tamu';
-                    document.getElementById('prof-email').innerText = 'Belum Login';
-                    btnContainer.innerHTML = `<button onclick="openAuthModal()" class="bg-white/25 text-white text-xs font-semibold py-2 px-4 rounded-full border border-white/30 cursor-pointer"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Daftar</button>`;
+                    clearUserState();
                 }
-            } catch(e) {}
+            } catch(e) {
+                clearUserState();
+            }
         }
 
         async function logout() {
+            if (!confirm('Apakah Anda yakin ingin keluar dari akun?')) return;
             await supabaseClient.auth.signOut();
-            checkSession();
+            clearUserState();
             switchTab('home');
-            alert('Berhasil keluar.');
+            alert('Berhasil keluar akun.');
         }
 
         function switchTab(tab) {
