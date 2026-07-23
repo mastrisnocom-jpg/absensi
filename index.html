@@ -140,7 +140,6 @@
                         <div class="w-20 h-20 rounded-full bg-primary-dark text-gold flex items-center justify-center text-3xl font-bold shadow-inner mb-3 overflow-hidden border-2 border-gold relative group" id="profile-avatar-container">
                             <i class="fa-solid fa-user"></i>
                         </div>
-
                         <h3 id="prof-nama" class="font-bold text-lg text-gray-800 text-center px-2">Tamu</h3>
                         <p id="prof-role" class="text-xs text-green-700 font-semibold mt-1">Staff Operational</p>
                     </div>
@@ -222,7 +221,7 @@
 
     </div>
 
-    <!-- Script Logika Auth Handat & Fallback -->
+    <!-- Script Logika Lengkap -->
     <script>
         const SUPABASE_URL = 'https://aiehifutwebeozxtnvej.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_QMdCN0udb1J28YZAOMv6zQ_99kor31F';
@@ -236,10 +235,117 @@
         let currentUser = null;
         let currentUserEmail = null;
         let currentUserData = {};
+        let currentCoords = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) checkSession();
+            initGeolocation();
         });
+
+        // Deteksi Lokasi GPS
+        function initGeolocation() {
+            const gpsBadge = document.getElementById('gps-status-badge');
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        currentCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                        gpsBadge.className = "text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold";
+                        gpsBadge.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> GPS Aktif`;
+                    },
+                    (error) => {
+                        gpsBadge.className = "text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-semibold";
+                        gpsBadge.innerHTML = `<i class="fa-solid fa-ban mr-1"></i> GPS Tidak Aktif`;
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                gpsBadge.innerHTML = "GPS Tidak Didukung";
+            }
+        }
+
+        // FUNGSI UTAMA CLOCK IN / CLOCK OUT
+        async function recordAttendance(actionType) {
+            if (!currentUser) {
+                alert('Silakan Login terlebih dahulu untuk mencatat absensi!');
+                openAuthModal();
+                return;
+            }
+
+            const btnId = actionType === 'Clock In' ? 'btn-in' : 'btn-out';
+            const btnElement = document.getElementById(btnId);
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            btnElement.disabled = true;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('attendance_logs')
+                    .insert([{ 
+                        user_name: currentUser, 
+                        action_type: actionType,
+                        jabatan: currentUserData.jabatan || 'Staff Operational'
+                    }]);
+
+                if (error) throw error;
+
+                alert(`Berhasil ${actionType}! Data absensi telah dicatat.`);
+                fetchAttendanceLogs(); // Refresh riwayat
+            } catch (error) {
+                console.error('Error Absensi:', error);
+                alert(`Gagal mencatat absensi: ` + (error.message || "Terjadi kesalahan koneksi"));
+            } finally {
+                btnElement.innerHTML = originalContent;
+                btnElement.disabled = false;
+            }
+        }
+
+        // Ambil Data Riwayat Absensi
+        async function fetchAttendanceLogs() {
+            const logList = document.getElementById('log-list');
+            logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data riwayat...</p>';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('attendance_logs')
+                    .select('*')
+                    .order('timestamp', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    logList.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Belum ada riwayat absensi.</p>';
+                    return;
+                }
+
+                logList.innerHTML = data.map(item => {
+                    const timeStr = new Date(item.timestamp || Date.now()).toLocaleString('id-ID', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                    });
+                    const isIn = item.action_type === 'Clock In';
+                    const badgeColor = isIn ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                    const iconClass = isIn ? 'fa-arrow-right-to-bracket text-green-700' : 'fa-arrow-right-from-bracket text-red-700';
+
+                    return `
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                    <i class="fa-solid ${iconClass}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-gray-800">${item.user_name || 'Karyawan'}</h4>
+                                    <p class="text-[11px] text-gray-400">${timeStr}</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${badgeColor}">${item.action_type}</span>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error("Gagal memuat log:", err);
+                logList.innerHTML = `<p class="text-red-500 text-xs text-center py-10">Gagal memuat data: ${err.message}</p>`;
+            }
+        }
 
         function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
@@ -261,7 +367,7 @@
             }
         }
 
-        // DUAL-MODE AUTHENTICATION (SDK + DIRECT REST FALLBACK)
+        // AUTHENTICATION LOGIC (SDK + REST FALLBACK)
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -292,26 +398,18 @@
             }
         });
 
-        // 1. FUNGSI LOGIN DENGAN FALLBACK DIRECT FETCH
         async function doLogin(email, password) {
-            // Coba lewat SDK terlebih dahulu
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (!error && data && data.session) return data;
-                if (error && error.message && !error.message.includes('fetch')) {
-                    throw error;
-                }
+                if (error && error.message && !error.message.includes('fetch')) throw error;
             } catch (err) {
                 if (err.message && err.message.includes("Invalid login credentials")) throw err;
             }
 
-            // Fallback: Panggilan REST API Langsung
             const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
                 method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
 
@@ -331,7 +429,6 @@
             return result;
         }
 
-        // 2. FUNGSI DAFTAR DENGAN FALLBACK DIRECT FETCH
         async function doSignUp(email, password, fullName) {
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
@@ -341,13 +438,9 @@
                 if (!error && data && data.user) return data;
             } catch (err) {}
 
-            // Fallback: Panggilan REST API Langsung
             const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                 method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email, password,
                     data: { full_name: fullName, jabatan: 'Staff Operational' }
@@ -378,6 +471,9 @@
                     document.getElementById('user-display-name').innerText = userName;
                     document.getElementById('prof-nama').innerText = userName;
                     document.getElementById('prof-email').innerText = session.user.email;
+                    document.getElementById('karyawan-name-card').innerText = userName;
+                    document.getElementById('karyawan-initial').innerText = userName.charAt(0).toUpperCase();
+
                     btnContainer.innerHTML = `<button onclick="logout()" class="bg-red-500/25 text-red-100 text-xs font-semibold py-2 px-3 rounded-full border border-red-400/35 cursor-pointer"><i class="fa-solid fa-power-off"></i> Keluar</button>`;
                 } else {
                     currentUser = null; currentUserEmail = null; currentUserData = {};
@@ -392,12 +488,32 @@
         async function logout() {
             await supabaseClient.auth.signOut();
             checkSession();
+            switchTab('home');
             alert('Berhasil keluar.');
         }
 
         function switchTab(tab) {
             ['home-section', 'log-section', 'karyawan-section', 'inbox-section', 'profile-section'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            
+            const navItems = ['nav-home', 'nav-karyawan', 'nav-log', 'nav-inbox', 'nav-profile'];
+            navItems.forEach(item => {
+                const el = document.getElementById(item);
+                if (el) {
+                    el.className = "flex flex-col items-center text-gray-400 hover:text-green-700 cursor-pointer transition select-none";
+                    const span = el.querySelector('span');
+                    if (span) span.className = "text-[10px] font-medium";
+                }
+            });
+
             document.getElementById(tab + '-section').classList.remove('hidden');
+            const activeNav = document.getElementById('nav-' + tab);
+            if (activeNav) {
+                activeNav.className = "flex flex-col items-center text-green-700 cursor-pointer transition select-none";
+                const activeSpan = activeNav.querySelector('span');
+                if (activeSpan) activeSpan.className = "text-[10px] font-bold";
+            }
+
+            if (tab === 'log') fetchAttendanceLogs();
         }
     </script>
 </body>
