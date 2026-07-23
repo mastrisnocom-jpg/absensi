@@ -44,8 +44,8 @@
                     </div>
                 </div>
 
-                <!-- Clock In / Out Card -->
-                <div class="px-6 -mt-12 relative z-10">
+                <!-- Clock In / Out Card & Informasi Shift User -->
+                <div class="px-6 -mt-12 relative z-10 space-y-3">
                     <div class="bg-white rounded-2xl shadow-md p-5">
                         <div class="flex justify-between items-center mb-3">
                             <h2 class="text-gray-700 font-bold text-sm">Status Shift Aktif</h2>
@@ -60,10 +60,24 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- CARD INFORMASI JADWAL SHIFT TEKNISI/USER -->
+                    <div id="user-shift-info-card" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-green-700 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm" id="user-shift-code-badge">
+                                SFT
+                            </div>
+                            <div>
+                                <h4 id="user-shift-name" class="font-bold text-xs text-gray-800">Jadwal Shift Kerja</h4>
+                                <p id="user-shift-times" class="text-[11px] text-green-800 font-semibold mt-0.5">Memuat jadwal...</p>
+                            </div>
+                        </div>
+                        <span class="text-[9px] bg-emerald-200 text-emerald-900 px-2 py-1 rounded-lg font-bold">Aktif</span>
+                    </div>
                 </div>
 
                 <!-- Menu Grid -->
-                <div class="grid grid-cols-4 gap-y-6 gap-x-2 p-6 mt-2">
+                <div class="grid grid-cols-4 gap-y-6 gap-x-2 p-6 mt-1">
                     <div onclick="switchTab('approval')" id="menu-approval-container" class="hidden flex flex-col items-center cursor-pointer group">
                         <div class="icon-circle w-14 h-14 rounded-full flex justify-center items-center text-xl mb-2 shadow-sm group-active:scale-95 transition bg-amber-600"><i class="fa-solid fa-user-check"></i></div>
                         <span class="text-xs text-center text-gray-700 font-semibold leading-tight">Persetujuan<br>Absensi</span>
@@ -249,7 +263,7 @@
                         </div>
                     </div>
 
-                    <!-- SUPER ADMIN CONTAINER -->
+                    <!-- SUPER ADMIN & KEPALA UNIT SYSTEM SETTINGS CONTAINER -->
                     <div id="superadmin-menu-container" class="hidden pt-2 border-t space-y-2">
                         <button onclick="openSystemSettingsModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold py-2.5 rounded-xl transition text-xs border border-amber-300 cursor-pointer flex items-center justify-center gap-2">
                             <i class="fa-solid fa-gears text-amber-700"></i> Pengaturan Sistem & Shift
@@ -348,11 +362,11 @@
             </div>
         </div>
 
-        <!-- ================= MODAL EDIT PROFIL LENGKAP USER (KHUSUS SUPER ADMIN) ================= -->
+        <!-- ================= MODAL EDIT PROFIL LENGKAP & SHIFT USER ================= -->
         <div id="admin-user-edit-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm overflow-y-auto">
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 relative my-auto space-y-3">
                 <button onclick="closeAdminUserEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                <h3 class="text-base font-bold text-gray-800">Kelola Profil User (Super Admin)</h3>
+                <h3 class="text-base font-bold text-gray-800">Kelola Profil & Shift User</h3>
                 <p id="adm-edit-user-email" class="text-xs text-green-700 font-bold truncate border-b pb-2">-</p>
                 
                 <div class="space-y-2.5 text-xs max-h-[60vh] overflow-y-auto pr-1">
@@ -376,6 +390,13 @@
                             <select id="adm-select-unit" class="w-full border rounded-lg p-2 mt-0.5 bg-white outline-none"></select>
                         </div>
                     </div>
+
+                    <!-- ATUR JADWAL SHIFT KHUSUS UNTUK TEKNISI/USER -->
+                    <div>
+                        <label class="font-bold text-green-800">Penetapan Shift Kerja</label>
+                        <select id="adm-select-shift" class="w-full border-2 border-green-600 rounded-lg p-2 mt-0.5 bg-green-50 outline-none font-bold text-gray-800"></select>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="font-semibold text-gray-600">NIP</label>
@@ -423,7 +444,7 @@
                 </div>
 
                 <button onclick="saveAdminUserEdit()" class="w-full bg-green-700 text-white font-bold py-2.5 rounded-xl transition shadow text-xs mt-2">
-                    Simpan Perubahan Profil
+                    Simpan Perubahan Profil & Shift
                 </button>
             </div>
         </div>
@@ -582,6 +603,8 @@
         let activeEditField = null;
         let activeChatUser = null;
         let mediaStream = null;
+        let allShiftsList = [];
+        let userAssignedShift = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (supabaseClient) {
@@ -591,12 +614,50 @@
                     else if (event === 'SIGNED_OUT') clearUserState();
                 });
                 fetchOfficeLocations();
+                fetchShiftsListGlobal();
             }
             initGeolocation();
         });
 
         function isUserSuperAdmin() {
             return (currentUserEmail === 'mastrisnocom@gmail.com' || (currentUserData && currentUserData.jabatan === 'Super Admin'));
+        }
+
+        async function fetchShiftsListGlobal() {
+            try {
+                const { data } = await supabaseClient.from('schedules').select('*');
+                allShiftsList = data || [];
+            } catch(e) {}
+        }
+
+        // LOAD BACA SHIFT USER DIPASANG DI HOME CARD
+        async function loadUserShiftCardInfo() {
+            const shiftNameEl = document.getElementById('user-shift-name');
+            const shiftTimesEl = document.getElementById('user-shift-times');
+            const shiftBadgeEl = document.getElementById('user-shift-code-badge');
+
+            if (!currentUserEmail || !currentUserData.assigned_shift_id) {
+                shiftNameEl.innerText = "Non-Shift / Belum diatur";
+                shiftTimesEl.innerText = "Jam Masuk Bebas";
+                shiftBadgeEl.innerText = "OFF";
+                userAssignedShift = null;
+                return;
+            }
+
+            try {
+                const { data: s } = await supabaseClient.from('schedules').select('*').eq('id', currentUserData.assigned_shift_id).single();
+                if (s) {
+                    userAssignedShift = s;
+                    shiftNameEl.innerText = `${s.shift_name}`;
+                    shiftTimesEl.innerText = `Masuk: ${s.time_in} - Pulang: ${s.time_out}`;
+                    shiftBadgeEl.innerText = `${s.shift_code || 'SFT'}`;
+                } else {
+                    shiftNameEl.innerText = "Shift Tidak Ditemukan";
+                    shiftTimesEl.innerText = "-";
+                    shiftBadgeEl.innerText = "OFF";
+                    userAssignedShift = null;
+                }
+            } catch(e) {}
         }
 
         function compressImage(imageSource, maxDimension = 800, maxSizeBytes = 200 * 1024) {
@@ -770,7 +831,7 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
-        // AKSI ABSENSI TERMASUK LOGIKA HITUNG KETERLAMBATAN JAM SHIFT
+        // ABSENSI DENGAN PENGECEKAN KETERLAMBATAN PADA SHIFT TEKNISI
         async function recordAttendance(actionType, selfieBase64 = null) {
             if (!currentUser) {
                 alert('Akses Ditolak: Anda belum login!');
@@ -783,22 +844,17 @@
             const todayStr = now.toISOString().split('T')[0];
             let statusAbsen = 'Tepat Waktu';
 
-            // Pengecekan Keterlambatan Khusus Clock In
+            // Pengecekan Keterlambatan Berdasarkan Shift Kerja User
             if (actionType === 'Clock In' && !isSuper) {
-                try {
-                    const { data: schedules } = await supabaseClient.from('schedules').select('*').limit(1);
-                    if (schedules && schedules.length > 0) {
-                        const targetTimeIn = schedules[0].time_in; // HH:MM:SS
-                        const [sHour, sMinute] = targetTimeIn.split(':').map(Number);
+                if (userAssignedShift && userAssignedShift.time_in) {
+                    const [sHour, sMinute] = userAssignedShift.time_in.split(':').map(Number);
+                    const currentHour = now.getHours();
+                    const currentMinute = now.getMinutes();
 
-                        const currentHour = now.getHours();
-                        const currentMinute = now.getMinutes();
-
-                        if (currentHour > sHour || (currentHour === sHour && currentMinute > sMinute)) {
-                            statusAbsen = 'Terlambat';
-                        }
+                    if (currentHour > sHour || (currentHour === sHour && currentMinute > sMinute)) {
+                        statusAbsen = 'Terlambat';
                     }
-                } catch(e) {}
+                }
             }
 
             if (actionType === 'Clock Out' && !isSuper) {
@@ -856,7 +912,7 @@
                     foto_url: selfieBase64 || '', status_absen: statusAbsen
                 }]);
                 if (error) throw error;
-                
+
                 if (statusAbsen === 'Terlambat') {
                     alert(`Clock In Berhasil. Catatan: Anda dicatat Terlambat hari ini.`);
                 } else {
@@ -1126,6 +1182,12 @@
                 const unitSel = document.getElementById('adm-select-unit');
                 unitSel.innerHTML = officeLocations.map(o => `<option value="${o.unit_name}" ${p.unit === o.unit_name ? 'selected' : ''}>${o.unit_name}</option>`).join('');
 
+                // LOAD PILIHAN SHIFT UNTUK KARYAWAN
+                const shiftSel = document.getElementById('adm-select-shift');
+                let shiftOpts = `<option value="">-- Pilih Shift Kerja --</option>`;
+                shiftOpts += allShiftsList.map(s => `<option value="${s.id}" ${p.assigned_shift_id == s.id ? 'selected' : ''}>[${s.shift_code || 'SFT'}] ${s.shift_name} (${s.time_in}-${s.time_out})</option>`).join('');
+                shiftSel.innerHTML = shiftOpts;
+
                 document.getElementById('admin-user-edit-modal').classList.remove('hidden');
             } catch(e) { alert("Gagal memuat data user: " + e.message); }
         }
@@ -1136,6 +1198,7 @@
             const fullname = document.getElementById('adm-edit-fullname').value.trim();
             const role = document.getElementById('adm-select-role').value;
             const unit = document.getElementById('adm-select-unit').value;
+            const shiftId = document.getElementById('adm-select-shift').value || null;
             const nip = document.getElementById('adm-edit-nip').value.trim();
             const phone = document.getElementById('adm-edit-phone').value.trim();
             const gender = document.getElementById('adm-edit-gender').value;
@@ -1150,6 +1213,7 @@
                     full_name: fullname,
                     jabatan: role,
                     unit: unit,
+                    assigned_shift_id: shiftId,
                     nip: nip,
                     phone: phone,
                     gender: gender,
@@ -1160,10 +1224,14 @@
 
                 if (error) throw error;
 
-                alert('Data profil user berhasil diperbarui oleh Super Admin!');
+                alert('Data profil & shift user berhasil diperbarui!');
                 closeAdminUserEditModal();
                 fetchPendingUserRegistrations();
                 fetchAllEmployees();
+
+                if (currentEditingAdminEmail === currentUserEmail) {
+                    checkSession();
+                }
             } catch(e) { alert('Gagal memperbarui profil: ' + e.message); }
         }
 
@@ -1202,6 +1270,7 @@
 
                 resetScheduleForm();
                 fetchScheduleShifts();
+                fetchShiftsListGlobal();
             } catch(e) { alert('Gagal menyimpan shift: ' + e.message); }
         }
 
@@ -1235,6 +1304,7 @@
                 await supabaseClient.from('schedules').delete().eq('id', id);
                 alert('Shift berhasil dihapus.');
                 fetchScheduleShifts();
+                fetchShiftsListGlobal();
             } catch(e) { alert('Gagal menghapus shift: ' + e.message); }
         }
 
@@ -1304,7 +1374,6 @@
             `).join('');
         }
 
-        // TAMPILKAN RIWAYAT ABSEN DENGAN BADGE TERLAMBAT JIKA KETERANGAN DITEMUKAN
         async function fetchAttendanceLogs() {
             const logList = document.getElementById('log-list');
             const logTitle = document.getElementById('log-section-title');
@@ -1668,6 +1737,7 @@
                 </button>
             `;
             renderProfileData();
+            loadUserShiftCardInfo();
         }
 
         async function checkSession() {
@@ -1699,6 +1769,7 @@
                         full_name: (profDb && profDb.full_name) || userName, 
                         email: session.user.email, 
                         jabatan: roleUser,
+                        assigned_shift_id: profDb ? profDb.assigned_shift_id : null,
                         nip: (profDb && profDb.nip) || meta.nip, 
                         unit: (profDb && profDb.unit) || meta.unit,
                         gender: (profDb && profDb.gender) || meta.gender, 
@@ -1711,6 +1782,7 @@
 
                     document.getElementById('user-display-name').innerText = currentUserData.full_name;
                     renderProfileData();
+                    loadUserShiftCardInfo();
                     checkUnreadMessages();
 
                     btnContainer.innerHTML = `
